@@ -1,0 +1,48 @@
+name: Publish tutorial to GitHub Pages
+
+# Builds the MkDocs site in tutorial/ and publishes it to the gh-pages branch.
+# GitHub serves that branch at https://debnathsd.github.io/presenton-os/.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tutorial/**"
+      - ".github/workflows/docs-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy MkDocs site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs Material
+        run: pip install -r tutorial/requirements.txt
+
+      - name: Build site (strict)
+        run: mkdocs build --strict -f tutorial/mkdocs.yml
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy to gh-pages
+        run: mkdocs gh-deploy --force -f tutorial/mkdocs.yml --message "docs: publish tutorial from ${{ github.sha }}"

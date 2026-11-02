@@ -1,0 +1,147 @@
+site_name: Presenton OS Internals
+site_description: >-
+  A step-by-step, code-level tutorial on how Presenton (the open-source AI
+  presentation generator) works, and a design for bringing the same
+  prompt-to-deck workflow to Apache Superset with live, data-bound slides.
+site_url: https://debnathsd.github.io/presenton-os/
+repo_url: https://github.com/debnathSD/presenton-os
+repo_name: debnathSD/presenton-os
+edit_uri: edit/main/tutorial/content/
+docs_dir: content
+site_dir: site
+copyright: >-
+  Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is
+  © Presenton contributors, Apache License 2.0.
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 4
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - "Part I · Orientation":
+      - presenton/index.md
+      - What Presenton is: presenton/01-what-is-presenton.md
+      - Repository tour: presenton/02-repository-tour.md
+      - Runtime topology: presenton/03-runtime-topology.md
+      - Running it locally: presenton/04-running-locally.md
+  - "Part II · Backend":
+      - FastAPI app and startup: presenton/05-fastapi-startup.md
+      - Configuration and LLM providers: presenton/06-configuration-and-providers.md
+      - Data model: presenton/07-data-model.md
+      - Standard generation pipeline: presenton/08-standard-pipeline.md
+      - Prompts and schemas: presenton/09-prompts-and-schemas.md
+      - Streaming (SSE): presenton/10-streaming.md
+      - Document ingestion: presenton/11-document-ingestion.md
+      - Images, icons, web search: presenton/12-images-icons-search.md
+      - Smart mode: presenton/13-smart-mode.md
+      - Editing and chat assistant: presenton/14-editing-and-chat.md
+      - REST API, async tasks, webhooks, MCP: presenton/15-api-async-mcp.md
+  - "Part III · Templates":
+      - Template v2 format: presenton/16-template-v2-format.md
+      - From template to schema to slide: presenton/17-template-to-slide.md
+      - Custom templates from PPTX: presenton/18-custom-templates.md
+      - Themes and fonts: presenton/19-themes-and-fonts.md
+  - "Part IV · Frontend":
+      - Next.js architecture: presenton/20-nextjs-architecture.md
+      - User journey: presenton/21-user-journey.md
+      - Slide editor: presenton/22-slide-editor.md
+      - Settings, onboarding, auth UI: presenton/23-settings-and-auth-ui.md
+  - "Part V · Export":
+      - PPTX and PDF export: presenton/24-export-pipeline.md
+  - "Part VI · Auth, infra, ops":
+      - Auth and multi-user: presenton/25-auth-and-multiuser.md
+      - Docker build and deployment: presenton/26-docker-and-deployment.md
+      - Electron desktop app: presenton/27-electron.md
+      - CI, tests, security: presenton/28-ci-tests-security.md
+  - "Part VII · Superset integration":
+      - superset/index.md
+      - Vision and requirements: superset/30-vision.md
+      - Superset landscape (6.1): superset/31-superset-landscape.md
+      - Target architecture: superset/32-architecture.md
+      - Data-bound slide model: superset/33-data-bound-model.md
+      - Generation flow: superset/34-generation-flow.md
+      - Native rendering, no screenshots: superset/35-native-rendering.md
+      - Building the Superset extension: superset/36-superset-extension.md
+      - Building the DeckForge service: superset/37-deckforge-service.md
+      - Security, RLS, auth: superset/38-security.md
+      - Scheduling and live refresh: superset/39-scheduling-and-refresh.md
+      - Roadmap: superset/40-roadmap.md
+  - Appendix:
+      - Glossary: appendix-glossary.md
+      - Endpoint index: appendix-endpoints.md
+      - File index: appendix-files.md
