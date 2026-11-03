@@ -1,3 +1,8 @@
+> [!NOTE]
+> **presenton-os** mirrors [presenton/presenton](https://github.com/presenton/presenton) (Apache 2.0) and adds a code-level tutorial:
+> how Presenton works internally, plus a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound output.
+> **Read it at [debnathsd.github.io/presenton-os](https://debnathsd.github.io/presenton-os/).** Tutorial sources live in [`tutorial/`](tutorial/).
+
 <p align="center">
   <img src="./readme_assets/images/logo.png" alt="Presenton" />
 </p>

@@ -137,7 +137,7 @@ nav:
       - Generation flow: superset/34-generation-flow.md
       - Native rendering, no screenshots: superset/35-native-rendering.md
       - Building the Superset extension: superset/36-superset-extension.md
-      - Building the DeckForge service: superset/37-deckforge-service.md
+      - Building the generation service: superset/37-generation-service.md
       - Security, RLS, auth: superset/38-security.md
       - Scheduling and live refresh: superset/39-scheduling-and-refresh.md
       - Roadmap: superset/40-roadmap.md
