@@ -141,6 +141,19 @@ nav:
       - Security, RLS, auth: superset/38-security.md
       - Scheduling and live refresh: superset/39-scheduling-and-refresh.md
       - Roadmap: superset/40-roadmap.md
+  - "Part VIII · AI Slides delivery":
+      - delivery/index.md
+      - Release plan and tracker: delivery/51-release-plan.md
+      - Architecture and contracts: delivery/41-architecture-and-contracts.md
+      - "Story 1: Dynamic data and refresh": delivery/42-story1-dynamic-data.md
+      - "Story 2: Platform integration": delivery/43-story2-platform-integration.md
+      - "Story 3: Prompt library backend": delivery/44-story3-prompt-library-backend.md
+      - "Story 4: Native charts and refresh UX": delivery/45-story4-native-charts-ux.md
+      - "Story 5: Analytics menu and iframe": delivery/46-story5-menu-and-iframe.md
+      - "Story 6: Prompt library and template UI": delivery/47-story6-prompt-library-ui.md
+      - "Story 7: Harness presentation planner": delivery/48-story7-harness-planner.md
+      - "Story 8: Analytics refresh APIs and MCP": delivery/49-story8-analytics-mcp.md
+      - "Story 9: Deployment": delivery/50-story9-infra.md
   - Appendix:
       - Glossary: appendix-glossary.md
       - Endpoint index: appendix-endpoints.md
