@@ -45,4 +45,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Deploy to gh-pages
-        run: mkdocs gh-deploy --force -f tutorial/mkdocs.yml --message "docs: publish tutorial from ${{ github.sha }}"
+        run: |
+          mkdocs gh-deploy --force -f tutorial/mkdocs.yml --message "docs: publish tutorial from ${{ github.sha }}"
