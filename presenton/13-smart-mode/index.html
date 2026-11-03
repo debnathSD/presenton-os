@@ -1214,17 +1214,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#selecting-an-element-for-the-ai" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Selecting an element for the AI
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#smart_slide_layoutpy-static-overflow-and-overlap-detection" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1397,7 +1386,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#selecting-an-element-for-the-ai_1" class="md-nav__link">
+  <a href="#selecting-an-element-for-the-ai" class="md-nav__link">
     <span class="md-ellipsis">
       
         Selecting an element for the AI
@@ -2884,17 +2873,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#selecting-an-element-for-the-ai" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Selecting an element for the AI
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#smart_slide_layoutpy-static-overflow-and-overlap-detection" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3067,7 +3045,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#selecting-an-element-for-the-ai_1" class="md-nav__link">
+  <a href="#selecting-an-element-for-the-ai" class="md-nav__link">
     <span class="md-ellipsis">
       
         Selecting an element for the AI
@@ -3715,17 +3693,31 @@
 </tr>
 <tr>
 <td>Root check</td>
-<td>The fragment must start with <code>&lt;section</code> and end with <code>y as received. It does not run</code>normalize_smart_slide_html<code>, so manual edits are never checked for overflow, and anything a client sends is stored and later re-executed by the chart injector in the editor. If you harden this path, call the normalizer in</code>update_presentation_slide<code>for rows whose</code>layout<code>is</code>smart-html`.</td>
-<td></td>
+<td>The fragment must start with <code>&lt;section</code> and end with <code>&lt;/section&gt;</code></td>
+<td>400 "invalid Smart slide"</td>
+</tr>
+<tr>
+<td>Canvas classes</td>
+<td>Root needs <code>relative</code>, <code>h-[720px]</code>, <code>w-[1280px]</code>, <code>overflow-hidden</code></td>
+<td>400 "invalid canvas"</td>
+</tr>
+<tr>
+<td>Scroll/clip check (<code>:444</code>)</td>
+<td>Any class <code>overflow-(x-/y-)auto/scroll</code>, <code>line-clamp-*</code>, <code>truncate</code>, <code>text-ellipsis</code>, or a style <code>overflow: auto/scroll</code></td>
+<td>400</td>
+</tr>
+<tr>
+<td>Text density (<code>:454-492</code>)</td>
+<td>Counts visible words and characters (scripts and comments removed) against limits per slide type</td>
+<td>400 with counts</td>
+</tr>
+<tr>
+<td><code>inspect_smart_slide_layout</code></td>
+<td>Static geometry analysis (next section)</td>
+<td>400 listing the issues</td>
 </tr>
 </tbody>
 </table>
-<h3 id="selecting-an-element-for-the-ai">Selecting an element for the AI<a class="headerlink" href="#selecting-an-element-for-the-ai" title="Permanent link">&para;</a></h3>
-<p>When the header's selector toggle is on (it defaults to on for smart decks after streaming and remembers the choice in <code>localStorage["html-selector-mode"]</code>, <code>servers/nextjs/app/(presentation-generator)/presentation/components/PresentationHeader.tsx:139-158</code>), the editor adds capture-phase <code>mouseover</code> and <code>click</code> listeners (<code>servers/nextjs/app/(presentation-generator)/components/SmartHtmlEditor.tsx:345-478</code>). <code>normalizeSelectableElement</code> climbs to the nearest <code>[data-select-root]</code>, <code>[data-card]</code> or <code>.card</code> if present, and refuses the root <code>&lt;section&gt;</code> | 400 "invalid Smart slide" |
-| Canvas classes | Root needs <code>relative</code>, <code>h-[720px]</code>, <code>w-[1280px]</code>, <code>overflow-hidden</code> | 400 "invalid canvas" |
-| Scroll/clip check (<code>:444</code>) | Any class <code>overflow-(x-/y-)auto/scroll</code>, <code>line-clamp-*</code>, <code>truncate</code>, <code>text-ellipsis</code>, or a style <code>overflow: auto/scroll</code> | 400 |
-| Text density (<code>:454-492</code>) | Counts visible words and characters (scripts and comments removed) against limits per slide type | 400 with counts |
-| <code>inspect_smart_slide_layout</code> | Static geometry analysis (next section) | 400 listing the issues |</p>
 <p>The text-density limits (<code>:51-58</code>):</p>
 <table>
 <thead>
@@ -4041,7 +4033,7 @@
 <p class="admonition-title">Gotcha</p>
 <p><code>slide_update</code> stores <code>html_content</code> exactly as received. It does not run <code>normalize_smart_slide_html</code>, so manual edits are never checked for overflow, and anything a client sends is stored and later re-executed by the chart injector in the editor. If you harden this path, call the normalizer in <code>update_presentation_slide</code> for rows whose <code>layout</code> is <code>smart-html</code>.</p>
 </div>
-<h3 id="selecting-an-element-for-the-ai_1">Selecting an element for the AI<a class="headerlink" href="#selecting-an-element-for-the-ai_1" title="Permanent link">&para;</a></h3>
+<h3 id="selecting-an-element-for-the-ai">Selecting an element for the AI<a class="headerlink" href="#selecting-an-element-for-the-ai" title="Permanent link">&para;</a></h3>
 <p>When the header's selector toggle is on (it defaults to on for smart decks after streaming and remembers the choice in <code>localStorage["html-selector-mode"]</code>, <code>servers/nextjs/app/(presentation-generator)/presentation/components/PresentationHeader.tsx:139-158</code>), the editor adds capture-phase <code>mouseover</code> and <code>click</code> listeners (<code>servers/nextjs/app/(presentation-generator)/components/SmartHtmlEditor.tsx:345-478</code>). <code>normalizeSelectableElement</code> climbs to the nearest <code>[data-select-root]</code>, <code>[data-card]</code> or <code>.card</code> if present, and refuses the root <code>&lt;section&gt;</code> or any element covering at least 98% of the slide in both width and height. Hovering draws a light box and clicking draws the selected box with an "AI edit" label; both are rendered by <code>SmartHtmlSelectionOverlay</code> (<code>servers/nextjs/app/(presentation-generator)/components/SmartHtmlSelectionOverlay.tsx:10-51</code>) into <code>document.body</code> as <code>position: fixed</code> divs, with rectangles re-measured on every animation frame so they stay attached while the assistant panel animates.</p>
 <p>A click dispatches <code>setChatHtmlSelection</code> with <code>slideId</code>, <code>slideIndex</code>, <code>slideNumber</code>, the cleaned <code>outerHTML</code> of the element, its tag, the first 240 characters of its text, and a timestamp (<code>:413-425</code>). Clicking the same element again, or pressing Escape, clears the selection. <code>PresentationPage</code> opens the assistant panel automatically when a new selection arrives. What the assistant does with that selection is the subject of <a href="../14-editing-and-chat/">chapter 14</a>.</p>
 <h2 id="what-smart-mode-does-not-use-latex-runs-and-native-infographics">What smart mode does not use: LaTeX runs and native infographics<a class="headerlink" href="#what-smart-mode-does-not-use-latex-runs-and-native-infographics" title="Permanent link">&para;</a></h2>
