@@ -1,0 +1,68 @@
+Num,Story title,What it does,Owner,SubTask ID,SubTasks,SubTask owner,Effort (person-days),Depends on,Release train,Release Date,Status
+1,"[Presenton BE] Dynamic data: refresh spike, binding storage and refresh service","Stores a Superset data binding for each chart or metric and refreshes values on open, after a spike picks the refresh approach.","Srini, Sourav, Nitesh",,7 subtasks,,19,,R7,2027-01-08,Not started
+,,,,1.1,"Refresh spike: prototype options A, B and C, measure, write and approve the decision record","Srini, Nitesh",3,,R1,2026-11-13,Not started
+,,,,1.2,slide_data_bindings SQLModel model and Alembic migration,Srini,2,"1.1, 2.1",R2,2026-11-20,Not started
+,,,,1.3,Create bindings during generation from the DeckPlan,Srini,3,"1.2, 7.1",R4,2026-12-04,Not started
+,,,,1.4,"BindingRefreshService: batching, mapping, caching, snapshot write-back",Srini,4,"1.2, 8.3",R5,2026-12-11,Not started
+,,,,1.5,"Bindings API: GET and PUT bindings, refresh SSE stream, batch refresh",Sourav,3,1.4,R5,2026-12-11,Not started
+,,,,1.6,Export pre-refresh with 'data as of' fallback footnote,Sourav,2,1.4,R7,2027-01-08,Not started
+,,,,1.7,"Tests (mappers, contract test against fake refresh API, migration) and metrics",Srini,2,1.5,R6,2026-12-18,Not started
+2,"[Presenton BE] Platform Integration: Postgres, access control, pod-ready API","Moves metadata to the analytics Postgres, enforces owner, org and collaborator access with platform identity, and makes the API fit the analytics pod.",Nitesh,,6 subtasks,,15,,R9,2027-01-22,Not started
+,,,,2.1,"Postgres schema presenton, pool settings, migration Kubernetes Job",Nitesh,2,,R2,2026-11-20,Not started
+,,,,2.2,"POST /api/v1/platform/session: JWKS verification, jti replay guard, user and org upsert, cookie path",Nitesh,3,"2.1, 8.2",R5,2026-12-11,Not started
+,,,,2.3,Encrypted data-token storage and refresh-data-token endpoint,Nitesh,2,2.2,R8,2027-01-15,Not started
+,,,,2.4,"organizations and presentation_collaborators tables, require_presentation_access on every endpoint",Nitesh,4,2.2,R7,2027-01-08,Not started
+,,,,2.5,"Sharing endpoints, owned plus shared listing, app_data asset authorization",Nitesh,2,2.4,R8,2027-01-15,Not started
+,,,,2.6,"Pod readiness: /healthz, /readyz, JSON logs, graceful shutdown, root_path, local login off",Nitesh,2,2.1,R9,2027-01-22,Not started
+3,[Presenton BE] Prompt library and custom templates backend,"Provides APIs for curated prompts and bundled templates and async generation, with custom template upload on hold pending a decision.",Srini,,6 subtasks,,10,,R11,2027-02-05,Not started
+,,,,3.1,"prompt_library_items model, migration and curated seed import",Srini,2,2.1,R3,2026-11-27,Not started
+,,,,3.2,"List, detail and render endpoints with JSON Schema validation",Srini,2,3.1,R5,2026-12-11,Not started
+,,,,3.3,GET /api/v1/ppt/templates/bundled,Srini,1,,R1,2026-11-13,Not started
+,,,,3.4,POST generate-from-prompt/async with planner stage and task polling,Srini,3,"3.2, 7.5",R9,2027-01-22,Not started
+,,,,3.5,Gate custom template upload behind AI_SLIDES_CUSTOM_TEMPLATES_ENABLED and record open questions,Srini,1,,R1,2026-11-13,Not started
+,,,,3.6,Backend tests for prompt library and async generation,Srini,1,3.4,R11,2027-02-05,Not started
+4,[Presenton FE] Native charts and async refresh UX,"Renders charts with a charting library from stored bindings and fills them in progressively with loading, error and stale states.","Srini, Sourav, Nitesh",,6 subtasks,,13,,R10,2027-01-29,Not started
+,,,,4.1,Chart rendering decision and element-patch reducer on the existing Chart.js path,Sourav,2,1.2,R3,2026-11-27,Not started
+,,,,4.2,useDeckRefresh SSE hook and bindingsSlice,Sourav,3,"1.5, 4.1",R6,2026-12-18,Not started
+,,,,4.3,"Overlay states (loading, error, stale, forbidden), status badge, retry, Refresh data button",Radhika (proposed),3,4.2,R7,2027-01-08,Not started
+,,,,4.4,"Autosave interaction, visible-slide-first ordering, cancellation",Srini,2,4.2,R10,2027-01-29,Not started
+,,,,4.5,Presentation mode and export render checks,Nitesh,1,4.3,R9,2027-01-22,Not started
+,,,,4.6,Reducer unit tests and Cypress component tests for every state,Radhika (proposed),2,4.3,R7,2027-01-08,Not started
+5,[Presenton FE] Analytics menu and iframe hardening,"Adds the ""AI Slides"" menu item and makes the embedded Presenton iframe reliable (sizing, deep links, session handoff, base path).",Sourav,,6 subtasks,,12,,R8,2027-01-15,Not started
+,,,,5.1,AI Slides menu item and role permission in Superset,Sourav,1,,R8,2027-01-15,Not started
+,,,,5.2,Superset host page /ai-slides/launch with iframe and postMessage bridge,Sourav,2,8.2,R2,2026-11-20,Not started
+,,,,5.3,"Next.js basePath /ai-slides and prefix fixes (proxy, asset URLs, export route)",Sourav,3,,R1,2026-11-13,Not started
+,,,,5.4,PlatformSessionBridge component with re-handoff on expiry,Sourav,2,"2.2, 5.2",R7,2027-01-08,Not started
+,,,,5.5,"Iframe sizing, fullscreen, deep links, downloads",Sourav,2,5.3,R2,2026-11-20,Not started
+,,,,5.6,End-to-end tests and browser QA matrix,Sourav,2,"5.4, 5.5",R8,2027-01-15,Not started
+6,[Presenton FE] Prompt library and template UI,"Lets users browse and use curated prompts and select templates, with template upload on hold.",Radhika,,7 subtasks,,13.0,,R10,2027-01-29,Not started
+,,,,6.1,Prompt library API client and state,Radhika,1,3.1,R3,2026-11-27,Not started
+,,,,6.2,PromptLibraryPanel and PromptCard with search and category filters,Radhika,3,6.1,R4,2026-12-04,Not started
+,,,,6.3,"PromptVariablesForm from JSON Schema, with dashboard picker",Radhika,3,"6.2, 8.4",R5,2026-12-11,Not started
+,,,,6.4,TemplatePicker with bundled templates and recommended badge,Radhika,2,3.3,R2,2026-11-20,Not started
+,,,,6.5,"GenerateFromPromptButton with async progress, navigation and ?prompt= deep link",Radhika,2,"3.4, 6.3",R9,2027-01-22,Not started
+,,,,6.6,Hide template upload entry points via runtime flag,Radhika,0.5,,R1,2026-11-13,Not started
+,,,,6.7,Unit and Cypress component tests,Radhika,1.5,6.5,R10,2027-01-29,Not started
+7,[Harness] presentation-planner skill and refreshable-only data selection,"Plans decks and picks only charts and metrics that Superset can refresh and the user can access, with validation, limits and an eval set.","Srini, Nitesh",,6 subtasks,,17,,R10,2027-01-29,Not started
+,,,,7.1,"Skill scaffold: SKILL.md, DeckPlan JSON Schema and Pydantic models, layout catalog input",Srini,2,,R1,2026-11-13,Not started
+,,,,7.2,"Catalog and MCP tool integration (list, info, row-limited samples) with the data token",Nitesh,3,"8.4, 8.5",R6,2026-12-18,Not started
+,,,,7.3,"Refreshable-only selection, viz_type compatibility table, ranking",Srini,3,"7.1, 7.2",R7,2027-01-08,Not started
+,,,,7.4,"Deterministic validators, bounded repair loop, limits and budgets",Srini,3,7.3,R8,2027-01-15,Not started
+,,,,7.5,Presenton BE harness client: DeckPlan to structure and bindings,Srini,2,"7.4, 1.3",R8,2027-01-15,Not started
+,,,,7.6,"Eval set (40+ cases), runner and CI gate",Srini,4,7.4,R10,2027-01-29,Not started
+8,"[Analytics BE/MCP] Refresh APIs, MCP catalog, user-context enforcement, CSP and cookies","Lets Presenton and the harness discover and refresh Superset data per user, with RBAC enforcement and the iframe CSP and cookie settings.",Nitesh,,7 subtasks,,15,,R10,2027-01-29,Not started
+,,,,8.1,"ai_slides blueprint scaffold, signing keys and JWKS endpoint",Nitesh,2,,R1,2026-11-13,Not started
+,,,,8.2,Handoff endpoint and data-token verification with user context,Nitesh,2,8.1,R1,2026-11-13,Not started
+,,,,8.3,"Refresh API: saved query context, overrides merge, ChartDataCommand, normalization, errors",Nitesh,4,"8.2, 1.1",R4,2026-12-04,Not started
+,,,,8.4,Catalog endpoint with refreshable rules,Nitesh,2,8.3,R4,2026-12-04,Not started
+,,,,8.5,"MCP: JWT auth as the user, tool allowlist, custom catalog tool",Nitesh,2,8.2,R5,2026-12-11,Not started
+,,,,8.6,"CSP, cookie settings and CSRF exemptions for Bearer endpoints",Nitesh,1,,R10,2027-01-29,Not started
+,,,,8.7,"Integration tests: RLS, forbidden charts, overrides",Nitesh,2,8.4,R9,2027-01-22,Not started
+9,[Infra] Deploy Presenton BE and FE alongside the analytics platform,"Deploys both Presenton services with routing, secrets, storage, harness connectivity, CI/CD and monitoring.","Nitesh, Sourav",,7 subtasks,,15,,R11,2027-02-05,Not started
+,,,,9.1,Split the Dockerfile into presenton-be and presenton-fe images,Sourav,2,,R1,2026-11-13,Not started
+,,,,9.2,"Dev namespace: Helm chart, prefix ingress, migrate Job",Nitesh,3,9.1,R3,2026-11-27,Not started
+,,,,9.3,Secrets through External Secrets,Sourav,1,9.2,R4,2026-12-04,Not started
+,,,,9.4,"Storage: RWX PVC for v1, object-storage plan",Sourav,1,9.2,R5,2026-12-11,Not started
+,,,,9.5,"CI/CD: build, scan, push, deploy dev, staging and prod",Sourav,3,9.1,R3,2026-11-27,Not started
+,,,,9.6,"Monitoring: metrics, tracing, dashboards, alerts",Sourav,3,9.2,R4,2026-12-04,Not started
+,,,,9.7,Production rollout: canary and pilot role,"Nitesh, Sourav",2,"5.6, 4.6, 6.7, 7.6, 3.6, 2.5, 8.7, 9.6, 1.7, 1.6, 4.4, 4.5, 2.6, 2.3, 9.3, 9.4, 9.5, 8.6, 3.5, 6.6, 6.4",R11,2027-02-05,Not started

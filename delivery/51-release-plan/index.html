@@ -1,0 +1,4452 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/delivery/51-release-plan/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../41-architecture-and-contracts/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Release plan and tracker - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#release-plan-and-tracker" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Release plan and tracker
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../presenton/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../presenton/05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../presenton/16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../presenton/20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../presenton/24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../presenton/25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VIII · AI Slides delivery
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../presenton/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../presenton/28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VIII · AI Slides delivery
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_9" id="__nav_9_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VIII · AI Slides delivery
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release plan and tracker
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release plan and tracker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-understand-the-planning-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Understand the planning rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-read-the-release-calendar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Read the release calendar
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-read-the-story-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Read the story summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-track-the-subtasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Track the subtasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Track the subtasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#story-1-presenton-be-dynamic-data-refresh-spike-binding-storage-and-refresh-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 1: [Presenton BE] Dynamic data: refresh spike, binding storage and refresh service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-2-presenton-be-platform-integration-postgres-access-control-pod-ready-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 2: [Presenton BE] Platform Integration: Postgres, access control, pod-ready API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-3-presenton-be-prompt-library-and-custom-templates-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 3: [Presenton BE] Prompt library and custom templates backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-4-presenton-fe-native-charts-and-async-refresh-ux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 4: [Presenton FE] Native charts and async refresh UX
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-5-presenton-fe-analytics-menu-and-iframe-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 5: [Presenton FE] Analytics menu and iframe hardening
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-6-presenton-fe-prompt-library-and-template-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 6: [Presenton FE] Prompt library and template UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-7-harness-presentation-planner-skill-and-refreshable-only-data-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 7: [Harness] presentation-planner skill and refreshable-only data selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-8-analytics-bemcp-refresh-apis-mcp-catalog-user-context-enforcement-csp-and-cookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 8: [Analytics BE/MCP] Refresh APIs, MCP catalog, user-context enforcement, CSP and cookies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-9-infra-deploy-presenton-be-and-fe-alongside-the-analytics-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 9: [Infra] Deploy Presenton BE and FE alongside the analytics platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-check-the-weekly-load-per-person" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Check the weekly load per person
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-read-the-schedule-as-a-gantt-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Read the schedule as a Gantt chart
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-watch-the-scheduling-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Watch the scheduling risks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-keep-the-tracker-in-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Keep the tracker in sync
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../41-architecture-and-contracts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture and contracts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../42-story1-dynamic-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 1: Dynamic data and refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../43-story2-platform-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 2: Platform integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../44-story3-prompt-library-backend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 3: Prompt library backend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../45-story4-native-charts-ux/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 4: Native charts and refresh UX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../46-story5-menu-and-iframe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 5: Analytics menu and iframe
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../47-story6-prompt-library-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 6: Prompt library and template UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../48-story7-harness-planner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 7: Harness presentation planner
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../49-story8-analytics-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 8: Analytics refresh APIs and MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../50-story9-infra/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Story 9: Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-understand-the-planning-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Understand the planning rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-read-the-release-calendar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Read the release calendar
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-read-the-story-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Read the story summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-track-the-subtasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Track the subtasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Track the subtasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#story-1-presenton-be-dynamic-data-refresh-spike-binding-storage-and-refresh-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 1: [Presenton BE] Dynamic data: refresh spike, binding storage and refresh service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-2-presenton-be-platform-integration-postgres-access-control-pod-ready-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 2: [Presenton BE] Platform Integration: Postgres, access control, pod-ready API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-3-presenton-be-prompt-library-and-custom-templates-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 3: [Presenton BE] Prompt library and custom templates backend
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-4-presenton-fe-native-charts-and-async-refresh-ux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 4: [Presenton FE] Native charts and async refresh UX
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-5-presenton-fe-analytics-menu-and-iframe-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 5: [Presenton FE] Analytics menu and iframe hardening
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-6-presenton-fe-prompt-library-and-template-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 6: [Presenton FE] Prompt library and template UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-7-harness-presentation-planner-skill-and-refreshable-only-data-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 7: [Harness] presentation-planner skill and refreshable-only data selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-8-analytics-bemcp-refresh-apis-mcp-catalog-user-context-enforcement-csp-and-cookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 8: [Analytics BE/MCP] Refresh APIs, MCP catalog, user-context enforcement, CSP and cookies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#story-9-infra-deploy-presenton-be-and-fe-alongside-the-analytics-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Story 9: [Infra] Deploy Presenton BE and FE alongside the analytics platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-check-the-weekly-load-per-person" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Check the weekly load per person
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-read-the-schedule-as-a-gantt-chart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Read the schedule as a Gantt chart
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-watch-the-scheduling-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Watch the scheduling risks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-keep-the-tracker-in-sync" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Keep the tracker in sync
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="release-plan-and-tracker">Release plan and tracker<a class="headerlink" href="#release-plan-and-tracker" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> the architect's story sheet  ·  <strong>Builds on:</strong> <a href="../">Part VIII landing</a>, <a href="../41-architecture-and-contracts/">Architecture and contracts</a>  ·  <strong>Time:</strong> ~15 min</p>
+</div>
+<p>This page breaks the nine stories into trackable subtasks. Each subtask has an owner, an effort estimate, a weekly release date and a status, matching the columns of the team's story sheet (SubTasks, Effort, Release Date, Status). The schedule respects task dependencies and each person's weekly capacity. A spreadsheet version is available for the team tracker.</p>
+<p><a class="md-button md-button--primary" href="../../assets/ai-slides-tracker.xlsx"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.17 3.25q.33 0 .59.25.24.24.24.58v15.84q0 .34-.24.58-.26.25-.59.25H7.83q-.33 0-.59-.25-.24-.24-.24-.58V17H2.83q-.33 0-.59-.24Q2 16.5 2 16.17V7.83q0-.33.24-.59Q2.5 7 2.83 7H7V4.08q0-.34.24-.58.26-.25.59-.25M7 13.06l1.18 2.22h1.79L8 12.06l1.93-3.17H8.22L7.13 10.9l-.04.06-.03.07q-.26-.53-.56-1.07-.25-.53-.53-1.07H4.16l1.89 3.19L4 15.28h1.78m8.1 4.22V17H8.25v2.5m5.63-3.75v-3.12H12v3.12m1.88-4.37V8.25H12v3.13M13.88 7V4.5H8.25V7m12.5 12.5V17h-5.62v2.5m5.62-3.75v-3.12h-5.62v3.12m5.62-4.37V8.25h-5.62v3.13M20.75 7V4.5h-5.62V7Z"/></svg></span> Download tracker (.xlsx)</a> <a class="md-button" href="../../assets/ai-slides-tracker.csv"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm1 14-2 4h-3l2-4H9v-5h6zm-2-7V3.5L18.5 9z"/></svg></span> Download tracker (.csv)</a></p>
+<h2 id="step-1-understand-the-planning-rules">Step 1: Understand the planning rules<a class="headerlink" href="#step-1-understand-the-planning-rules" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Release cadence</td>
+<td>Weekly release train, every Friday. Code freeze Thursday 17:00, deploy to staging Friday morning, production promotion after sign-off</td>
+</tr>
+<tr>
+<td>Plan start</td>
+<td>Wednesday 4 November 2026 (the first train, R1, has 8 working days)</td>
+</tr>
+<tr>
+<td>Holiday break</td>
+<td>No release trains from 21 December 2026 to 1 January 2027 (assumed; adjust to the team calendar)</td>
+</tr>
+<tr>
+<td>Effort unit</td>
+<td>Ideal person-days (<code>d</code>) of focused work, including tests and code review, excluding meetings</td>
+</tr>
+<tr>
+<td>Capacity</td>
+<td>0.8 focus-days per working day per person (4 per 5-day week); one subtask at a time per person, critical-path work first</td>
+</tr>
+<tr>
+<td>Release date of a subtask</td>
+<td>The Friday of the train it ships in, to dev or staging behind a feature flag</td>
+</tr>
+<tr>
+<td>Release date of a story</td>
+<td>The release date of its last subtask</td>
+</tr>
+<tr>
+<td>Dependencies</td>
+<td>A subtask is never scheduled before the train of anything it depends on</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Estimates are starting points</p>
+<p>The efforts below were derived from the implementation steps in each story chapter. Re-estimate in the first planning meeting, update the spreadsheet, and keep this page in sync (the generator script is described at the end of this page).</p>
+</div>
+<h2 id="step-2-read-the-release-calendar">Step 2: Read the release calendar<a class="headerlink" href="#step-2-read-the-release-calendar" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Train</th>
+<th>Release date</th>
+<th>Capacity per person</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>Fri 13 Nov 2026</td>
+<td>6 d</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Fri 20 Nov 2026</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>Fri 27 Nov 2026</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>Fri 4 Dec 2026</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>Fri 11 Dec 2026</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R6</td>
+<td>Fri 18 Dec 2026</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R7</td>
+<td>Fri 8 Jan 2027</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R8</td>
+<td>Fri 15 Jan 2027</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R9</td>
+<td>Fri 22 Jan 2027</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R10</td>
+<td>Fri 29 Jan 2027</td>
+<td>4 d</td>
+</tr>
+<tr>
+<td>R11</td>
+<td>Fri 5 Feb 2027</td>
+<td>4 d</td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-3-read-the-story-summary">Step 3: Read the story summary<a class="headerlink" href="#step-3-read-the-story-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Story</th>
+<th>Owner</th>
+<th>SubTasks</th>
+<th>Effort</th>
+<th>Starts</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="../42-story1-dynamic-data/">[Presenton BE] Dynamic data: refresh spike, binding storage and refresh service</a></td>
+<td>Srini, Sourav, Nitesh</td>
+<td>7</td>
+<td>19 d</td>
+<td>R1</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="../43-story2-platform-integration/">[Presenton BE] Platform Integration: Postgres, access control, pod-ready API</a></td>
+<td>Nitesh</td>
+<td>6</td>
+<td>15 d</td>
+<td>R2</td>
+<td>R9 · Fri 22 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="../44-story3-prompt-library-backend/">[Presenton BE] Prompt library and custom templates backend</a></td>
+<td>Srini</td>
+<td>6</td>
+<td>10 d</td>
+<td>R1</td>
+<td>R11 · Fri 5 Feb 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="../45-story4-native-charts-ux/">[Presenton FE] Native charts and async refresh UX</a></td>
+<td>Srini, Sourav, Nitesh</td>
+<td>6</td>
+<td>13 d</td>
+<td>R3</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="../46-story5-menu-and-iframe/">[Presenton FE] Analytics menu and iframe hardening</a></td>
+<td>Sourav</td>
+<td>6</td>
+<td>12 d</td>
+<td>R1</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="../47-story6-prompt-library-ui/">[Presenton FE] Prompt library and template UI</a></td>
+<td>Radhika</td>
+<td>7</td>
+<td>13 d</td>
+<td>R1</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="../48-story7-harness-planner/">[Harness] presentation-planner skill and refreshable-only data selection</a></td>
+<td>Srini, Nitesh</td>
+<td>6</td>
+<td>17 d</td>
+<td>R1</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="../49-story8-analytics-mcp/">[Analytics BE/MCP] Refresh APIs, MCP catalog, user-context enforcement, CSP and cookies</a></td>
+<td>Nitesh</td>
+<td>7</td>
+<td>15 d</td>
+<td>R1</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="../50-story9-infra/">[Infra] Deploy Presenton BE and FE alongside the analytics platform</a></td>
+<td>Nitesh, Sourav</td>
+<td>7</td>
+<td>15 d</td>
+<td>R1</td>
+<td>R11 · Fri 5 Feb 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Total</strong></td>
+<td></td>
+<td><strong>58</strong></td>
+<td><strong>129 d</strong></td>
+<td></td>
+<td><strong>R11 · Fri 5 Feb 2027</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-4-track-the-subtasks">Step 4: Track the subtasks<a class="headerlink" href="#step-4-track-the-subtasks" title="Permanent link">&para;</a></h2>
+<p>Status values: <code>Not started</code>, <code>In progress</code>, <code>In review</code>, <code>Blocked</code>, <code>Done</code>. Update the Status column in the spreadsheet; the trains and dates only change when the plan is re-baselined.</p>
+<h3 id="story-1-presenton-be-dynamic-data-refresh-spike-binding-storage-and-refresh-service">Story 1: [Presenton BE] Dynamic data: refresh spike, binding storage and refresh service<a class="headerlink" href="#story-1-presenton-be-dynamic-data-refresh-spike-binding-storage-and-refresh-service" title="Permanent link">&para;</a></h3>
+<p>Owner: Srini, Sourav, Nitesh · Effort: 19 d · Release: R7 (Fri 8 Jan 2027) · <a href="../42-story1-dynamic-data/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1</td>
+<td>Refresh spike: prototype options A, B and C, measure, write and approve the decision record</td>
+<td>Srini, Nitesh</td>
+<td>3 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>slide_data_bindings SQLModel model and Alembic migration</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>1.1, 2.1</td>
+<td>R2 · Fri 20 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>Create bindings during generation from the DeckPlan</td>
+<td>Srini</td>
+<td>3 d</td>
+<td>1.2, 7.1</td>
+<td>R4 · Fri 4 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.4</td>
+<td>BindingRefreshService: batching, mapping, caching, snapshot write-back</td>
+<td>Srini</td>
+<td>4 d</td>
+<td>1.2, 8.3</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.5</td>
+<td>Bindings API: GET and PUT bindings, refresh SSE stream, batch refresh</td>
+<td>Sourav</td>
+<td>3 d</td>
+<td>1.4</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.6</td>
+<td>Export pre-refresh with 'data as of' fallback footnote</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>1.4</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.7</td>
+<td>Tests (mappers, contract test against fake refresh API, migration) and metrics</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>1.5</td>
+<td>R6 · Fri 18 Dec 2026</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-2-presenton-be-platform-integration-postgres-access-control-pod-ready-api">Story 2: [Presenton BE] Platform Integration: Postgres, access control, pod-ready API<a class="headerlink" href="#story-2-presenton-be-platform-integration-postgres-access-control-pod-ready-api" title="Permanent link">&para;</a></h3>
+<p>Owner: Nitesh · Effort: 15 d · Release: R9 (Fri 22 Jan 2027) · <a href="../43-story2-platform-integration/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1</td>
+<td>Postgres schema presenton, pool settings, migration Kubernetes Job</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>-</td>
+<td>R2 · Fri 20 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.2</td>
+<td>POST /api/v1/platform/session: JWKS verification, jti replay guard, user and org upsert, cookie path</td>
+<td>Nitesh</td>
+<td>3 d</td>
+<td>2.1, 8.2</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.3</td>
+<td>Encrypted data-token storage and refresh-data-token endpoint</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>2.2</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.4</td>
+<td>organizations and presentation_collaborators tables, require_presentation_access on every endpoint</td>
+<td>Nitesh</td>
+<td>4 d</td>
+<td>2.2</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.5</td>
+<td>Sharing endpoints, owned plus shared listing, app_data asset authorization</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>2.4</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.6</td>
+<td>Pod readiness: /healthz, /readyz, JSON logs, graceful shutdown, root_path, local login off</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>2.1</td>
+<td>R9 · Fri 22 Jan 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-3-presenton-be-prompt-library-and-custom-templates-backend">Story 3: [Presenton BE] Prompt library and custom templates backend<a class="headerlink" href="#story-3-presenton-be-prompt-library-and-custom-templates-backend" title="Permanent link">&para;</a></h3>
+<p>Owner: Srini · Effort: 10 d · Release: R11 (Fri 5 Feb 2027) · <a href="../44-story3-prompt-library-backend/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.1</td>
+<td>prompt_library_items model, migration and curated seed import</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>2.1</td>
+<td>R3 · Fri 27 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.2</td>
+<td>List, detail and render endpoints with JSON Schema validation</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>3.1</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.3</td>
+<td>GET /api/v1/ppt/templates/bundled</td>
+<td>Srini</td>
+<td>1 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.4</td>
+<td>POST generate-from-prompt/async with planner stage and task polling</td>
+<td>Srini</td>
+<td>3 d</td>
+<td>3.2, 7.5</td>
+<td>R9 · Fri 22 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.5</td>
+<td>Gate custom template upload behind AI_SLIDES_CUSTOM_TEMPLATES_ENABLED and record open questions</td>
+<td>Srini</td>
+<td>1 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.6</td>
+<td>Backend tests for prompt library and async generation</td>
+<td>Srini</td>
+<td>1 d</td>
+<td>3.4</td>
+<td>R11 · Fri 5 Feb 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-4-presenton-fe-native-charts-and-async-refresh-ux">Story 4: [Presenton FE] Native charts and async refresh UX<a class="headerlink" href="#story-4-presenton-fe-native-charts-and-async-refresh-ux" title="Permanent link">&para;</a></h3>
+<p>Owner: Srini, Sourav, Nitesh · Effort: 13 d · Release: R10 (Fri 29 Jan 2027) · <a href="../45-story4-native-charts-ux/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4.1</td>
+<td>Chart rendering decision and element-patch reducer on the existing Chart.js path</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>1.2</td>
+<td>R3 · Fri 27 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.2</td>
+<td>useDeckRefresh SSE hook and bindingsSlice</td>
+<td>Sourav</td>
+<td>3 d</td>
+<td>1.5, 4.1</td>
+<td>R6 · Fri 18 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.3</td>
+<td>Overlay states (loading, error, stale, forbidden), status badge, retry, Refresh data button</td>
+<td>Radhika (proposed)</td>
+<td>3 d</td>
+<td>4.2</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.4</td>
+<td>Autosave interaction, visible-slide-first ordering, cancellation</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>4.2</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.5</td>
+<td>Presentation mode and export render checks</td>
+<td>Nitesh</td>
+<td>1 d</td>
+<td>4.3</td>
+<td>R9 · Fri 22 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.6</td>
+<td>Reducer unit tests and Cypress component tests for every state</td>
+<td>Radhika (proposed)</td>
+<td>2 d</td>
+<td>4.3</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-5-presenton-fe-analytics-menu-and-iframe-hardening">Story 5: [Presenton FE] Analytics menu and iframe hardening<a class="headerlink" href="#story-5-presenton-fe-analytics-menu-and-iframe-hardening" title="Permanent link">&para;</a></h3>
+<p>Owner: Sourav · Effort: 12 d · Release: R8 (Fri 15 Jan 2027) · <a href="../46-story5-menu-and-iframe/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5.1</td>
+<td>AI Slides menu item and role permission in Superset</td>
+<td>Sourav</td>
+<td>1 d</td>
+<td>-</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>5.2</td>
+<td>Superset host page /ai-slides/launch with iframe and postMessage bridge</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>8.2</td>
+<td>R2 · Fri 20 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>5.3</td>
+<td>Next.js basePath /ai-slides and prefix fixes (proxy, asset URLs, export route)</td>
+<td>Sourav</td>
+<td>3 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>5.4</td>
+<td>PlatformSessionBridge component with re-handoff on expiry</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>2.2, 5.2</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>5.5</td>
+<td>Iframe sizing, fullscreen, deep links, downloads</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>5.3</td>
+<td>R2 · Fri 20 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>5.6</td>
+<td>End-to-end tests and browser QA matrix</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>5.4, 5.5</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-6-presenton-fe-prompt-library-and-template-ui">Story 6: [Presenton FE] Prompt library and template UI<a class="headerlink" href="#story-6-presenton-fe-prompt-library-and-template-ui" title="Permanent link">&para;</a></h3>
+<p>Owner: Radhika · Effort: 13 d · Release: R10 (Fri 29 Jan 2027) · <a href="../47-story6-prompt-library-ui/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6.1</td>
+<td>Prompt library API client and state</td>
+<td>Radhika</td>
+<td>1 d</td>
+<td>3.1</td>
+<td>R3 · Fri 27 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6.2</td>
+<td>PromptLibraryPanel and PromptCard with search and category filters</td>
+<td>Radhika</td>
+<td>3 d</td>
+<td>6.1</td>
+<td>R4 · Fri 4 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6.3</td>
+<td>PromptVariablesForm from JSON Schema, with dashboard picker</td>
+<td>Radhika</td>
+<td>3 d</td>
+<td>6.2, 8.4</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6.4</td>
+<td>TemplatePicker with bundled templates and recommended badge</td>
+<td>Radhika</td>
+<td>2 d</td>
+<td>3.3</td>
+<td>R2 · Fri 20 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6.5</td>
+<td>GenerateFromPromptButton with async progress, navigation and ?prompt= deep link</td>
+<td>Radhika</td>
+<td>2 d</td>
+<td>3.4, 6.3</td>
+<td>R9 · Fri 22 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6.6</td>
+<td>Hide template upload entry points via runtime flag</td>
+<td>Radhika</td>
+<td>0.5 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>6.7</td>
+<td>Unit and Cypress component tests</td>
+<td>Radhika</td>
+<td>1.5 d</td>
+<td>6.5</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-7-harness-presentation-planner-skill-and-refreshable-only-data-selection">Story 7: [Harness] presentation-planner skill and refreshable-only data selection<a class="headerlink" href="#story-7-harness-presentation-planner-skill-and-refreshable-only-data-selection" title="Permanent link">&para;</a></h3>
+<p>Owner: Srini, Nitesh · Effort: 17 d · Release: R10 (Fri 29 Jan 2027) · <a href="../48-story7-harness-planner/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>7.1</td>
+<td>Skill scaffold: SKILL.md, DeckPlan JSON Schema and Pydantic models, layout catalog input</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>7.2</td>
+<td>Catalog and MCP tool integration (list, info, row-limited samples) with the data token</td>
+<td>Nitesh</td>
+<td>3 d</td>
+<td>8.4, 8.5</td>
+<td>R6 · Fri 18 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>7.3</td>
+<td>Refreshable-only selection, viz_type compatibility table, ranking</td>
+<td>Srini</td>
+<td>3 d</td>
+<td>7.1, 7.2</td>
+<td>R7 · Fri 8 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>7.4</td>
+<td>Deterministic validators, bounded repair loop, limits and budgets</td>
+<td>Srini</td>
+<td>3 d</td>
+<td>7.3</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>7.5</td>
+<td>Presenton BE harness client: DeckPlan to structure and bindings</td>
+<td>Srini</td>
+<td>2 d</td>
+<td>7.4, 1.3</td>
+<td>R8 · Fri 15 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>7.6</td>
+<td>Eval set (40+ cases), runner and CI gate</td>
+<td>Srini</td>
+<td>4 d</td>
+<td>7.4</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-8-analytics-bemcp-refresh-apis-mcp-catalog-user-context-enforcement-csp-and-cookies">Story 8: [Analytics BE/MCP] Refresh APIs, MCP catalog, user-context enforcement, CSP and cookies<a class="headerlink" href="#story-8-analytics-bemcp-refresh-apis-mcp-catalog-user-context-enforcement-csp-and-cookies" title="Permanent link">&para;</a></h3>
+<p>Owner: Nitesh · Effort: 15 d · Release: R10 (Fri 29 Jan 2027) · <a href="../49-story8-analytics-mcp/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8.1</td>
+<td>ai_slides blueprint scaffold, signing keys and JWKS endpoint</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8.2</td>
+<td>Handoff endpoint and data-token verification with user context</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>8.1</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8.3</td>
+<td>Refresh API: saved query context, overrides merge, ChartDataCommand, normalization, errors</td>
+<td>Nitesh</td>
+<td>4 d</td>
+<td>8.2, 1.1</td>
+<td>R4 · Fri 4 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8.4</td>
+<td>Catalog endpoint with refreshable rules</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>8.3</td>
+<td>R4 · Fri 4 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8.5</td>
+<td>MCP: JWT auth as the user, tool allowlist, custom catalog tool</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>8.2</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8.6</td>
+<td>CSP, cookie settings and CSRF exemptions for Bearer endpoints</td>
+<td>Nitesh</td>
+<td>1 d</td>
+<td>-</td>
+<td>R10 · Fri 29 Jan 2027</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>8.7</td>
+<td>Integration tests: RLS, forbidden charts, overrides</td>
+<td>Nitesh</td>
+<td>2 d</td>
+<td>8.4</td>
+<td>R9 · Fri 22 Jan 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h3 id="story-9-infra-deploy-presenton-be-and-fe-alongside-the-analytics-platform">Story 9: [Infra] Deploy Presenton BE and FE alongside the analytics platform<a class="headerlink" href="#story-9-infra-deploy-presenton-be-and-fe-alongside-the-analytics-platform" title="Permanent link">&para;</a></h3>
+<p>Owner: Nitesh, Sourav · Effort: 15 d · Release: R11 (Fri 5 Feb 2027) · <a href="../50-story9-infra/">Implementation guide</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>SubTask</th>
+<th>Owner</th>
+<th>Effort</th>
+<th>Depends on</th>
+<th>Release date</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9.1</td>
+<td>Split the Dockerfile into presenton-be and presenton-fe images</td>
+<td>Sourav</td>
+<td>2 d</td>
+<td>-</td>
+<td>R1 · Fri 13 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9.2</td>
+<td>Dev namespace: Helm chart, prefix ingress, migrate Job</td>
+<td>Nitesh</td>
+<td>3 d</td>
+<td>9.1</td>
+<td>R3 · Fri 27 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9.3</td>
+<td>Secrets through External Secrets</td>
+<td>Sourav</td>
+<td>1 d</td>
+<td>9.2</td>
+<td>R4 · Fri 4 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9.4</td>
+<td>Storage: RWX PVC for v1, object-storage plan</td>
+<td>Sourav</td>
+<td>1 d</td>
+<td>9.2</td>
+<td>R5 · Fri 11 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9.5</td>
+<td>CI/CD: build, scan, push, deploy dev, staging and prod</td>
+<td>Sourav</td>
+<td>3 d</td>
+<td>9.1</td>
+<td>R3 · Fri 27 Nov 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9.6</td>
+<td>Monitoring: metrics, tracing, dashboards, alerts</td>
+<td>Sourav</td>
+<td>3 d</td>
+<td>9.2</td>
+<td>R4 · Fri 4 Dec 2026</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>9.7</td>
+<td>Production rollout: canary and pilot role</td>
+<td>Nitesh, Sourav</td>
+<td>2 d</td>
+<td>all other subtasks</td>
+<td>R11 · Fri 5 Feb 2027</td>
+<td>Not started</td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-5-check-the-weekly-load-per-person">Step 5: Check the weekly load per person<a class="headerlink" href="#step-5-check-the-weekly-load-per-person" title="Permanent link">&para;</a></h2>
+<p>Person-days of subtasks that ship in each train. A subtask counts in the train it finishes in, so a long subtask can make one train look heavier than 4 d while the previous train looks light.</p>
+<table>
+<thead>
+<tr>
+<th>Train</th>
+<th>Srini</th>
+<th>Sourav</th>
+<th>Nitesh</th>
+<th>Radhika</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1 (13 Nov)</td>
+<td>5.5</td>
+<td>5</td>
+<td>5.5</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>R2 (20 Nov)</td>
+<td>2</td>
+<td>4</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>R3 (27 Nov)</td>
+<td>2</td>
+<td>5</td>
+<td>3</td>
+<td>1</td>
+</tr>
+<tr>
+<td>R4 (04 Dec)</td>
+<td>3</td>
+<td>4</td>
+<td>6</td>
+<td>3</td>
+</tr>
+<tr>
+<td>R5 (11 Dec)</td>
+<td>6</td>
+<td>4</td>
+<td>5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>R6 (18 Dec)</td>
+<td>2</td>
+<td>3</td>
+<td>3</td>
+<td>0</td>
+</tr>
+<tr>
+<td>R7 (08 Jan)</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>5</td>
+</tr>
+<tr>
+<td>R8 (15 Jan)</td>
+<td>5</td>
+<td>3</td>
+<td>4</td>
+<td>0</td>
+</tr>
+<tr>
+<td>R9 (22 Jan)</td>
+<td>3</td>
+<td>0</td>
+<td>5</td>
+<td>2</td>
+</tr>
+<tr>
+<td>R10 (29 Jan)</td>
+<td>6</td>
+<td>0</td>
+<td>1</td>
+<td>1.5</td>
+</tr>
+<tr>
+<td>R11 (05 Feb)</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>38.5</strong></td>
+<td><strong>33</strong></td>
+<td><strong>39.5</strong></td>
+<td><strong>18</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-6-read-the-schedule-as-a-gantt-chart">Step 6: Read the schedule as a Gantt chart<a class="headerlink" href="#step-6-read-the-schedule-as-a-gantt-chart" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>gantt
+    title AI Slides weekly release plan
+    dateFormat YYYY-MM-DD
+    axisFormat %d %b
+    excludes weekends
+    section Story 1
+    1.1 :s1_1, 2026-11-06, 2026-11-11
+    1.2 :s1_2, 2026-11-17, 2026-11-20
+    1.3 :s1_3, 2026-11-24, 2026-12-01
+    1.4 :s1_4, 2026-11-30, 2026-12-08
+    1.5 :s1_5, 2026-12-07, 2026-12-12
+    1.7 :s1_7, 2026-12-11, 2026-12-16
+    1.6 :s1_6, 2027-01-04, 2027-01-08
+    section Story 2
+    2.1 :s2_1, 2026-11-12, 2026-11-18
+    2.2 :s2_2, 2026-12-07, 2026-12-11
+    2.4 :s2_4, 2026-12-16, 2027-01-07
+    2.3 :s2_3, 2027-01-06, 2027-01-12
+    2.5 :s2_5, 2027-01-11, 2027-01-14
+    2.6 :s2_6, 2027-01-13, 2027-01-19
+    section Story 3
+    3.3 :s3_3, 2026-11-10, 2026-11-12
+    3.5 :s3_5, 2026-11-11, 2026-11-13
+    3.1 :s3_1, 2026-11-19, 2026-11-25
+    3.2 :s3_2, 2026-12-07, 2026-12-10
+    3.4 :s3_4, 2027-01-13, 2027-01-20
+    3.6 :s3_6, 2027-01-28, 2027-02-02
+    section Story 4
+    4.1 :s4_1, 2026-11-25, 2026-11-28
+    4.2 :s4_2, 2026-12-11, 2026-12-18
+    4.3 :s4_3, 2026-12-17, 2027-01-06
+    4.6 :s4_6, 2027-01-06, 2027-01-09
+    4.5 :s4_5, 2027-01-20, 2027-01-22
+    4.4 :s4_4, 2027-01-26, 2027-01-29
+    section Story 5
+    5.3 :s5_3, 2026-11-06, 2026-11-13
+    5.2 :s5_2, 2026-11-16, 2026-11-20
+    5.5 :s5_5, 2026-11-12, 2026-11-17
+    5.4 :s5_4, 2026-12-17, 2027-01-05
+    5.1 :s5_1, 2027-01-11, 2027-01-13
+    5.6 :s5_6, 2027-01-07, 2027-01-12
+    section Story 6
+    6.6 :s6_6, 2026-11-04, 2026-11-05
+    6.4 :s6_4, 2026-11-11, 2026-11-17
+    6.1 :s6_1, 2026-11-24, 2026-11-26
+    6.2 :s6_2, 2026-11-25, 2026-12-02
+    6.3 :s6_3, 2026-12-02, 2026-12-09
+    6.5 :s6_5, 2027-01-19, 2027-01-22
+    6.7 :s6_7, 2027-01-21, 2027-01-26
+    section Story 7
+    7.1 :s7_1, 2026-11-04, 2026-11-07
+    7.2 :s7_2, 2026-12-10, 2026-12-17
+    7.3 :s7_3, 2026-12-16, 2027-01-06
+    7.4 :s7_4, 2027-01-05, 2027-01-12
+    7.5 :s7_5, 2027-01-11, 2027-01-14
+    7.6 :s7_6, 2027-01-19, 2027-01-27
+    section Story 8
+    8.1 :s8_1, 2026-11-04, 2026-11-07
+    8.2 :s8_2, 2026-11-10, 2026-11-13
+    8.3 :s8_3, 2026-11-23, 2026-12-01
+    8.4 :s8_4, 2026-11-30, 2026-12-03
+    8.5 :s8_5, 2026-12-02, 2026-12-08
+    8.7 :s8_7, 2027-01-18, 2027-01-21
+    8.6 :s8_6, 2027-01-21, 2027-01-26
+    section Story 9
+    9.1 :s9_1, 2026-11-04, 2026-11-07
+    9.2 :s9_2, 2026-11-17, 2026-11-24
+    9.5 :s9_5, 2026-11-19, 2026-11-25
+    9.3 :s9_3, 2026-12-03, 2026-12-05
+    9.6 :s9_6, 2026-11-27, 2026-12-04
+    9.4 :s9_4, 2026-12-04, 2026-12-08
+    9.7 :s9_7, 2027-02-01, 2027-02-03</code></pre>
+<h2 id="step-7-watch-the-scheduling-risks">Step 7: Watch the scheduling risks<a class="headerlink" href="#step-7-watch-the-scheduling-risks" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: Srini and Nitesh set the end date</p>
+<p>Srini carries 38.5 d and Nitesh 39.5 d, against 33 d for Sourav and 18 d for Radhika. Nitesh owns all of Stories 2 and 8 (identity handoff, refresh API, catalog), which most other work waits on, and Srini owns the binding service, the planner and the prompt backend. The plan finishes in R11 only if both stay focused. Protect their time, pair on 8.3 (refresh API) if it slips, and treat any new request for either of them as a date change.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Proposed reassignments</p>
+<p>Subtasks marked <code>(proposed)</code> are assigned to someone who is not listed as an owner of that story on the architect's sheet. They balance the load and should be confirmed by the architect. Radhika has spare capacity after Story 6, so the Story 4 overlay states and component tests (4.3, 4.6) are proposed for her; she is already building the same UI patterns in Story 6.</p>
+</div>
+<p>Other risks that move dates:</p>
+<ul>
+<li>The Story 1 spike (1.1) can change the refresh approach. If it selects option A (browser calls Superset directly), subtasks 1.4, 1.5 and 8.3 change shape; re-plan at the end of R1.</li>
+<li>Story 8 depends on how the analytics platform packages Superset changes (blueprint or extension). Settle that in R1.</li>
+<li>The harness team's availability for Story 7 integration (7.2) is an external dependency.</li>
+<li>Custom template upload stays out of the plan until the pending decision is made.</li>
+</ul>
+<h2 id="step-8-keep-the-tracker-in-sync">Step 8: Keep the tracker in sync<a class="headerlink" href="#step-8-keep-the-tracker-in-sync" title="Permanent link">&para;</a></h2>
+<p>This page, the tracking table in each story chapter, and both spreadsheet downloads are generated from one subtask list (IDs, efforts, owners, dependencies) by <code>tutorial/scripts/gen_release_plan.py</code>. The script schedules subtasks day by day: critical-path work first, one subtask at a time per person, never before its dependencies. Each subtask then ships in the first Friday train on or after its finish day. To re-plan, edit the <code>T</code> list or the <code>RELEASES</code> calendar in the script and regenerate (it needs <code>openpyxl</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>tutorial/scripts/gen_release_plan.py<span class="w"> </span>tutorial/content/delivery/51-release-plan.md<span class="w"> </span>tutorial/content/assets<span class="w"> </span>/tmp/ai-slides-snippets
+</span></code></pre></div>
+<p>Then paste the regenerated per-story tables from the snippets folder into the Tracking section of each story chapter, and commit. Statuses live in the team spreadsheet; copy them back here at each release review if you want the site to show progress.</p>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The 58 subtasks behind the nine stories, with owners, effort and dependencies.</li>
+<li>The weekly release train, from R1 on Fri 13 Nov 2026 to R11 on Fri 5 Feb 2027, and which train each subtask ships in.</li>
+<li>The total estimated effort (129 d) and the weekly load per person.</li>
+<li>The scheduling risks, starting with the critical path through Stories 8 and 2.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Start building with <a href="../42-story1-dynamic-data/">Story 1: Dynamic data, binding storage and refresh service</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Part VIII · AI Slides delivery plan">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Part VIII · AI Slides delivery plan
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../41-architecture-and-contracts/" class="md-footer__link md-footer__link--next" aria-label="Next: Architecture and contracts">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Architecture and contracts
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
