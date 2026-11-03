@@ -1,0 +1,4577 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/26-docker-and-deployment/">
+      
+      
+        <link rel="prev" href="../25-auth-and-multiuser/">
+      
+      
+        <link rel="next" href="../27-electron/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Docker build and deployment - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#docker-build-and-deployment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Docker build and deployment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-0-the-build-context-and-dockerignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 0: The build context and .dockerignore
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-stage-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The stage graph
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-stage-fastapi-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Stage fastapi-builder
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Stage fastapi-builder">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-a-pip-less-virtual-environment-managed-by-uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 A pip-less virtual environment managed by uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-installing-the-application-and-checking-packaged-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Installing the application and checking packaged data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-the-spacy-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 The spaCy model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-baking-fastembed-weights-then-proving-they-work-offline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Baking FastEmbed weights, then proving they work offline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-stage-nextjs-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Stage nextjs-builder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-stage-assets-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Stage assets-builder
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Stage assets-builder">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-liteparse-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 LiteParse runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-the-pinned-export-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 The pinned export engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-stage-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Stage runtime
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Stage runtime">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-arguments-and-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Arguments and environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-pinned-chromium-from-a-debian-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Pinned Chromium from a Debian snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-a-noto-only-font-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 A Noto-only font set
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-directories-and-the-assembly-copies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Directories and the assembly copies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-what-makes-the-image-large" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: What makes the image large
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-dockerfiledev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Dockerfile.dev
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-docker-composeyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: docker-compose.yml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: docker-compose.yml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-four-services-not-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Four services, not profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-bind-mounts-versus-named-volumes-in-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Bind mounts versus named volumes in development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-gpu-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 GPU services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-environment-forwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Environment forwarding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-multi-architecture-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Multi-architecture release
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: Multi-architecture release">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-the-ci-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 The CI workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-the-documented-manual-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 The documented manual flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-platform-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Platform templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: Platform templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-digitalocean-app-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 DigitalOcean App Platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-railway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Railway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-kubernetes-and-openshift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Kubernetes and OpenShift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-public-url-and-reverse-proxies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Public URL and reverse proxies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 11: Public URL and reverse proxies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-header-handling-in-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Header handling in nginx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-presenton_public_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 PRESENTON_PUBLIC_URL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-outer-proxy-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Outer proxy checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-external-databases-with-database_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: External databases with DATABASE_URL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-13-air-gapped-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 13: Air-gapped deployments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 13: Air-gapped deployments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-the-switch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 The switch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-other-outbound-dependencies-to-plan-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Other outbound dependencies to plan for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-14-resource-usage-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 14: Resource usage findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-15-production-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 15: Production checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-0-the-build-context-and-dockerignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 0: The build context and .dockerignore
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-stage-graph" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The stage graph
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-stage-fastapi-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Stage fastapi-builder
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Stage fastapi-builder">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-a-pip-less-virtual-environment-managed-by-uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 A pip-less virtual environment managed by uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-installing-the-application-and-checking-packaged-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Installing the application and checking packaged data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-the-spacy-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 The spaCy model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-baking-fastembed-weights-then-proving-they-work-offline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Baking FastEmbed weights, then proving they work offline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-stage-nextjs-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Stage nextjs-builder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-stage-assets-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Stage assets-builder
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Stage assets-builder">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-liteparse-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 LiteParse runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-the-pinned-export-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 The pinned export engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-stage-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Stage runtime
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Stage runtime">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-arguments-and-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Arguments and environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-pinned-chromium-from-a-debian-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Pinned Chromium from a Debian snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-a-noto-only-font-set" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 A Noto-only font set
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-directories-and-the-assembly-copies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Directories and the assembly copies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-what-makes-the-image-large" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: What makes the image large
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-dockerfiledev" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Dockerfile.dev
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-docker-composeyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: docker-compose.yml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: docker-compose.yml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-four-services-not-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Four services, not profiles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-bind-mounts-versus-named-volumes-in-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Bind mounts versus named volumes in development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-gpu-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 GPU services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-environment-forwarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Environment forwarding
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-multi-architecture-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Multi-architecture release
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: Multi-architecture release">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-the-ci-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 The CI workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-the-documented-manual-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 The documented manual flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-platform-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Platform templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: Platform templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-digitalocean-app-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 DigitalOcean App Platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-railway" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Railway
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-kubernetes-and-openshift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Kubernetes and OpenShift
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-public-url-and-reverse-proxies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Public URL and reverse proxies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 11: Public URL and reverse proxies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-header-handling-in-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Header handling in nginx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-presenton_public_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 PRESENTON_PUBLIC_URL
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-outer-proxy-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Outer proxy checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-external-databases-with-database_url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: External databases with DATABASE_URL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-13-air-gapped-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 13: Air-gapped deployments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 13: Air-gapped deployments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-the-switch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 The switch
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-other-outbound-dependencies-to-plan-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Other outbound dependencies to plan for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-14-resource-usage-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 14: Resource usage findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-15-production-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 15: Production checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="docker-build-and-deployment">Docker build and deployment<a class="headerlink" href="#docker-build-and-deployment" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>Dockerfile</code>, <code>Dockerfile.dev</code>, <code>docker-compose.yml</code>, <code>.dockerignore</code>, <code>nginx.conf</code>, <code>start.js</code>, <code>scripts/sync-presentation-export.cjs</code>, <code>.do/deploy.template.yaml</code>, <code>.github/workflows/docker-release.yml</code>, <code>docs/multi-docker-build.md</code>, <code>docs/presenton-resource-usage.md</code>, <code>servers/fastapi/utils/db_utils.py</code>  ·  <strong>Builds on:</strong> <a href="../03-runtime-topology/">Runtime topology</a>, <a href="../04-running-locally/">Running it locally</a>  ·  <strong>Time:</strong> ~40 min</p>
+</div>
+<p>This chapter is about producing and shipping the Presenton container: what each of the four Dockerfile stages builds and why, what the final image contains and what makes it large, how the development image differs, how <code>docker-compose.yml</code> forwards configuration, how the multi-architecture image reaches <code>ghcr.io</code>, and what you must configure for a real deployment (public URL, reverse proxy, external database, air-gapped mode, sizing). The processes that run inside the container (nginx, FastAPI, MCP, Next.js, optional Ollama) and how <code>start.js</code> supervises them are covered in <a href="../03-runtime-topology/">Runtime topology</a>; this chapter only touches <code>start.js</code> where it matters for deployment.</p>
+<h2 id="step-0-the-build-context-and-dockerignore">Step 0: The build context and <code>.dockerignore</code><a class="headerlink" href="#step-0-the-build-context-and-dockerignore" title="Permanent link">&para;</a></h2>
+<p><code>docker build .</code> sends the repository root as the build context, filtered by <code>.dockerignore</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Why it is excluded</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.git</code>, <code>node_modules</code>, <code>**/node_modules</code>, <code>**/.next</code>, <code>**/.next-build</code>, <code>**/.venv</code></td>
+<td>Host build outputs and dependencies are rebuilt inside the image for Linux</td>
+</tr>
+<tr>
+<td><code>**/.pytest_cache</code>, <code>**/__pycache__</code>, <code>**/*.pyc</code>, <code>**/debug</code></td>
+<td>Python caches</td>
+</tr>
+<tr>
+<td><code>**/fastembed_cache</code>, <code>**/chroma</code>, <code>.cache</code></td>
+<td>Model and vector caches are regenerated by the warm-up step</td>
+</tr>
+<tr>
+<td><code>app_data</code>, <code>container.db</code></td>
+<td>User data must never be baked into an image</td>
+</tr>
+<tr>
+<td><code>presentation-export</code></td>
+<td>Re-downloaded at the pinned version by the assets stage</td>
+</tr>
+<tr>
+<td><code>servers/fastapi/tests</code>, <code>servers/nextjs/cypress</code>, <code>servers/nextjs/cypress.config.ts</code>, <code>**/*.cy.ts</code>, <code>**/*.cy.tsx</code></td>
+<td>Tests are not shipped</td>
+</tr>
+<tr>
+<td><code>electron/*</code> with negations</td>
+<td>Only <code>electron/resources/document-extraction/liteparse_runner.mjs</code> survives</td>
+</tr>
+</tbody>
+</table>
+<p>The Electron block is a three-level negation (<code>.dockerignore:30</code> to <code>:35</code>): exclude <code>electron/*</code>, re-include <code>electron/resources</code>, exclude its children, re-include <code>document-extraction</code>, exclude its children, re-include the one runner file. Docker and the desktop app therefore share the exact same LiteParse runner.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: tests are not in the image</p>
+<p>Because <code>servers/fastapi/tests</code> is ignored, you cannot run <code>pytest</code> inside the production image. CI runs tests on the source tree instead (see <a href="../28-ci-tests-security/">CI, tests, security</a>).</p>
+</div>
+<h2 id="step-1-the-stage-graph">Step 1: The stage graph<a class="headerlink" href="#step-1-the-stage-graph" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+  subgraph FB["fastapi-builder (python:3.11-slim-trixie)"]
+    A1["uv export --frozen"] --&gt; A2["uv pip install into /opt/venv"]
+    A2 --&gt; A3["install project package and font catalog check"]
+    A3 --&gt; A4["spaCy en_core_web_sm wheel"]
+    A4 --&gt; A5["warm FastEmbed caches (online)"]
+    A5 --&gt; A6["re-warm with --network=none"]
+  end
+  subgraph NB["nextjs-builder (node:22-bookworm-slim)"]
+    B1["npm ci"] --&gt; B2["next build (standalone)"]
+  end
+  subgraph AB["assets-builder (node:22-bookworm-slim)"]
+    C1["npm ci LiteParse runtime"] --&gt; C2["sync-presentation-export --force"]
+  end
+  subgraph RT["runtime (python:3.11-slim-trixie)"]
+    D1["apt: pinned Chromium, nginx, ImageMagick, Noto fonts, Tesseract, Node 22"]
+    D2["delete non-Noto fonts"]
+    D3["COPY venv, caches, Next standalone, export runtime, start.js, nginx.conf"]
+    D1 --&gt; D2 --&gt; D3
+  end
+  FB --&gt; RT
+  NB --&gt; RT
+  AB --&gt; RT</code></pre>
+<p>The file starts with <code># syntax=docker/dockerfile:1.7</code> (<code>Dockerfile:1</code>). That front end is required for the <code>RUN --mount=type=cache</code> and <code>RUN --network=none</code> instructions used below.</p>
+<h2 id="step-2-stage-fastapi-builder">Step 2: Stage <code>fastapi-builder</code><a class="headerlink" href="#step-2-stage-fastapi-builder" title="Permanent link">&para;</a></h2>
+<h3 id="21-a-pip-less-virtual-environment-managed-by-uv">2.1 A pip-less virtual environment managed by uv<a class="headerlink" href="#21-a-pip-less-virtual-environment-managed-by-uv" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.11-slim-trixie</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">fastapi-builder</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app/servers/fastapi</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">ENV</span><span class="w"> </span><span class="nv">UV_COMPILE_BYTECODE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nv">UV_LINK_MODE</span><span class="o">=</span>copy
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">RUN</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>--without-pip<span class="w"> </span>/opt/venv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>uv
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="k">COPY</span><span class="w"> </span>servers/fastapi/pyproject.toml<span class="w"> </span>servers/fastapi/uv.lock<span class="w"> </span>./
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/root/.cache/uv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span>uv<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--frozen<span class="w"> </span>--no-dev<span class="w"> </span>--no-emit-project<span class="w"> </span>-o<span class="w"> </span>/tmp/requirements.txt<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--python<span class="w"> </span>/opt/venv/bin/python<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements.txt
+</span></code></pre></div>
+<ul>
+<li>The venv is created without pip; uv is installed into the base interpreter and pointed at the venv with <code>--python /opt/venv/bin/python</code>. Only <code>/opt/venv</code> is copied to the runtime stage, so neither pip nor uv exists at runtime.</li>
+<li><code>UV_COMPILE_BYTECODE=1</code> compiles <code>.pyc</code> files at install time, so the first import in the container does not pay that cost. <code>UV_LINK_MODE=copy</code> avoids hard links into the cache mount, which would dangle once the cache is unmounted.</li>
+<li><code>uv export --frozen --no-dev --no-emit-project</code> turns <code>uv.lock</code> into a fully pinned requirements file without the dev group (<code>pytest</code>, <code>pytest-cov</code>) and without the project itself. <code>--frozen</code> means the lock is used as-is; a lock that disagrees with <code>pyproject.toml</code> is not silently re-resolved.</li>
+<li>Copying only <code>pyproject.toml</code> and <code>uv.lock</code> first means dependency layers are reused when only application code changes.</li>
+</ul>
+<h3 id="22-installing-the-application-and-checking-packaged-data">2.2 Installing the application and checking packaged data<a class="headerlink" href="#22-installing-the-application-and-checking-packaged-data" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">COPY</span><span class="w"> </span>servers/fastapi<span class="w"> </span>/app/servers/fastapi
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/root/.cache/uv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--python<span class="w"> </span>/opt/venv/bin/python<span class="w"> </span>--no-deps<span class="w"> </span>.<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>/tmp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>/opt/venv/bin/python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"from templates.pptx_font_utils import get_static_font_catalog; assert get_static_font_catalog(), 'Packaged font catalog is empty'"</span>
+</span></code></pre></div>
+<p><code>uv pip install --no-deps .</code> installs the <code>presenton-backend</code> package defined by <code>servers/fastapi/pyproject.toml</code>, whose setuptools configuration includes the <code>api*</code>, <code>models*</code>, <code>services*</code>, <code>utils*</code>, <code>templates*</code> (and other) packages and ships <code>templates/assets/fonts.json</code> as package data (<code>pyproject.toml:48</code> to <code>:61</code>). The assertion runs from <code>/tmp</code>, so <code>templates</code> is imported from the installed package, not from the source checkout; the build fails if the font catalog JSON did not make it into the wheel.</p>
+<h3 id="23-the-spacy-model">2.3 The spaCy model<a class="headerlink" href="#23-the-spacy-model" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c"># mem0/spaCy BM25 lemmatization loads en_core_web_sm at runtime; spaCy tries pip to</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c"># download it otherwise. Runtime image has no pip in PATH (--without-pip venv).</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/root/.cache/uv<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--python<span class="w"> </span>/opt/venv/bin/python<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="s2">"https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"</span>
+</span></code></pre></div>
+<p>The model is not in <code>uv.lock</code>; it is fetched by URL at a fixed version (3.8.0). The comment states the reason: without it, spaCy would try to <code>pip install</code> the model at runtime, which cannot work in a pip-less venv.</p>
+<h3 id="24-baking-fastembed-weights-then-proving-they-work-offline">2.4 Baking FastEmbed weights, then proving they work offline<a class="headerlink" href="#24-baking-fastembed-weights-then-proving-they-work-offline" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">ENV</span><span class="w"> </span><span class="nv">HF_HOME</span><span class="o">=</span>/root/.cache/huggingface<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nv">FASTEMBED_CACHE_PATH</span><span class="o">=</span>/root/.cache/presenton/fastembed<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nv">PRESENTON_FASTEMBED_ICON_CACHE_DIR</span><span class="o">=</span>/root/.cache/presenton/fastembed-icons
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c"># Warm FastEmbed caches into the image (not a BuildKit cache mount, or HF weights would be missing).</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">RUN</span><span class="w"> </span>/opt/venv/bin/python<span class="w"> </span>scripts/warm_fastembed_cache.py
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="k">RUN</span><span class="w"> </span>--network<span class="o">=</span>none<span class="w"> </span><span class="nv">HF_HUB_OFFLINE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>/opt/venv/bin/python<span class="w"> </span>scripts/warm_fastembed_cache.py
+</span></code></pre></div>
+<p><code>servers/fastapi/scripts/warm_fastembed_cache.py</code> initializes three models: the icon-search embedding index through <code>ICON_FINDER_SERVICE.ensure_initialized()</code> (the docstring names <code>AllMiniLML6V2</code>), the Mem0 dense embedder (<code>MEM0_EMBEDDER_MODEL</code>, default <code>BAAI/bge-small-en-v1.5</code>, <code>warm_fastembed_cache.py:28</code>) and the <code>Qdrant/bm25</code> sparse model (<code>warm_fastembed_cache.py:49</code>). The first <code>RUN</code> downloads them into normal image layers. The second <code>RUN</code> repeats the warm-up with networking disabled and <code>HF_HUB_OFFLINE=1</code>: if any weight is missing, initialization tries the network, fails, and the build stops. This is the image's offline guarantee for embeddings.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: changing the embedder model at runtime defeats the bake</p>
+<p>Only the default <code>BAAI/bge-small-en-v1.5</code> (or whatever <code>MEM0_EMBEDDER_MODEL</code> was at build time) is cached. Setting a different <code>MEM0_EMBEDDER_MODEL</code> in compose makes the container download weights on first use, which fails in air-gapped deployments. The Dockerfile declares no <code>ARG</code> or <code>ENV</code> for <code>MEM0_EMBEDDER_MODEL</code> in the <code>fastapi-builder</code> stage, so to bake a different model you must add one before the warm-up <code>RUN</code> lines and rebuild.</p>
+</div>
+<h2 id="step-3-stage-nextjs-builder">Step 3: Stage <code>nextjs-builder</code><a class="headerlink" href="#step-3-stage-nextjs-builder" title="Permanent link">&para;</a></h2>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">node:22-bookworm-slim</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">nextjs-builder</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app/servers/nextjs</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">ENV</span><span class="w"> </span><span class="nv">NEXT_TELEMETRY_DISABLED</span><span class="o">=</span><span class="m">1</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">COPY</span><span class="w"> </span>servers/nextjs/package.json<span class="w"> </span>servers/nextjs/package-lock.json<span class="w"> </span>./
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="k">RUN</span><span class="w"> </span>--mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/root/.npm<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span>npm<span class="w"> </span>ci
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="k">COPY</span><span class="w"> </span>servers/nextjs<span class="w"> </span>/app/servers/nextjs
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="k">RUN</span><span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>.next-build/cache
+</span></code></pre></div>
+<p><code>servers/nextjs/next.config.mjs:10</code> sets <code>distDir: ".next-build"</code> and <code>output: "standalone"</code>, so the build emits a self-contained <code>server.js</code> plus only the traced <code>node_modules</code> under <code>.next-build/standalone</code>. The build cache is deleted in the same layer so it never reaches the final image. <code>npm ci</code> honors the <code>overrides</code> in <code>servers/nextjs/package.json</code> (pinned <code>brace-expansion</code>, <code>minimatch</code>, <code>glob</code>, <code>systeminformation</code> floors), which are covered in <a href="../28-ci-tests-security/">CI, tests, security</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: no <code>NEXT_PUBLIC_*</code> at build time</p>
+<p>The Docker build passes no <code>NEXT_PUBLIC_FAST_API</code> or <code>NEXT_PUBLIC_URL</code>. Browser code therefore uses same-origin paths like <code>/api/v1/...</code>, which nginx routes. If you add build-time <code>NEXT_PUBLIC_*</code> values, remember Next.js inlines them into the client bundle, so the image becomes tied to one hostname.</p>
+</div>
+<h2 id="step-4-stage-assets-builder">Step 4: Stage <code>assets-builder</code><a class="headerlink" href="#step-4-stage-assets-builder" title="Permanent link">&para;</a></h2>
+<p>This stage produces two Node runtimes that FastAPI shells out to: the LiteParse document parser and the closed-source export engine.</p>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">COPY</span><span class="w"> </span>package.json<span class="w"> </span>package-lock.json<span class="w"> </span>/app/
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="k">RUN</span><span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/app/document-extraction-liteparse<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>/app/package.json<span class="w"> </span>/app/package-lock.json<span class="w"> </span>/app/document-extraction-liteparse/<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>npm<span class="w"> </span>--prefix<span class="w"> </span>/app/document-extraction-liteparse<span class="w"> </span>ci<span class="w"> </span>--omit<span class="o">=</span>dev
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">COPY</span><span class="w"> </span>electron/resources/document-extraction/liteparse_runner.mjs<span class="w"> </span>/app/document-extraction-liteparse/liteparse_runner.mjs
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="k">COPY</span><span class="w"> </span>scripts/sync-presentation-export.cjs<span class="w"> </span>/app/scripts/sync-presentation-export.cjs
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="k">COPY</span><span class="w"> </span>scripts/run-presentation-export.mjs<span class="w"> </span>/app/scripts/run-presentation-export.mjs
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="k">COPY</span><span class="w"> </span>scripts/export-permissions.cjs<span class="w"> </span>/app/scripts/export-permissions.cjs
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="k">RUN</span><span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span>/app/presentation-export<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>node<span class="w"> </span>/app/scripts/sync-presentation-export.cjs<span class="w"> </span>--force
+</span></code></pre></div>
+<h3 id="41-liteparse-runtime">4.1 LiteParse runtime<a class="headerlink" href="#41-liteparse-runtime" title="Permanent link">&para;</a></h3>
+<p>The root <code>package.json</code> declares exactly two dependencies, <code>@llamaindex/liteparse ^1.5.2</code> and <code>sharp ^0.35.5</code>, with <code>overrides</code> that force LiteParse's own <code>sharp</code> and <code>zod</code> to safe versions (<code>package.json:16</code> to <code>:25</code>). <code>npm ci --omit=dev</code> installs them from the lock file into <code>/app/document-extraction-liteparse</code>, next to the shared runner script. How FastAPI calls this runner is covered in <a href="../11-document-ingestion/">Document ingestion</a>.</p>
+<h3 id="42-the-pinned-export-engine">4.2 The pinned export engine<a class="headerlink" href="#42-the-pinned-export-engine" title="Permanent link">&para;</a></h3>
+<p><code>scripts/sync-presentation-export.cjs --force</code> installs <code>@presenton/export-core</code> at the version pinned in the root <code>package.json</code> (<code>"presentationExportVersion": "v1.0.51"</code>, <code>package.json:4</code>). Its <code>main()</code> (<code>scripts/sync-presentation-export.cjs:359</code>) does the following:</p>
+<ol>
+<li>Read the pin (<code>readPinnedVersion</code>, <code>:155</code>). <code>EXPORT_RUNTIME_VERSION</code> is honored only with <code>--allow-version-override</code>, so the Docker build always uses the pin.</li>
+<li>Download <code>presenton-export-core-opensource-1.0.51.tgz</code> from <code>https://github.com/presenton/presenton-export/releases/download/v1.0.51/</code> (or copy <code>EXPORT_CORE_ARCHIVE</code> if set), following at most 5 redirects.</li>
+<li><code>installRuntime</code> (<code>:295</code>) empties <code>/app/presentation-export</code> (it clears contents instead of deleting the directory because the development compose service mounts a named volume there), copies <code>runner.mjs</code> and <code>export-permissions.cjs</code>, writes a <code>package.json</code> that depends on the tarball and overrides <code>sharp</code> to <code>0.35.5</code> and <code>katex</code> to <code>0.18.10</code>, then runs <code>npm install --omit=dev --ignore-scripts --no-package-lock --no-fund --no-audit</code>.</li>
+<li>Write <code>presenton-export-version.json</code> and re-validate with <code>validateExistingRuntime</code> (<code>:253</code>): the installed version and package name must match, <code>sharp</code> must be at least 0.35.5 with the exact native <code>@img/sharp-&lt;platform&gt;</code> package its manifest expects, and <code>katex</code> must be at least 0.18.2.</li>
+</ol>
+<p><code>getRuntimePlatformArch</code> (<code>:40</code>) distinguishes glibc from musl Linux, so the check expects <code>@img/sharp-linux-x64</code> or <code>@img/sharp-linux-arm64</code> on these Debian-based images.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>--ignore-scripts</code> is deliberate</p>
+<p>Lifecycle scripts never run for the export engine or its dependencies. If a future dependency needs a postinstall step, the install will not run it and <code>validateExportRuntime</code> (or the export itself) is where you will see the failure.</p>
+</div>
+<h2 id="step-5-stage-runtime">Step 5: Stage <code>runtime</code><a class="headerlink" href="#step-5-stage-runtime" title="Permanent link">&para;</a></h2>
+<h3 id="51-arguments-and-environment">5.1 Arguments and environment<a class="headerlink" href="#51-arguments-and-environment" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">ARG</span><span class="w"> </span><span class="nv">INSTALL_TESSERACT</span><span class="o">=</span><span class="nb">true</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">ARG</span><span class="w"> </span><span class="nv">CHROMIUM_VERSION</span><span class="o">=</span><span class="m">149</span>.0.7827.196-1~deb13u1
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">ARG</span><span class="w"> </span><span class="nv">CHROMIUM_SNAPSHOT</span><span class="o">=</span>20260625T180000Z
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Variable (<code>Dockerfile:82</code> to <code>:92</code>)</th>
+<th>Value</th>
+<th>Consumer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>APP_DATA_DIRECTORY</code></td>
+<td><code>/app_data</code></td>
+<td>Everything persistent: SQLite DB, <code>userConfig.json</code>, assets</td>
+</tr>
+<tr>
+<td><code>TEMP_DIRECTORY</code></td>
+<td><code>/tmp/presenton</code></td>
+<td>Per-owner scratch space</td>
+</tr>
+<tr>
+<td><code>EXPORT_PACKAGE_ROOT</code></td>
+<td><code>/app/presentation-export</code></td>
+<td>Export runner location</td>
+</tr>
+<tr>
+<td><code>PRESENTON_APP_ROOT</code></td>
+<td><code>/app</code></td>
+<td>Next.js route handlers locating FastAPI static files</td>
+</tr>
+<tr>
+<td><code>HF_HOME</code>, <code>FASTEMBED_CACHE_PATH</code>, <code>PRESENTON_FASTEMBED_ICON_CACHE_DIR</code></td>
+<td>under <code>/root/.cache</code></td>
+<td>Must match the paths used at bake time</td>
+</tr>
+<tr>
+<td><code>PATH</code></td>
+<td><code>/opt/venv/bin:$PATH</code></td>
+<td><code>python</code> resolves to the venv</td>
+</tr>
+<tr>
+<td><code>NODE_ENV</code></td>
+<td><code>production</code></td>
+<td>Next.js and Node scripts</td>
+</tr>
+<tr>
+<td><code>START_OLLAMA</code></td>
+<td><code>false</code></td>
+<td><code>start.js</code></td>
+</tr>
+<tr>
+<td><code>PUPPETEER_EXECUTABLE_PATH</code></td>
+<td><code>/usr/bin/chromium</code></td>
+<td>Export engine uses system Chromium</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-pinned-chromium-from-a-debian-snapshot">5.2 Pinned Chromium from a Debian snapshot<a class="headerlink" href="#52-pinned-chromium-from-a-debian-snapshot" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">RUN</span><span class="w"> </span><span class="nb">set</span><span class="w"> </span>-eux<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s1">'Acquire::Check-Valid-Until "false";\n'</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/apt/apt.conf.d/99snapshot<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nb">printf</span><span class="w"> </span><span class="s1">'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/%s trixie-security main\n'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$CHROMIUM_SNAPSHOT</span><span class="s2">"</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/apt/sources.list.d/chromium-snapshot.list<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span>#<span class="w"> </span>...
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">"</span><span class="nv">$INSTALL_TESSERACT</span><span class="s2">"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"true"</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nv">packages</span><span class="o">=</span><span class="s2">"</span><span class="nv">$packages</span><span class="s2"> tesseract-ocr tesseract-ocr-eng"</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span><span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span>apt-get<span class="w"> </span>update<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--no-install-recommends<span class="w"> </span>--allow-downgrades<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nv">$packages</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nv">chromium</span><span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">CHROMIUM_VERSION</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span>chromium-common<span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">CHROMIUM_VERSION</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span>chromium-driver<span class="o">=</span><span class="s2">"</span><span class="si">${</span><span class="nv">CHROMIUM_VERSION</span><span class="si">}</span><span class="s2">"</span><span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span>apt-mark<span class="w"> </span>hold<span class="w"> </span>chromium<span class="w"> </span>chromium-common<span class="w"> </span>chromium-driver<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>https://deb.nodesource.com/setup_22.x<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash<span class="w"> </span>-<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--no-install-recommends<span class="w"> </span>nodejs<span class="p">;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+</span></code></pre></div>
+<p>The export engine's rendering is sensitive to the browser build, so the image does not take "whatever Chromium trixie-security has today". It adds a <code>snapshot.debian.org</code> source frozen at <code>20260625T180000Z</code>, disables <code>Valid-Until</code> checks (snapshot metadata is old by design), installs exactly <code>149.0.7827.196-1~deb13u1</code> (with <code>--allow-downgrades</code> in case the live mirror is newer), and holds the packages. The same build ID (<code>149.0.7827.196</code>) is pinned for the desktop app in <code>electron/package.json:6</code>, so Docker and Electron export with the same browser revision.</p>
+<p>The rest of the package list provides <code>nginx</code>, <code>fontconfig</code>, <code>imagemagick</code>, <code>zstd</code>, <code>curl</code>, the Chromium shared libraries (<code>libgtk-3-0t64</code>, <code>libnss3</code>, <code>libgbm1</code> and others), and fonts. Node.js 22 comes from the NodeSource setup script, not from Debian.</p>
+<h3 id="53-a-noto-only-font-set">5.3 A Noto-only font set<a class="headerlink" href="#53-a-noto-only-font-set" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c"># Remove any non-Noto fonts that may have been installed as dependencies.</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">RUN</span><span class="w"> </span>find<span class="w"> </span>/usr/share/fonts<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>!<span class="w"> </span>-iname<span class="w"> </span><span class="s1">'Noto*'</span><span class="w"> </span>-delete<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>find<span class="w"> </span>/usr/share/fonts<span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-empty<span class="w"> </span>-delete<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>fc-cache<span class="w"> </span>-fsv
+</span></code></pre></div>
+<p>Every system font whose filename does not start with <code>Noto</code> is deleted and the fontconfig cache rebuilt. This makes font fallback during export deterministic: when a slide requests a font the image does not have, Chromium falls back to a Noto family rather than whichever font a dependency happened to pull in. Template fonts are loaded separately (see <a href="../19-themes-and-fonts/">Themes and fonts</a>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: deleting files in a later layer does not shrink the image</p>
+<p><code>fonts-liberation</code> is installed by the apt layer and then removed by this one. The bytes remain in the earlier layer, so the deletion changes behavior (no Liberation fallback) but not image size. The same applies to anything you "clean up" in a separate <code>RUN</code>.</p>
+</div>
+<h3 id="54-directories-and-the-assembly-copies">5.4 Directories and the assembly copies<a class="headerlink" href="#54-directories-and-the-assembly-copies" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">RUN</span><span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/app_data/exports<span class="w"> </span>/app_data/images<span class="w"> </span>/app_data/uploads<span class="w"> </span>/app_data/fonts<span class="w"> </span>/app_data/templates<span class="w"> </span>/app_data/pptx-to-html<span class="w"> </span>/app_data/pptx-to-json<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>-R<span class="w"> </span>a+rX<span class="w"> </span>/app_data
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>fastapi-builder<span class="w"> </span>/opt/venv<span class="w"> </span>/opt/venv
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>fastapi-builder<span class="w"> </span>/app/servers/fastapi<span class="w"> </span>/app/servers/fastapi
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>fastapi-builder<span class="w"> </span>/root/.cache/huggingface<span class="w"> </span>/root/.cache/huggingface
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c"># ...</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>assets-builder<span class="w"> </span>/app/presentation-export<span class="w"> </span>/app/presentation-export
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="c"># ...</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="k">RUN</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>-f<span class="w"> </span>/app/presentation-export/runner.mjs<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">test</span><span class="w"> </span>-f<span class="w"> </span>/app/presentation-export/node_modules/@presenton/export-core/dist/index.js
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>nextjs-builder<span class="w"> </span>/app/servers/nextjs/.next-build/standalone/<span class="w"> </span>/app/servers/nextjs/
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>nextjs-builder<span class="w"> </span>/app/servers/nextjs/public<span class="w"> </span>/app/servers/nextjs/public
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>nextjs-builder<span class="w"> </span>/app/servers/nextjs/.next-build/static<span class="w"> </span>/app/servers/nextjs/.next-build/static
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Destination</th>
+<th>Source stage</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/opt/venv</code></td>
+<td>fastapi-builder</td>
+<td>Python dependencies, project package, spaCy model</td>
+</tr>
+<tr>
+<td><code>/app/servers/fastapi</code></td>
+<td>fastapi-builder</td>
+<td>Source tree (FastAPI runs from here, so <code>static/</code>, <code>assets/</code>, <code>alembic/</code> are found relative to the working directory)</td>
+</tr>
+<tr>
+<td><code>/root/.cache/huggingface</code>, <code>/root/.cache/presenton/fastembed*</code></td>
+<td>fastapi-builder</td>
+<td>Baked model weights</td>
+</tr>
+<tr>
+<td><code>/app/templates</code></td>
+<td>build context</td>
+<td>Bundled template packs</td>
+</tr>
+<tr>
+<td><code>/app/document-extraction-liteparse</code></td>
+<td>assets-builder</td>
+<td>LiteParse runtime and runner</td>
+</tr>
+<tr>
+<td><code>/app/presentation-export</code></td>
+<td>assets-builder</td>
+<td>Export engine (guarded by two <code>test -f</code> checks)</td>
+</tr>
+<tr>
+<td><code>/app/scripts/*</code></td>
+<td>assets-builder and context</td>
+<td>Export sync and permission helpers, banner, <code>user-config-env.cjs</code>, <code>run-node-script.mjs</code></td>
+</tr>
+<tr>
+<td><code>/app/servers/nextjs/</code></td>
+<td>nextjs-builder</td>
+<td>Standalone server, <code>public/</code>, and hashed static chunks</td>
+</tr>
+<tr>
+<td><code>/app/start.js</code>, <code>LICENSE</code>, <code>NOTICE</code></td>
+<td>context</td>
+<td>Supervisor and license files</td>
+</tr>
+<tr>
+<td><code>/etc/nginx/nginx.conf</code></td>
+<td>context</td>
+<td>Reverse proxy</td>
+</tr>
+</tbody>
+</table>
+<p>The image ends with <code>EXPOSE 80</code> and <code>CMD ["node", "/app/start.js"]</code> (<code>Dockerfile:152</code>). There is no <code>USER</code> instruction, so the container runs as root unless the orchestrator overrides it. <code>start.js</code> spawns the Next.js standalone server only when <code>servers/nextjs/server.js</code> exists and the process is not in <code>--dev</code> mode (<code>start.js:35</code>, <code>:539</code>).</p>
+<h2 id="step-6-what-makes-the-image-large">Step 6: What makes the image large<a class="headerlink" href="#step-6-what-makes-the-image-large" title="Permanent link">&para;</a></h2>
+<p>The repository contains no measured image size, so this is a qualitative inventory of what the Dockerfile puts into layers:</p>
+<table>
+<thead>
+<tr>
+<th>Contributor</th>
+<th>Where</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chromium 149 plus GTK, NSS, X11 and audio libraries</td>
+<td><code>Dockerfile:97</code> to <code>:111</code></td>
+<td>Required by the export engine and template previews</td>
+</tr>
+<tr>
+<td>Noto font families, including <code>fonts-noto-cjk</code> and <code>fonts-noto-cjk-extra</code> and color emoji</td>
+<td><code>Dockerfile:98</code> to <code>:99</code></td>
+<td>CJK coverage is the largest font component</td>
+</tr>
+<tr>
+<td>Python ML stack: <code>fastembed</code> (ONNX Runtime), <code>mem0ai[nlp]</code> (spaCy), <code>pandas</code>, <code>pdfplumber</code>, provider SDKs</td>
+<td><code>/opt/venv</code></td>
+<td>Driven by <code>servers/fastapi/pyproject.toml:12</code> to <code>:39</code></td>
+</tr>
+<tr>
+<td>Baked embedding weights</td>
+<td><code>/root/.cache</code></td>
+<td>Three models (Step 2.4)</td>
+</tr>
+<tr>
+<td>Node.js 22 runtime</td>
+<td>NodeSource</td>
+<td>Needed by Next.js, LiteParse and export</td>
+</tr>
+<tr>
+<td>Export engine with <code>sharp</code>/libvips native binaries and KaTeX</td>
+<td><code>/app/presentation-export</code></td>
+<td>Pinned v1.0.51</td>
+</tr>
+<tr>
+<td>LiteParse with its own <code>sharp</code></td>
+<td><code>/app/document-extraction-liteparse</code></td>
+<td>Separate install from the export engine</td>
+</tr>
+<tr>
+<td>Tesseract OCR with English data</td>
+<td>optional</td>
+<td>Skip with <code>--build-arg INSTALL_TESSERACT=false</code></td>
+</tr>
+<tr>
+<td>ImageMagick, nginx</td>
+<td>apt</td>
+<td>Document conversion and reverse proxy</td>
+</tr>
+</tbody>
+</table>
+<p>The only size knob the Dockerfile exposes is <code>INSTALL_TESSERACT</code>. Building without it removes OCR for scanned documents; nothing in the Dockerfile substitutes another OCR engine.</p>
+<h2 id="step-7-dockerfiledev">Step 7: <code>Dockerfile.dev</code><a class="headerlink" href="#step-7-dockerfiledev" title="Permanent link">&para;</a></h2>
+<p>The development image is a single stage built for bind-mounted source:</p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th><code>Dockerfile</code></th>
+<th><code>Dockerfile.dev</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stages</td>
+<td>4</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Python packages</td>
+<td><code>/opt/venv</code> (no pip, no uv at runtime)</td>
+<td>System site-packages via <code>UV_SYSTEM_PYTHON=1</code> and <code>uv pip install --system</code>, uv installed with the astral.sh script</td>
+</tr>
+<tr>
+<td>Tesseract</td>
+<td>optional (<code>INSTALL_TESSERACT</code>)</td>
+<td>always installed</td>
+</tr>
+<tr>
+<td>LiteParse install</td>
+<td><code>npm ci --omit=dev</code></td>
+<td><code>scripts/sync-document-dependencies.cjs</code> (fingerprinted, see below)</td>
+</tr>
+<tr>
+<td>Next.js</td>
+<td>prebuilt standalone</td>
+<td>not built; <code>start.js --dev</code> runs <code>npm ci</code> then <code>next dev --webpack</code></td>
+</tr>
+<tr>
+<td>Command</td>
+<td><code>node /app/start.js</code></td>
+<td><code>node /app/start.js --dev</code></td>
+</tr>
+</tbody>
+</table>
+<p>The comment at <code>Dockerfile.dev:68</code> explains the system-site-packages choice: the compose bind mount <code>.:/app</code> would hide a <code>.venv</code> inside <code>servers/fastapi</code>, so dependencies must live outside <code>/app</code>.</p>
+<p><code>scripts/sync-document-dependencies.cjs</code> is the development counterpart to the production <code>npm ci</code>. It computes a SHA-256 fingerprint of <code>package-lock.json</code>, the <code>dependencies</code> and <code>overrides</code> blocks, and <code>process.platform:arch:modules</code> (<code>sync-document-dependencies.cjs:35</code>), and reinstalls only when the stored marker differs, a critical package version (<code>@llamaindex/liteparse</code>, <code>sharp</code>, <code>zod</code>, <code>axios</code>, <code>form-data</code>, <code>follow-redirects</code>) does not match the lock, or <code>import('@llamaindex/liteparse')</code> and <code>import('sharp')</code> fail. A failed reinstall throws "Document dependencies do not match the reviewed lockfile" and never writes the marker.</p>
+<p>In <code>--dev</code> mode <code>start.js</code> also: runs <code>npm ci</code> in <code>servers/nextjs</code> on every start (<code>start.js:171</code>), re-syncs the document dependencies (<code>:226</code>), forces a fresh export runtime sync if the check fails (<code>:463</code>), copies the bind-mounted <code>nginx.conf</code> over <code>/etc/nginx/nginx.conf</code> (<code>:468</code>), starts FastAPI with <code>--reload true</code>, waits for log lines instead of HTTP probes (<code>:633</code>), and restarts FastAPI or Next.js if either exits with code 0 (<code>:582</code>).</p>
+<h2 id="step-8-docker-composeyml">Step 8: <code>docker-compose.yml</code><a class="headerlink" href="#step-8-docker-composeyml" title="Permanent link">&para;</a></h2>
+<h3 id="81-four-services-not-profiles">8.1 Four services, not profiles<a class="headerlink" href="#81-four-services-not-profiles" title="Permanent link">&para;</a></h3>
+<p>The compose file defines four services (no Compose <code>profiles:</code> key is used): <code>production</code> (<code>docker-compose.yml:2</code>), <code>production-gpu</code> (<code>:130</code>), <code>development</code> (<code>:264</code>) and <code>development-gpu</code> (<code>:395</code>). You pick one by name: <code>docker compose up production</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Dockerfile</th>
+<th>Volumes</th>
+<th>GPU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>production</code></td>
+<td><code>Dockerfile</code></td>
+<td><code>./app_data:/app_data</code>, <code>./servers/fastapi/templates:/app/servers/fastapi/templates:ro</code></td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>production-gpu</code></td>
+<td><code>Dockerfile</code></td>
+<td><code>./app_data:/app_data</code></td>
+<td>1 NVIDIA device</td>
+</tr>
+<tr>
+<td><code>development</code></td>
+<td><code>Dockerfile.dev</code></td>
+<td><code>.:/app</code>, three named volumes, <code>./app_data:/app_data</code></td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>development-gpu</code></td>
+<td><code>Dockerfile.dev</code></td>
+<td>same as development</td>
+<td>1 NVIDIA device</td>
+</tr>
+</tbody>
+</table>
+<p>All four publish <code>${PRESENTON_HTTP_HOST_PORT:-5001}:80</code> and <code>1455:1455</code>. Port 1455 is commented as "Required for Codex OAuth callback (OpenAI redirects browser directly to localhost:1455)" (<code>docker-compose.yml:11</code>).</p>
+<h3 id="82-bind-mounts-versus-named-volumes-in-development">8.2 Bind mounts versus named volumes in development<a class="headerlink" href="#82-bind-mounts-versus-named-volumes-in-development" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><span class="filename">docker-compose.yml (excerpt)</span><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.:/app</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">presenton_root_node_modules:/app/node_modules</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">presenton_document_extraction_liteparse:/app/document-extraction-liteparse</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">presenton_presentation_export:/app/presentation-export</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./app_data:/app_data</span>
+</span></code></pre></div>
+<p>The whole repository is mounted at <code>/app</code> so source edits reload live. Three named volumes are mounted on top of paths inside that bind mount; they shadow whatever the host has there. This keeps Linux-built native modules (<code>sharp</code>, the export engine) inside Docker-managed storage, isolated from a macOS or Windows host's <code>node_modules</code>. This is also why <code>installRuntime</code> clears the contents of <code>/app/presentation-export</code> rather than deleting the directory: deleting a mount point fails with <code>EBUSY</code> (<code>scripts/sync-presentation-export.cjs:296</code>). The root test <code>package-metadata.test.mjs</code> asserts that <code>presenton_presentation_export:/app/presentation-export</code> appears exactly twice in the compose file and is declared under top-level <code>volumes:</code> (<code>scripts/package-metadata.test.mjs:56</code>).</p>
+<p>The <code>production</code> service's read-only templates mount replaces the image's <code>servers/fastapi/templates</code> package with the host copy. FastAPI is started as <code>python server.py</code> from <code>/app/servers/fastapi</code> (<code>start.js:521</code>), so that directory is first on <code>sys.path</code> and the mounted package is the one imported.</p>
+<h3 id="83-gpu-services">8.3 GPU services<a class="headerlink" href="#83-gpu-services" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><span class="filename">docker-compose.yml (excerpt)</span><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="w">    </span><span class="nt">deploy</span><span class="p">:</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">      </span><span class="nt">resources</span><span class="p">:</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">        </span><span class="nt">reservations</span><span class="p">:</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">          </span><span class="nt">devices</span><span class="p">:</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nvidia</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">              </span><span class="nt">count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">              </span><span class="nt">capabilities</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">gpu</span><span class="p p-Indicator">]</span>
+</span></code></pre></div>
+<p>The image contains no CUDA libraries. The GPU reservation matters for an Ollama server started inside the container with <code>START_OLLAMA=true</code>, which <code>start.js</code> installs at startup from <code>https://ollama.com/install.sh</code> if the binary is missing (<code>start.js:433</code>) and then runs as <code>ollama serve</code> (<code>:662</code>). The NVIDIA Container Toolkit must be installed on the host.</p>
+<h3 id="84-environment-forwarding">8.4 Environment forwarding<a class="headerlink" href="#84-environment-forwarding" title="Permanent link">&para;</a></h3>
+<p>Every service forwards roughly 110 variables using the pattern <code>- NAME=${NAME:-default}</code>. Most defaults are empty, which forwards an empty string. Two mechanisms make empty values harmless:</p>
+<ul>
+<li><code>start.js</code> seeds <code>userConfig.json</code> from the environment through <code>scripts/user-config-env.cjs</code>. <code>envValue</code> treats both <code>undefined</code> and <code>""</code> as "not set" (<code>scripts/user-config-env.cjs:130</code>), so an empty compose variable never erases a value saved in the UI.</li>
+<li><code>setupUserConfigFromEnv</code> (<code>start.js:490</code>) writes the file only if it is empty or at least one recognised key is non-empty; otherwise it leaves a UI-managed configuration alone.</li>
+</ul>
+<p>Non-empty compose defaults worth knowing:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Compose default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MIGRATE_DATABASE_ON_STARTUP</code></td>
+<td><code>true</code> (hard-coded, not <code>${...:-true}</code>, so a shell variable cannot override it)</td>
+<td>Run Alembic at startup (otherwise <code>create_all</code> on a fixed table list)</td>
+</tr>
+<tr>
+<td><code>PRESENTATION_GENERATION_MODE</code></td>
+<td><code>both</code></td>
+<td>Standard and Smart generation</td>
+</tr>
+<tr>
+<td><code>PRESENTON_COMMUNITY_ENABLED</code></td>
+<td><code>true</code></td>
+<td>Community gallery on</td>
+</tr>
+<tr>
+<td><code>START_OLLAMA</code></td>
+<td><code>false</code></td>
+<td>No in-container Ollama</td>
+</tr>
+<tr>
+<td><code>ENABLE_PARALLEL_IMAGE_GENERATION</code></td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MAX_OUTLINE_WORDS</code></td>
+<td><code>100</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MEM0_LLM_MODEL</code></td>
+<td><code>${OLLAMA_MODEL:-llama3.1:latest}</code></td>
+<td>Mem0 points at Ollama by default</td>
+</tr>
+<tr>
+<td><code>MEM0_LLM_BASE_URL</code></td>
+<td><code>${OLLAMA_URL:-http://host.docker.internal:11434}</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MEM0_EMBEDDER_MODEL</code>, <code>MEM0_EMBEDDING_DIMS</code></td>
+<td><code>BAAI/bge-small-en-v1.5</code>, <code>384</code></td>
+<td>Matches the baked weights</td>
+</tr>
+<tr>
+<td><code>LITEPARSE_DPI</code>, <code>LITEPARSE_NUM_WORKERS</code></td>
+<td><code>120</code>, <code>1</code></td>
+<td>Document parsing cost</td>
+</tr>
+<tr>
+<td><code>PUPPETEER_EXECUTABLE_PATH</code></td>
+<td><code>/usr/bin/chromium</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Authentication variables (<code>AUTH_USERNAME</code>, <code>AUTH_PASSWORD</code>, <code>AUTH_OVERRIDE_FROM_ENV</code>, <code>RESET_AUTH</code>) are forwarded by all four services; their semantics are in <a href="../25-auth-and-multiuser/">Auth and multi-user</a>. <code>DISABLE_AUTH</code> is not forwarded by compose, which keeps accounts on for Docker unless you add it yourself.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: two different host-port variable names</p>
+<p>The port mapping uses <code>PRESENTON_HTTP_HOST_PORT</code>, but the environment block forwards <code>PRESENTON_HOST_HTTP_PORT</code> (note the word order), defaulting to <code>5001</code> (and to <code>5000</code> in <code>production-gpu</code>). Inside the container that value only feeds the startup banner (<code>scripts/presenton-terminal-banner.mjs:97</code>). If you only set <code>PRESENTON_HTTP_HOST_PORT=8080</code>, the app works on 8080 but the banner still prints <code>5001</code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>platform</code> defaults to <code>linux/amd64</code></p>
+<p>Every service sets <code>platform: ${PRESENTON_DOCKER_PLATFORM:-linux/amd64}</code>. On Apple Silicon or ARM servers, compose builds and runs an emulated amd64 image unless you export <code>PRESENTON_DOCKER_PLATFORM=linux/arm64</code>.</p>
+</div>
+<h2 id="step-9-multi-architecture-release">Step 9: Multi-architecture release<a class="headerlink" href="#step-9-multi-architecture-release" title="Permanent link">&para;</a></h2>
+<h3 id="91-the-ci-workflow">9.1 The CI workflow<a class="headerlink" href="#91-the-ci-workflow" title="Permanent link">&para;</a></h3>
+<p><code>.github/workflows/docker-release.yml</code> runs on <code>release: published</code> and on <code>workflow_dispatch</code>:</p>
+<div class="language-yaml highlight"><span class="filename">.github/workflows/docker-release.yml (excerpt)</span><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build and push multi-architecture image</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc</span><span class="w"> </span><span class="c1"># v7</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">          </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">          </span><span class="nt">platforms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">linux/amd64,linux/arm64</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">          </span><span class="nt">push</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">          </span><span class="nt">tags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ steps.docker-tags.outputs.tags }}</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">          </span><span class="nt">cache-from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type=gha</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">          </span><span class="nt">cache-to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type=gha,mode=max</span>
+</span></code></pre></div>
+<ol>
+<li>Check out the release tag (or the dispatched ref).</li>
+<li>Set up QEMU and Buildx (both actions pinned by commit SHA), log in to <code>ghcr.io</code> with <code>secrets.GITHUB_TOKEN</code> (the job has <code>packages: write</code>).</li>
+<li>Tag: <code>ghcr.io/presenton/presenton:&lt;release tag&gt;</code> for releases, <code>ghcr.io/presenton/presenton:dev</code> (<code>MOVING_TAG</code>) for manual runs.</li>
+<li>Build both platforms in one Buildx invocation with the GitHub Actions cache backend.</li>
+<li><code>docker buildx imagetools inspect</code> the pushed tag and <code>grep</code> for both <code>linux/amd64</code> and <code>linux/arm64</code>.</li>
+</ol>
+<p>The <code>concurrency</code> group keys on the tag with <code>cancel-in-progress: false</code>, so two releases never cancel each other.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: CI never moves <code>latest</code></p>
+<p>The workflow pushes only the release tag or <code>dev</code>. The <code>latest</code> tag used by <code>docker run ghcr.io/presenton/presenton:latest</code> and by the DigitalOcean template is promoted by hand, following <code>docs/multi-docker-build.md</code> step 4.</p>
+</div>
+<h3 id="92-the-documented-manual-flow">9.2 The documented manual flow<a class="headerlink" href="#92-the-documented-manual-flow" title="Permanent link">&para;</a></h3>
+<p><code>docs/multi-docker-build.md</code> describes the alternative used when building natively on two machines: build on macOS (arm64) and Linux (amd64), tag the local image <code>presenton-3-production:latest</code> as <code>ghcr.io/presenton/presenton:&lt;version&gt;-arm64</code> and <code>-amd64</code>, push both, then stitch them with <code>docker buildx imagetools create -t ghcr.io/presenton/presenton:&lt;version&gt; &lt;amd64&gt; &lt;arm64&gt;</code>, promote with a second <code>imagetools create -t ...:latest ...:&lt;version&gt;</code>, and verify that both manifests list <code>linux/amd64</code> and <code>linux/arm64</code>. Native builds avoid QEMU emulation, which matters for a build that compiles Python bytecode, installs Chromium and warms ONNX models.</p>
+<p>Because Buildx runs the <code>assets-builder</code> stage once per platform, each architecture gets its own <code>@img/sharp-linux-&lt;arch&gt;</code> native package, and <code>validateSharpRuntime</code> checks the right one.</p>
+<h2 id="step-10-platform-templates">Step 10: Platform templates<a class="headerlink" href="#step-10-platform-templates" title="Permanent link">&para;</a></h2>
+<h3 id="101-digitalocean-app-platform">10.1 DigitalOcean App Platform<a class="headerlink" href="#101-digitalocean-app-platform" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><span class="filename">.do/deploy.template.yaml (excerpt)</span><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="w">  </span><span class="nt">services</span><span class="p">:</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">presenton</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">      </span><span class="nt">image</span><span class="p">:</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">        </span><span class="nt">registry_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GHCR</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">        </span><span class="nt">registry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">        </span><span class="nt">repository</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">presenton/presenton</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">        </span><span class="nt">tag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">latest</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">      </span><span class="nt">http_port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">      </span><span class="nt">instance_count</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">      </span><span class="nt">instance_size_slug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps-s-1vcpu-2gb</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">      </span><span class="nt">envs</span><span class="p">:</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MIGRATE_DATABASE_ON_STARTUP</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">          </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RUN_TIME</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GENERAL</span>
+</span></code></pre></div>
+<p>The template deploys the prebuilt <code>latest</code> image to one <code>apps-s-1vcpu-2gb</code> instance on port 80, sets <code>MIGRATE_DATABASE_ON_STARTUP=true</code> and <code>START_OLLAMA=false</code>, and alerts on <code>DEPLOYMENT_FAILED</code> and <code>DOMAIN_FAILED</code>. It declares no volume and no <code>DATABASE_URL</code>, so the SQLite database, <code>userConfig.json</code> (with the JWT signing secret) and all generated assets live on the container filesystem under <code>/app_data</code>. If the platform does not persist that filesystem across deploys, every redeploy resets accounts and data; add a managed database through <code>DATABASE_URL</code> and check your provider's storage options before relying on it.</p>
+<h3 id="102-railway">10.2 Railway<a class="headerlink" href="#102-railway" title="Permanent link">&para;</a></h3>
+<p>The repository contains no Railway configuration file. The README links to a hosted Railway template (<code>https://railway.com/deploy/presenton-ai-presentations</code>); its contents are not part of this source tree and are not verified here.</p>
+<h3 id="103-kubernetes-and-openshift">10.3 Kubernetes and OpenShift<a class="headerlink" href="#103-kubernetes-and-openshift" title="Permanent link">&para;</a></h3>
+<p>No Helm chart or manifest ships in the repository. What the code does provide is tolerance for volumes owned by an arbitrary UID:</p>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1">// Volumes mounted by the host (e.g. a Kubernetes/OpenShift PVC owned by an</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="c1">// arbitrary non-root UID) may already have sufficient permissions without</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1">// letting this process chmod them. Treat chmod as best-effort so a restricted</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1">// environment doesn't crash the whole process on startup.</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">chmodBestEffort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">path</span><span class="p">,</span><span class="w"> </span><span class="nx">mode</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="nx">chmodSync</span><span class="p">(</span><span class="nx">path</span><span class="p">,</span><span class="w"> </span><span class="nx">mode</span><span class="p">);</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-9"><a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">code</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"EPERM"</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">code</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"EACCES"</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-10"><a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">      </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-14-11"><a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-14-12"><a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="nx">error</span><span class="p">;</span>
+</span><span id="__span-14-13"><a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-14-14"><a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="p">};</span>
+</span></code></pre></div>
+<p>At startup <code>start.js</code> creates the seven asset directories with mode <code>0755</code> (<code>start.js:93</code>), applies <code>chmodBestEffort</code> to them and to <code>userConfig.json</code>/<code>.bak</code> (<code>0600</code>, <code>:104</code>), and normalizes permissions under <code>exports</code>, <code>pptx-to-html</code> and <code>pptx-to-json</code> with <code>legacy: true</code> (<code>start.js:89</code>). In legacy mode an existing directory keeps its owner and group bits and only loses world access (<code>stat.mode &amp; 0o7770</code>) instead of being forced to <code>0750</code>; a non-root process also switches to legacy mode on its own for any directory it does not own (<code>scripts/export-permissions.cjs:24</code>). When running as root, exported files are re-grouped to <code>www-data</code> (or <code>nginx</code>) and set to <code>0640</code> so the nginx worker (<code>user www-data;</code>, <code>nginx.conf:1</code>) can read them without making them world-readable (<code>exportReaderGid</code>, <code>scripts/export-permissions.cjs:4</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: one replica only</p>
+<p><code>start.js</code> runs FastAPI, the MCP server, Next.js and nginx inside one container, async generation tasks are in-process <code>BackgroundTasks</code> that are marked failed after a restart (<code>servers/fastapi/api/lifespan.py:60</code>), and assets are on local disk. Nothing in the repository coordinates multiple replicas; run one instance per data volume.</p>
+</div>
+<h2 id="step-11-public-url-and-reverse-proxies">Step 11: Public URL and reverse proxies<a class="headerlink" href="#step-11-public-url-and-reverse-proxies" title="Permanent link">&para;</a></h2>
+<h3 id="111-header-handling-in-nginx">11.1 Header handling in nginx<a class="headerlink" href="#111-header-handling-in-nginx" title="Permanent link">&para;</a></h3>
+<div class="language-nginx highlight"><span class="filename">nginx.conf (excerpt)</span><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="w">  </span><span class="k">client_max_body_size</span><span class="w"> </span><span class="s">100M</span><span class="p">;</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="c1"># Keep the browser-facing origin supplied by an outer reverse proxy. Direct</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="c1"># deployments fall back to this nginx listener's own scheme and Host header.</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="k">map</span><span class="w"> </span><span class="nv">$http_x_forwarded_proto</span><span class="w"> </span><span class="nv">$presenton_forwarded_proto</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">    </span><span class="kn">""</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="kn">default</span><span class="w"> </span><span class="nv">$http_x_forwarded_proto</span><span class="p">;</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">  </span><span class="k">map</span><span class="w"> </span><span class="nv">$http_x_forwarded_host</span><span class="w"> </span><span class="nv">$presenton_forwarded_host</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="kn">""</span><span class="w"> </span><span class="nv">$http_host</span><span class="p">;</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="kn">default</span><span class="w"> </span><span class="nv">$http_x_forwarded_host</span><span class="p">;</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">  </span><span class="p">}</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Upstream</th>
+<th>Body limit</th>
+<th>Timeouts</th>
+<th>Forwarded headers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>Next.js <code>:3000</code></td>
+<td>100M</td>
+<td>read/connect 30m</td>
+<td><code>Host $http_host</code>, <code>X-Real-IP</code>, <code>X-Forwarded-For</code>, mapped <code>X-Forwarded-Proto</code>/<code>-Host</code>, WebSocket upgrade</td>
+</tr>
+<tr>
+<td><code>/api/v1/</code></td>
+<td>FastAPI <code>:8000</code></td>
+<td>110M, <code>413</code> returns <code>{"detail":"File size must be less than 100MB."}</code></td>
+<td>read/send/connect 30m</td>
+<td>same (no upgrade)</td>
+</tr>
+<tr>
+<td><code>/api/v2/</code></td>
+<td>FastAPI <code>:8000</code></td>
+<td>100M</td>
+<td>30m</td>
+<td>same</td>
+</tr>
+<tr>
+<td><code>/mcp</code>, <code>/mcp/</code></td>
+<td>MCP <code>:8001</code></td>
+<td>145M</td>
+<td>30m</td>
+<td><code>Host localhost:8001</code> (FastMCP host allowlist) plus mapped forwarded headers</td>
+</tr>
+<tr>
+<td><code>/docs</code>, <code>/openapi.json</code></td>
+<td>FastAPI</td>
+<td>100M</td>
+<td>30m</td>
+<td><code>Host $host</code>, <code>X-Forwarded-Proto $scheme</code></td>
+</tr>
+<tr>
+<td><code>/static/</code></td>
+<td><code>alias</code> to <code>/app/servers/fastapi/static/</code></td>
+<td></td>
+<td></td>
+<td>public, <code>Cache-Control: public, immutable</code></td>
+</tr>
+<tr>
+<td><code>/app_data/*</code></td>
+<td><code>alias</code> to <code>/app_data/*</code></td>
+<td></td>
+<td></td>
+<td>see <a href="../25-auth-and-multiuser/">Auth and multi-user</a></td>
+</tr>
+</tbody>
+</table>
+<p>The 30-minute timeouts exist for long SSE generation streams and exports. <code>Host $http_host</code> (not <code>$host</code>) keeps the port, which the comment at <code>nginx.conf:34</code> says Next.js needs for redirects and absolute URLs.</p>
+<p>Downstream, the forwarded headers drive three behaviors: the <code>Secure</code> flag on the session cookie (<code>_secure_request</code>, <code>servers/fastapi/api/v1/auth/router.py:39</code>), MCP result links (<code>absolute_mcp_url</code>, <code>servers/fastapi/utils/mcp_public_urls.py:17</code>) and the <code>/pdf-maker</code> session cookie in <code>servers/nextjs/proxy.ts:126</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: nginx trusts incoming <code>X-Forwarded-*</code></p>
+<p>The <code>map</code> blocks pass any client-supplied <code>X-Forwarded-Proto</code> or <code>X-Forwarded-Host</code> through unchanged. When nginx is directly exposed (no outer proxy), a client can set them. Put a proxy in front that overwrites these headers, or set <code>PRESENTON_PUBLIC_URL</code> so generated links do not depend on them.</p>
+</div>
+<h3 id="112-presenton_public_url">11.2 <code>PRESENTON_PUBLIC_URL</code><a class="headerlink" href="#112-presenton_public_url" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/get_env.py (excerpt)</span><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_presenton_public_url</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"PRESENTON_PUBLIC_URL"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"http://"</span><span class="p">,</span> <span class="s2">"https://"</span><span class="p">)):</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>        <span class="k">return</span> <span class="n">value</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="k">return</span> <span class="kc">None</span>
+</span></code></pre></div>
+<p>The value must start with <code>http://</code> or <code>https://</code> or it is ignored. When set it is used for:</p>
+<ul>
+<li>MCP links: <code>absolute_mcp_url</code> prefers it over <code>X-Forwarded-Proto</code>/<code>X-Forwarded-Host</code> for <code>path</code>, <code>edit_path</code> and <code>preview_url</code> fields (<code>servers/fastapi/utils/mcp_public_urls.py:22</code>).</li>
+<li>The MCP DNS-rebinding allowlist: its origin is appended to the loopback origins (<code>get_mcp_allowed_origins</code>, <code>servers/fastapi/mcp_server.py:128</code>). Without it, browser-based MCP clients on your public hostname are rejected.</li>
+<li>Template endpoints answering MCP requests (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:109</code>).</li>
+<li>The trusted-origin check for custom provider discovery (<code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:29</code>).</li>
+</ul>
+<h3 id="113-outer-proxy-checklist">11.3 Outer proxy checklist<a class="headerlink" href="#113-outer-proxy-checklist" title="Permanent link">&para;</a></h3>
+<p>From the code above, an outer proxy (Traefik, Caddy, a cloud load balancer) in front of the container should: terminate TLS and send <code>X-Forwarded-Proto: https</code> (otherwise the <code>presenton_session</code> cookie is issued without <code>Secure</code>), send <code>X-Forwarded-Host</code> or preserve <code>Host</code> with its port, allow request bodies of at least 110 MB on <code>/api/v1/</code> (145 MB on <code>/mcp</code>), and use idle timeouts long enough for streaming generation (nginx itself allows 30 minutes).</p>
+<h2 id="step-12-external-databases-with-database_url">Step 12: External databases with <code>DATABASE_URL</code><a class="headerlink" href="#step-12-external-databases-with-database_url" title="Permanent link">&para;</a></h2>
+<p><code>get_database_url_and_connect_args</code> (<code>servers/fastapi/utils/db_utils.py:57</code>) decides the runtime URL:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Runtime URL</th>
+<th>Alembic URL (<code>to_sync_sqlalchemy_url</code>, <code>:103</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>unset</td>
+<td><code>sqlite+aiosqlite:///$APP_DATA_DIRECTORY/fastapi.db</code> (default <code>/tmp/presenton/fastapi.db</code>)</td>
+<td><code>sqlite:///...</code></td>
+</tr>
+<tr>
+<td><code>sqlite://...</code></td>
+<td><code>sqlite+aiosqlite://...</code>, parent directory created</td>
+<td><code>sqlite:///...</code></td>
+</tr>
+<tr>
+<td><code>postgresql://...</code></td>
+<td><code>postgresql+asyncpg://...</code></td>
+<td><code>postgresql+psycopg://...</code></td>
+</tr>
+<tr>
+<td><code>mysql://...</code></td>
+<td><code>mysql+aiomysql://...</code></td>
+<td><code>mysql+pymysql://...</code></td>
+</tr>
+<tr>
+<td>anything else</td>
+<td>unchanged</td>
+<td>unchanged</td>
+</tr>
+</tbody>
+</table>
+<p>All three drivers are in <code>pyproject.toml</code> (<code>aiosqlite</code>, <code>asyncpg</code>, <code>aiomysql</code>, <code>psycopg[binary]</code>). For server databases, <code>services/database.py:38</code> adds pool settings from <code>get_pool_kwargs</code> (<code>db_utils.py:34</code>): <code>DB_POOL_SIZE</code> (5), <code>DB_MAX_OVERFLOW</code> (10), <code>DB_POOL_TIMEOUT</code> (30 s), <code>DB_POOL_RECYCLE</code> (1800 s), <code>DB_POOL_PRE_PING</code> (true).</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/db_utils.py (excerpt)</span><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>        <span class="k">if</span> <span class="n">split_result</span><span class="o">.</span><span class="n">query</span><span class="p">:</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>            <span class="n">query_params</span> <span class="o">=</span> <span class="n">parse_qsl</span><span class="p">(</span><span class="n">split_result</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">keep_blank_values</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>            <span class="n">driver_scheme</span> <span class="o">=</span> <span class="n">split_result</span><span class="o">.</span><span class="n">scheme</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">query_params</span><span class="p">:</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>                <span class="n">key_lower</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>                <span class="k">if</span> <span class="n">key_lower</span> <span class="o">==</span> <span class="s2">"sslmode"</span> <span class="ow">and</span> <span class="s2">"postgresql+asyncpg"</span> <span class="ow">in</span> <span class="n">driver_scheme</span><span class="p">:</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>                    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"disable"</span> <span class="ow">and</span> <span class="s2">"sqlite"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">database_url</span><span class="p">:</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>                        <span class="n">connect_args</span><span class="p">[</span><span class="s2">"ssl"</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">()</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>            <span class="n">database_url</span> <span class="o">=</span> <span class="n">urlunsplit</span><span class="p">(</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>                <span class="p">(</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>                    <span class="n">split_result</span><span class="o">.</span><span class="n">scheme</span><span class="p">,</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>                    <span class="n">split_result</span><span class="o">.</span><span class="n">netloc</span><span class="p">,</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>                    <span class="n">split_result</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>                    <span class="s2">""</span><span class="p">,</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>                    <span class="n">split_result</span><span class="o">.</span><span class="n">fragment</span><span class="p">,</span>
+</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>                <span class="p">)</span>
+</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>            <span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: every query parameter is dropped</p>
+<p>The only query parameter that is interpreted is <code>sslmode</code> on PostgreSQL, which turns into a default <code>ssl.SSLContext</code> unless it equals <code>disable</code>. The whole query string is then removed, so options like <code>?charset=utf8mb4</code> or <code>?sslrootcert=...</code> never reach the driver.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>postgres://</code> is not rewritten</p>
+<p>Only the <code>postgresql://</code> prefix is mapped to <code>asyncpg</code>. A <code>postgres://</code> URL (common in hosted database dashboards) is passed through unchanged and will not select the async driver. Rename the scheme before setting <code>DATABASE_URL</code>.</p>
+</div>
+<p>Moving to Postgres or MySQL does not move <code>userConfig.json</code> (signing secret, provider keys) or the asset directories; <code>/app_data</code> still needs persistent storage. How migrations run at startup is covered in <a href="../05-fastapi-startup/">FastAPI app and startup</a>.</p>
+<h2 id="step-13-air-gapped-deployments">Step 13: Air-gapped deployments<a class="headerlink" href="#step-13-air-gapped-deployments" title="Permanent link">&para;</a></h2>
+<h3 id="131-the-switch">13.1 The switch<a class="headerlink" href="#131-the-switch" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/get_env.py (excerpt)</span><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">is_community_enabled</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">    </span><span class="sd">"""Return whether cloud-backed community features are available."""</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"PRESENTON_COMMUNITY_ENABLED"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="k">return</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"0"</span><span class="p">,</span> <span class="s2">"false"</span><span class="p">,</span> <span class="s2">"no"</span><span class="p">,</span> <span class="s2">"off"</span><span class="p">}</span>
+</span></code></pre></div>
+<p>An unset or empty value means enabled. With <code>PRESENTON_COMMUNITY_ENABLED=false</code>:</p>
+<ul>
+<li><code>require_community_enabled</code> returns <code>404</code> with code <code>community_disabled</code> and message "Community is disabled for this deployment." (<code>servers/fastapi/services/community_presentations.py:150</code>).</li>
+<li>Presentation creation that references community design IDs fails with <code>422 "Community references are disabled"</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1717</code>).</li>
+<li>The Presenton Cloud proxy answers community paths with <code>404 community_disabled</code> and payloads carrying <code>community_design_ids</code> with <code>422 community_references_disabled</code> (<code>servers/fastapi/services/presenton_cloud_proxy.py:424</code>, <code>:468</code>).</li>
+<li>The Next.js dashboard layout, community page and upload page read the same variable to hide the feature.</li>
+</ul>
+<h3 id="132-other-outbound-dependencies-to-plan-for">13.2 Other outbound dependencies to plan for<a class="headerlink" href="#132-other-outbound-dependencies-to-plan-for" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Dependency</th>
+<th>Offline status in the image</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Embedding weights</td>
+<td>Baked and verified with <code>--network=none</code> (Step 2.4)</td>
+</tr>
+<tr>
+<td>spaCy model</td>
+<td>Baked (Step 2.3)</td>
+</tr>
+<tr>
+<td>Export engine and Chromium</td>
+<td>Baked; <code>start.js</code> only runs <code>--check-only</code> in production and throws if it is missing (<code>start.js:455</code>)</td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td><code>START_OLLAMA=true</code> downloads Ollama from the internet at startup; point <code>OLLAMA_URL</code> at an internal server instead</td>
+</tr>
+<tr>
+<td>Text and image providers</td>
+<td>Must be local or internal (Ollama, LM Studio, LiteLLM, OpenAI-compatible, ComfyUI); see <a href="../06-configuration-and-providers/">Configuration and LLM providers</a></td>
+</tr>
+<tr>
+<td>Error reporting</td>
+<td>Sentry initializes only when <code>SENTRY_DSN</code> is set (<code>servers/fastapi/api/main.py:32</code>)</td>
+</tr>
+<tr>
+<td>Frontend analytics</td>
+<td>Controlled by <code>DISABLE_ANONYMOUS_TRACKING</code>, forwarded by compose</td>
+</tr>
+<tr>
+<td>Mem0 LLM</td>
+<td>Defaults to <code>http://host.docker.internal:11434</code>; set <code>MEM0_ENABLED=false</code> or an internal URL</td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-14-resource-usage-findings">Step 14: Resource usage findings<a class="headerlink" href="#step-14-resource-usage-findings" title="Permanent link">&para;</a></h2>
+<p><code>docs/presenton-resource-usage.md</code> reports a controlled k6 test of a single container. The workflow it exercised is exactly the standard pipeline described in <a href="../08-standard-pipeline/">Standard generation pipeline</a>:</p>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th>Request</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>setup</td>
+<td><code>POST /api/v1/auth/login</code> once per test account (<code>Testuser1</code> to <code>Testuser4</code>), sequentially</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>POST /api/v1/ppt/presentation/create</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>GET /api/v1/ppt/chat/conversations?presentation_id={id}&amp;presentation_type=standard</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>GET /api/v1/ppt/outlines/stream/{id}</code> (SSE)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>POST /api/v1/ppt/presentation/prepare</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>GET /api/v1/ppt/presentation/stream/{id}</code> (SSE)</td>
+</tr>
+</tbody>
+</table>
+<p>The load shape was four waves with a 60-second cooldown; in each wave four virtual users ran one workflow each (10, 20, 30 and 40 slides), for 16 workflows, 96 HTTP requests and zero failures over a 51 minute 50 second window sampled every 2 seconds (1,551 samples). PPTX export was deliberately excluded.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th style="text-align: right;">Start</th>
+<th style="text-align: right;">Median</th>
+<th style="text-align: right;">P95</th>
+<th style="text-align: right;">Max</th>
+<th style="text-align: right;">End</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU (100% = one core)</td>
+<td style="text-align: right;">0.53%</td>
+<td style="text-align: right;">3.70%</td>
+<td style="text-align: right;">43.27%</td>
+<td style="text-align: right;">1,087.09%</td>
+<td style="text-align: right;">579.11%</td>
+</tr>
+<tr>
+<td>Memory utilization</td>
+<td style="text-align: right;">17.42%</td>
+<td style="text-align: right;">20.19%</td>
+<td style="text-align: right;">21.36%</td>
+<td style="text-align: right;">37.09%</td>
+<td style="text-align: right;">37.09%</td>
+</tr>
+<tr>
+<td>Available memory</td>
+<td style="text-align: right;">6,031.36 MB</td>
+<td style="text-align: right;">5,828.61 MB</td>
+<td style="text-align: right;">5,985.28 MB</td>
+<td style="text-align: right;">6,031.36 MB</td>
+<td style="text-align: right;">4,594.69 MB</td>
+</tr>
+<tr>
+<td>"Heap" (sum of process <code>VmData</code>)</td>
+<td style="text-align: right;">2,670.32 MB</td>
+<td style="text-align: right;">3,170.68 MB</td>
+<td style="text-align: right;">3,273.54 MB</td>
+<td style="text-align: right;">11,866.22 MB</td>
+<td style="text-align: right;">11,086.41 MB</td>
+</tr>
+</tbody>
+</table>
+<p>The report's conclusions: CPU is bursty with a near-empty run queue (zero in 97.4% of samples); memory grew slowly during the run (+4.07 points, about +601 MB of <code>VmData</code> before 18:19:13); and about four minutes after the last k6 wave finished, a one-minute burst drove average CPU to 337.87%, memory to 37.09% and <code>VmData</code> to 11.9 GB. The capture ended during that burst, so the report cannot say which process caused it or whether memory was released. The report notes that <code>heap_memory_mb</code> is not a managed-runtime heap counter but the sum of Linux <code>VmData</code> across the container's processes, to be read as aggregate data/heap allocation rather than resident memory.</p>
+<p>For sizing, the start and end rows are consistent with a host of about 7.3 GB total memory (derived arithmetic: 6,031.36 / (1 - 0.1742) and 4,594.69 / (1 - 0.3709) both give roughly 7,300 MB). That implies roughly 1.3 GB in use at the start and 2.7 GB at the peak, so the 2 GB DigitalOcean template leaves little headroom for concurrent generation. The report itself recommends repeating the test with stage markers, a recovery period, and OOM and swap counters.</p>
+<h2 id="step-15-production-checklist">Step 15: Production checklist<a class="headerlink" href="#step-15-production-checklist" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Why</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Persist <code>/app_data</code> on a real volume</td>
+<td>Database (default SQLite), <code>userConfig.json</code> with the JWT secret and provider keys, all assets</td>
+<td><code>Dockerfile:82</code>, <code>start.js:56</code></td>
+</tr>
+<tr>
+<td>Back up <code>userConfig.json</code> together with the database</td>
+<td>API key ciphertext and all sessions depend on <code>AUTH_SECRET_KEY</code></td>
+<td><a href="../25-auth-and-multiuser/">Auth and multi-user</a></td>
+</tr>
+<tr>
+<td>Create the admin before exposing the port (<code>AUTH_USERNAME</code>, <code>AUTH_PASSWORD</code>)</td>
+<td><code>/api/v1/auth/setup</code> is open on an empty database</td>
+<td><code>servers/fastapi/api/v1/auth/bootstrap.py:43</code></td>
+</tr>
+<tr>
+<td>Remove <code>RESET_AUTH</code>/<code>AUTH_OVERRIDE_FROM_ENV</code> after one start</td>
+<td>They rotate the secret and delete all API keys on every boot</td>
+<td><code>bootstrap.py:61</code></td>
+</tr>
+<tr>
+<td>Never add <code>DISABLE_AUTH=true</code></td>
+<td>Removes login and tenant isolation</td>
+<td><code>servers/fastapi/api/middlewares.py:59</code></td>
+</tr>
+<tr>
+<td>Terminate TLS upstream and send <code>X-Forwarded-Proto: https</code></td>
+<td><code>Secure</code> session cookie</td>
+<td><code>servers/fastapi/api/v1/auth/router.py:39</code></td>
+</tr>
+<tr>
+<td>Overwrite <code>X-Forwarded-Host</code>/<code>-Proto</code> at the edge, set <code>PRESENTON_PUBLIC_URL</code></td>
+<td>nginx forwards client values; MCP links and origins</td>
+<td><code>nginx.conf:16</code>, <code>servers/fastapi/utils/get_env.py:17</code></td>
+</tr>
+<tr>
+<td>Allow 110 MB bodies and long idle timeouts upstream</td>
+<td>Uploads and SSE</td>
+<td><code>nginx.conf:46</code>, <code>:41</code></td>
+</tr>
+<tr>
+<td>Pin an image tag instead of <code>latest</code></td>
+<td><code>latest</code> is promoted manually</td>
+<td><code>docs/multi-docker-build.md</code></td>
+</tr>
+<tr>
+<td>Set <code>PRESENTON_DOCKER_PLATFORM</code> on ARM hosts</td>
+<td>Compose defaults to amd64</td>
+<td><code>docker-compose.yml:3</code></td>
+</tr>
+<tr>
+<td>Use <code>postgresql://</code> (not <code>postgres://</code>) and no extra query options</td>
+<td>URL rewriting rules</td>
+<td><code>servers/fastapi/utils/db_utils.py:64</code></td>
+</tr>
+<tr>
+<td>Keep <code>MIGRATE_DATABASE_ON_STARTUP=true</code></td>
+<td>Alembic migrations, including the primary-admin constraint</td>
+<td><code>docker-compose.yml:20</code></td>
+</tr>
+<tr>
+<td>Run a single replica per volume</td>
+<td>In-process tasks, local assets</td>
+<td><code>servers/fastapi/api/lifespan.py:60</code></td>
+</tr>
+<tr>
+<td>For air-gapped sites set <code>PRESENTON_COMMUNITY_ENABLED=false</code>, keep <code>START_OLLAMA=false</code>, use internal providers</td>
+<td>No outbound calls</td>
+<td>Step 13</td>
+</tr>
+<tr>
+<td>Size memory well above 2 GB for concurrent users</td>
+<td>Measured burst behavior</td>
+<td>Step 14</td>
+</tr>
+<tr>
+<td>Put rate limiting in front of <code>/api/v1/auth/login</code></td>
+<td>No built-in throttling</td>
+<td><code>servers/fastapi/tests/integration/test_auth_endpoints.py:244</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The production image is assembled from three builder stages (Python venv with baked models, Next.js standalone, Node runtimes for LiteParse and the pinned export engine) and a Debian trixie runtime with a snapshot-pinned Chromium and Noto-only fonts.</li>
+<li>The build fails early if packaged data, offline embedding weights, or the export runtime are missing, and pins every moving dependency (uv lock, npm lock and overrides, Chromium snapshot, export-core v1.0.51).</li>
+<li><code>docker-compose.yml</code> offers four services; development bind-mounts the repo while named volumes protect native modules, and empty forwarded variables never overwrite UI-saved settings.</li>
+<li>Releases are multi-arch through Buildx in CI or native builds plus <code>imagetools</code>, and <code>latest</code> is moved by hand.</li>
+<li>Real deployments need persistent <code>/app_data</code>, a TLS proxy that sets forwarded headers, <code>PRESENTON_PUBLIC_URL</code> for MCP, careful <code>DATABASE_URL</code> formatting, and <code>PRESENTON_COMMUNITY_ENABLED=false</code> when offline.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../27-electron/">Electron desktop app</a> to see the same servers packaged as a desktop application with a PyInstaller backend and per-launch loopback security.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../25-auth-and-multiuser/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Auth and multi-user">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Auth and multi-user
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../27-electron/" class="md-footer__link md-footer__link--next" aria-label="Next: Electron desktop app">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Electron desktop app
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

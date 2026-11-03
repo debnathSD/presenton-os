@@ -1,0 +1,3793 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/18-custom-templates/">
+      
+      
+        <link rel="prev" href="../17-template-to-slide/">
+      
+      
+        <link rel="next" href="../19-themes-and-fonts/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Custom templates from PPTX - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#custom-templates-from-pptx" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Custom templates from PPTX
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-two-creation-workflows-and-the-api-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The two creation workflows and the API surface
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-choose-the-file-in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Choose the file in the browser
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-check-the-fonts-in-the-pptx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Check the fonts in the PPTX
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-replace-fonts-and-render-slide-previews" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Replace fonts and render slide previews
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Replace fonts and render slide previews">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-previews-are-rendered-and-who-converts-pptx-to-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How previews are rendered (and who converts PPTX to JSON)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-mcp-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The MCP variant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-start-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Start creation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-prepare-the-template-source-in-the-background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Prepare the template source in the background
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-certify-every-slide-four-vision-passes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Certify every slide (four vision passes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Certify every slide (four vision passes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pass-1-visual-data-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 1: visual data detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pass-2-semantic-manifest-the-only-mandatory-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 2: semantic manifest (the only mandatory pass)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pass-3-flexible-regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 3: flexible regions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pass-4-text-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 4: text capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compile-and-certify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compile and certify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#placeholders-for-editable-images-and-icons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholders for editable images and icons
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-cluster-components-and-derive-the-theme-then-persist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Cluster components and derive the theme, then persist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Cluster components and derive the theme, then persist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merged-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merged components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#semantic-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Semantic theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-row" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The row
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-track-progress-and-retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Track progress and retry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-the-incremental-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: The incremental routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-the-template-editor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: The template editor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-turning-a-stored-template-into-a-bundled-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: Turning a stored template into a bundled template
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 12: Turning a stored template into a bundled template">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scriptsconvert-templatemjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/convert-template.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scriptsconvert-presentation-templatemjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/convert-presentation-template.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-two-creation-workflows-and-the-api-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The two creation workflows and the API surface
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-choose-the-file-in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Choose the file in the browser
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-check-the-fonts-in-the-pptx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Check the fonts in the PPTX
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-replace-fonts-and-render-slide-previews" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Replace fonts and render slide previews
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Replace fonts and render slide previews">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-previews-are-rendered-and-who-converts-pptx-to-json" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How previews are rendered (and who converts PPTX to JSON)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-mcp-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The MCP variant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-start-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Start creation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-prepare-the-template-source-in-the-background" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Prepare the template source in the background
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-certify-every-slide-four-vision-passes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Certify every slide (four vision passes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Certify every slide (four vision passes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pass-1-visual-data-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 1: visual data detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pass-2-semantic-manifest-the-only-mandatory-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 2: semantic manifest (the only mandatory pass)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pass-3-flexible-regions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 3: flexible regions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pass-4-text-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pass 4: text capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compile-and-certify" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compile and certify
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#placeholders-for-editable-images-and-icons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Placeholders for editable images and icons
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-cluster-components-and-derive-the-theme-then-persist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Cluster components and derive the theme, then persist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Cluster components and derive the theme, then persist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#merged-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Merged components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#semantic-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Semantic theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-row" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The row
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-track-progress-and-retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Track progress and retry
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-the-incremental-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: The incremental routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-the-template-editor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: The template editor
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-turning-a-stored-template-into-a-bundled-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: Turning a stored template into a bundled template
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 12: Turning a stored template into a bundled template">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scriptsconvert-templatemjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/convert-template.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scriptsconvert-presentation-templatemjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        scripts/convert-presentation-template.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="custom-templates-from-pptx">Custom templates from PPTX<a class="headerlink" href="#custom-templates-from-pptx" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/api/v1/ppt/endpoints/template.py</code>, <code>servers/fastapi/templates/fonts_and_slides_preview.py</code>, <code>servers/fastapi/templates/pptx_font_utils.py</code>, <code>servers/fastapi/templates/v2/certified_generation.py</code>, <code>servers/fastapi/templates/v2/generation.py</code>, <code>servers/fastapi/templates/v2/theme.py</code>, <code>servers/nextjs/app/(presentation-generator)/custom-template/hooks/useTemplateCreation.ts</code>, <code>scripts/convert-template.mjs</code>  ·  <strong>Builds on:</strong> <a href="../17-template-to-slide/">From template to schema to slide</a>  ·  <strong>Time:</strong> ~50 min</p>
+</div>
+<h2 id="what-you-will-learn">What you will learn<a class="headerlink" href="#what-you-will-learn" title="Permanent link">&para;</a></h2>
+<p>This chapter follows a user's <code>.pptx</code> file from the upload dropzone to a persisted, certified <code>TemplateV2</code> row. You will see the font check and font replacement pass, how slide preview images are rendered, the four vision passes that turn raw PPTX elements into editable layouts (and every fallback when a pass fails), how reusable components are clustered and a semantic theme is derived, and every route in the template API. The chapter ends with the template studio and editor in Next.js and the two Node scripts that turn a stored template into a bundled <code>templates/&lt;id&gt;/template.json</code>.</p>
+<pre class="mermaid"><code>flowchart TD
+    U["Browser: /custom-template"] --&gt; FC["POST /api/v1/ppt/fonts/check"]
+    FC --&gt; FP["POST /api/v1/ppt/template/fonts-upload-and-slides-preview"]
+    FP --&gt; EX1["Export runtime: pptx-to-json"]
+    EX1 --&gt; EX2["Export runtime: json-to-images (Chromium)"]
+    EX2 --&gt; PRE["slide_image_urls + modified_pptx_url + fonts"]
+    PRE --&gt; ASYNC["POST /api/v1/ppt/template/async"]
+    ASYNC --&gt; TASK["async_task row, BackgroundTasks"]
+    TASK --&gt; PREP["_prepare_template_source: pptx-to-json again"]
+    PREP --&gt; GEN["generate_slide_layout per slide, up to 10 threads"]
+    GEN --&gt; VP["Pass 1: visual data"]
+    VP --&gt; SP["Pass 2: semantic manifest"]
+    SP --&gt; FL["Pass 3: flexible regions"]
+    FL --&gt; TC["Pass 4: text capacity"]
+    TC --&gt; CMP["Compile and certify"]
+    CMP --&gt; MERGE["merge_similar_components"]
+    CMP --&gt; THEME["generate_template_theme"]
+    MERGE --&gt; ROW["TemplateV2 row"]
+    THEME --&gt; ROW</code></pre>
+<h2 id="step-1-the-two-creation-workflows-and-the-api-surface">Step 1: The two creation workflows and the API surface<a class="headerlink" href="#step-1-the-two-creation-workflows-and-the-api-surface" title="Permanent link">&para;</a></h2>
+<p>Everything lives under <code>TEMPLATE_ROUTER = APIRouter(prefix="/template", tags=["Templates"])</code> (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:96</code>), mounted inside <code>API_V1_PPT_ROUTER</code> (prefix <code>/api/v1/ppt</code>, <code>servers/fastapi/api/v1/ppt/router.py:22</code>, include at <code>:39</code>). The font routes are a separate router, <code>FONTS_ROUTER = APIRouter(prefix="/fonts")</code> (<code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:18</code>), included at <code>servers/fastapi/api/v1/ppt/router.py:25</code>.</p>
+<p>There are two ways to turn preview images plus a PPTX into a template:</p>
+<ol>
+<li><strong>One-shot asynchronous creation.</strong> <code>POST /template/async</code> stores an <code>async_task</code> row and runs <code>_run_create_template_task</code> as a FastAPI background task. It certifies every slide in parallel, clusters components, derives a theme and inserts one <code>TemplateV2</code> row at the end. The template studio's <strong>Generate Template</strong> button uses this route, and so does the MCP tool flow.</li>
+<li><strong>Incremental creation.</strong> <code>POST /template/init</code> stores a row with <code>raw_layouts</code> and no <code>layouts</code>. The client then calls <code>POST /template/layouts/create</code> per slide, saves each result with <code>PATCH /template/{id}/layouts</code>, and finally calls <code>POST /template/generate-blocks</code> to cluster components and derive a theme. This is wired into the <code>useTemplateCreation</code> hook and is also what the template editor uses to "reconstruct" a single slide.</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Handler</th>
+<th>Request</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /template/all</code></td>
+<td><code>list_templates</code> (<code>template.py:1118</code>)</td>
+<td>query <code>page</code> (default 1), <code>page_size</code> (default 20, max 100), <code>default</code> (optional bool)</td>
+<td><code>TemplateListResponse {items, total, page, page_size}</code></td>
+</tr>
+<tr>
+<td><code>POST /template/fonts-upload-and-slides-preview</code></td>
+<td><code>upload_template_fonts_and_slides_preview</code> (<code>:1193</code>)</td>
+<td>multipart: <code>pptx_file</code>, <code>font_files[]</code>, <code>original_font_names[]</code>, <code>google_font_original_names[]</code>, <code>google_font_replacement_names[]</code>, <code>google_font_names[]</code>, <code>google_font_urls[]</code></td>
+<td><code>FontsUploadAndSlidesPreviewResponse {slide_image_urls, pptx_url, modified_pptx_url, fonts}</code></td>
+</tr>
+<tr>
+<td><code>POST /template/mcp-upload</code></td>
+<td><code>upload_template_assets_for_mcp</code> (<code>:1220</code>)</td>
+<td>JSON <code>{pptx: {filename, content_base64}, fonts: [{filename, content_base64, original_font_name}]}</code></td>
+<td><code>{pptx_url, slide_image_urls, fonts}</code></td>
+</tr>
+<tr>
+<td><code>POST /template/init</code></td>
+<td><code>init_template</code> (<code>:1277</code>), status 201</td>
+<td><code>InitTemplateRequest</code></td>
+<td>the new template id as a bare JSON string</td>
+</tr>
+<tr>
+<td><code>POST /template/async</code></td>
+<td><code>create_template</code> (<code>:1574</code>), status 201</td>
+<td><code>CreateTemplateRequest</code> (same fields as init)</td>
+<td><code>AsyncTaskModel</code></td>
+</tr>
+<tr>
+<td><code>POST /template/async/{task_id}/retry</code></td>
+<td><code>retry_create_template</code> (<code>:1626</code>), status 202</td>
+<td>none</td>
+<td><code>AsyncTaskModel</code></td>
+</tr>
+<tr>
+<td><code>POST /template/layouts/generate</code></td>
+<td><code>generate_template_layout_from_prompt</code> (<code>:1700</code>)</td>
+<td><code>{template_id or id, prompt}</code></td>
+<td><code>{layout, response}</code></td>
+</tr>
+<tr>
+<td><code>POST /template/layouts/create</code></td>
+<td><code>create_template_slide_layouts</code> (<code>:1789</code>)</td>
+<td><code>{template_id or id, index or indices, generation_options?}</code></td>
+<td><code>{layouts: [{index, layout}]}</code></td>
+</tr>
+<tr>
+<td><code>POST /template/generate-blocks</code></td>
+<td><code>generate_template_blocks</code> (<code>:1874</code>)</td>
+<td><code>{template_id or id}</code></td>
+<td><code>TemplateResponse</code></td>
+</tr>
+<tr>
+<td><code>PATCH /template/{template_id}/layouts</code></td>
+<td><code>patch_template_slide_layout</code> (<code>:1929</code>)</td>
+<td><code>{index, layout}</code> or <code>{layouts: [{index, layout}]}</code></td>
+<td><code>TemplateResponse</code></td>
+</tr>
+<tr>
+<td><code>PATCH /template/{template_id}</code></td>
+<td><code>update_template_metadata</code> (<code>:1976</code>)</td>
+<td><code>UpdateTemplateMetadataRequest</code></td>
+<td><code>TemplateResponse</code></td>
+</tr>
+<tr>
+<td><code>GET /template/{template_id}/theme</code></td>
+<td><code>get_template_theme</code> (<code>:2093</code>)</td>
+<td>none</td>
+<td><code>{template_id, theme}</code></td>
+</tr>
+<tr>
+<td><code>GET /template/{template_id}</code></td>
+<td><code>get_template</code> (<code>:2127</code>)</td>
+<td>none</td>
+<td><code>TemplateResponse</code></td>
+</tr>
+<tr>
+<td><code>DELETE /template/{template_id}</code></td>
+<td><code>delete_template</code> (<code>:2158</code>), status 204</td>
+<td>none</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>POST /fonts/check</code></td>
+<td><code>check_fonts_in_pptx_handler</code> (<code>fonts.py:152</code>)</td>
+<td>multipart <code>pptx_file</code></td>
+<td><code>FontCheckResponse {available_fonts, unavailable_fonts}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Every mutating route except creation calls <code>_require_private_template</code> (<code>template.py:2170</code>), which raises <code>403 "Built-in templates are read-only"</code> when <code>is_default</code> is true.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>GET /template/{template_id}/theme</code> must be registered before <code>GET /template/{template_id}</code>, otherwise FastAPI would match <code>theme</code> as a template id. The order in the file is deliberate and pinned by <code>test_get_template_theme_route_is_registered_before_template_detail_get</code> (<code>servers/fastapi/tests/unit/test_template_api.py:1127</code>).</p>
+</div>
+<h2 id="step-2-choose-the-file-in-the-browser">Step 2: Choose the file in the browser<a class="headerlink" href="#step-2-choose-the-file-in-the-browser" title="Permanent link">&para;</a></h2>
+<p>The studio page is <code>servers/nextjs/app/(presentation-generator)/custom-template/page.tsx</code>. It redirects to <code>/dashboard</code> when <code>PRESENTATION_GENERATION_MODE</code> normalizes to <code>smart</code> (<code>page.tsx:8</code>), because smart-mode decks do not use templates (see <a href="../13-smart-mode/">Smart mode</a>). Otherwise it renders <code>CustomTemplatePage</code>.</p>
+<p>File selection goes through <code>useFileUpload</code> (<code>custom-template/hooks/useFileUpload.ts</code>). The only client-side checks are the extension and size:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/custom-template/hooks/useFileUpload.ts (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">lowerName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">file</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">();</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">isPptx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">lowerName</span><span class="p">.</span><span class="nx">endsWith</span><span class="p">(</span><span class="s2">".pptx"</span><span class="p">);</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">isPptx</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nx">notify</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s2">"Invalid file"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Please select a valid PPTX file."</span><span class="p">);</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1024</span><span class="p">;</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">file</span><span class="p">.</span><span class="nx">size</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">maxSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="nx">notify</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s2">"File too large"</span><span class="p">,</span><span class="w"> </span><span class="s2">"File size must be less than 100MB."</span><span class="p">);</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="p">}</span>
+</span></code></pre></div>
+<p>When the page mounts it also calls <code>showTemplateV2ModelWarningIfNeeded(llmConfig)</code> (<code>CustomTemplatePage.tsx:1296</code>). That helper (<code>custom-template/utils/templateModelWarning.ts</code>) shows a persistent toast unless the configured text model is on a hard-coded allow list: the <code>presenton</code> provider, OpenAI families such as <code>gpt-5</code>, <code>gpt-4.1</code>, <code>gpt-4o</code>, <code>gpt-4-turbo</code>, or any <code>claude-</code> model containing <code>opus</code> or <code>sonnet</code>. Dismissal is remembered in <code>localStorage</code> under <code>presenton.nonSotaTemplateToastDismissed</code>. This is only a warning; nothing blocks a weaker model.</p>
+<div class="admonition info">
+<p class="admonition-title">Model requirements</p>
+<p><code>docs/template-v2.md</code> is explicit that template creation sends each slide screenshot to the configured <strong>text</strong> LLM, so that model must accept image input and structured JSON output. Template creation requests up to 16,000 completion tokens (<code>TEMPLATE_GENERATION_MAX_COMPLETION_TOKENS = 16000</code>, <code>servers/fastapi/templates/v2/certified_generation.py:61</code>, and <code>SLIDE_LAYOUT_GENERATION_MAX_TOKENS = 16000</code>, <code>template.py:101</code>). Configuring an image-generation provider does not help. Generating a deck from an existing template does not need vision. Provider configuration is covered in <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>.</p>
+</div>
+<h2 id="step-3-check-the-fonts-in-the-pptx">Step 3: Check the fonts in the PPTX<a class="headerlink" href="#step-3-check-the-fonts-in-the-pptx" title="Permanent link">&para;</a></h2>
+<p><code>checkFonts</code> in <code>useTemplateCreation.ts:135</code> posts the file as <code>pptx_file</code> to <code>POST /api/v1/ppt/fonts/check</code>. The route is registered without a decorator, as a call on the router:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/fonts.py (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">FONTS_ROUTER</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/check"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">FontCheckResponse</span><span class="p">)(</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">check_fonts_in_pptx_handler</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">)</span>
+</span></code></pre></div>
+<p><code>check_fonts_in_pptx_handler</code> (<code>servers/fastapi/templates/fonts_and_slides_preview.py:1160</code>) does the following, in order:</p>
+<ol>
+<li>Rejects anything not ending in <code>.pptx</code> with 400 <code>"Invalid file type. Expected PPTX file"</code>.</li>
+<li>Rejects uploads of 100 MB or more with 413 (<code>MAX_FONT_CHECK_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024</code>, <code>:150</code>; the check is <code>size &gt;= MAX</code>, <code>:1040</code>).</li>
+<li>Writes the bytes to a temporary <code>presentation.pptx</code> and validates the ZIP package (<code>_validate_pptx_package</code>, <code>:1045</code>): <code>testzip()</code> must pass, and <code>[Content_Types].xml</code>, <code>ppt/presentation.xml</code> and at least one <code>ppt/slides/slide*.xml</code> must exist, otherwise 400 <code>"The uploaded PowerPoint file is corrupted or unsupported."</code>.</li>
+<li>Extracts every font family and the variants actually used (<code>extract_used_font_variants_from_pptx</code>, <code>servers/fastapi/templates/pptx_font_utils.py:366</code>). Variants are one of <code>regular</code>, <code>bold</code>, <code>italic</code>, <code>bold_italic</code>, derived by <code>_font_style_variant</code> (<code>pptx_font_utils.py:330</code>) from the <code>b</code> and <code>i</code> attributes on run properties plus the family name itself. Theme references such as <code>+mj-lt</code> are resolved to the theme's major/minor fonts (<code>_resolve_theme_typeface</code>, <code>:193</code>).</li>
+<li>Calls <code>get_available_and_unavailable_fonts_for_pptx</code> (<code>pptx_font_utils.py:813</code>). For every family/variant it first looks for a matching embedded font (<code>ppt/fonts/*.fntdata</code>), then the packaged catalog through <code>get_static_font_url</code> (<code>:177</code>). Anything left is unavailable.</li>
+<li>For unavailable fonts, looks in the global <code>font_uploads</code> table (<code>get_font_uploads_for_names_by_variant</code>, <code>servers/fastapi/utils/font_uploads.py:406</code>). A previously uploaded file whose variant matches moves the entry into <code>available_fonts</code> with its <code>/app_data/fonts/...</code> URL.</li>
+</ol>
+<p>A response looks like this (one entry per family and variant; <code>name</code> is the display name built by <code>_font_info_entry</code>, <code>fonts_and_slides_preview.py:874</code>):</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"available_fonts"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Montserrat Regular"</span><span class="p">,</span><span class="w"> </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/vendor/fonts/sans_serif/montserrat/Montserrat[wght].ttf"</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">     </span><span class="nt">"original_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Montserrat"</span><span class="p">,</span><span class="w"> </span><span class="nt">"family_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Montserrat"</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">     </span><span class="nt">"variant"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regular"</span><span class="p">,</span><span class="w"> </span><span class="nt">"variants"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"regular"</span><span class="p">]}</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">"unavailable_fonts"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Brand Sans Bold"</span><span class="p">,</span><span class="w"> </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="nt">"original_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"BrandSans-Bold"</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">     </span><span class="nt">"family_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Brand Sans"</span><span class="p">,</span><span class="w"> </span><span class="nt">"variant"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bold"</span><span class="p">,</span><span class="w"> </span><span class="nt">"variants"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"bold"</span><span class="p">]}</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Embedded fonts are reported as available with a fake URL. The code literally stores <code>"https://example.com/just-a-placeholder-url.ttf"</code> for embedded matches (<code>pptx_font_utils.py:860</code>, inside <code>get_available_and_unavailable_fonts_for_pptx</code>), because at check time nothing has been extracted yet. The real URL only appears after the next step extracts and persists the embedded file. Do not render or cache the URL from <code>/fonts/check</code> for embedded fonts.</p>
+</div>
+<p>The "packaged catalog" is <code>servers/fastapi/templates/assets/fonts.json</code>: a JSON array of 95 <code>{font_name, font_url}</code> objects whose URLs point at <code>/vendor/fonts/&lt;category&gt;/&lt;dir&gt;/&lt;file&gt;</code> (files that ship in the Next.js <code>public/</code> folder). It is loaded once with <code>@lru_cache(maxsize=1)</code> by <code>get_static_font_catalog</code> (<code>pptx_font_utils.py:162</code>) and keyed by <code>normalize_font_family_name(family).casefold()</code>. Normalization (<code>:130</code>) turns <code>_</code> and <code>-</code> into spaces, splits camelCase, and strips trailing weight/style tokens, so <code>Montserrat-SemiBold</code> and <code>MontserratSemiBold</code> both normalize to <code>Montserrat</code>. <a href="../19-themes-and-fonts/">Themes and fonts</a> covers the catalog from the frontend side.</p>
+<h2 id="step-4-replace-fonts-and-render-slide-previews">Step 4: Replace fonts and render slide previews<a class="headerlink" href="#step-4-replace-fonts-and-render-slide-previews" title="Permanent link">&para;</a></h2>
+<p>If any font is missing, the studio shows a picker per missing font. The user can upload a font file or pick a fallback from the local catalog <code>LOCAL_FONT_OPTIONS</code> (<code>CustomTemplatePage.tsx:1199</code>); a default fallback is pre-selected by <code>preferredFallbackFont</code> (<code>:208</code>), which tries the font's <code>family_name</code> and <code>original_name</code> against the catalog and otherwise takes the first catalog entry. When every font is covered, <code>fontUploadAndPreview</code> (<code>useTemplateCreation.ts:259</code>) posts multipart form data to <code>POST /api/v1/ppt/template/fonts-upload-and-slides-preview</code>:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/custom-template/hooks/useTemplateCreation.ts (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">            </span><span class="nx">uploadedFonts</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">font</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">                </span><span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"font_files"</span><span class="p">,</span><span class="w"> </span><span class="nx">font</span><span class="p">.</span><span class="nx">file</span><span class="p">);</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">                </span><span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"original_font_names"</span><span class="p">,</span><span class="w"> </span><span class="nx">font</span><span class="p">.</span><span class="nx">fontName</span><span class="p">);</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">            </span><span class="p">});</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">            </span><span class="nb">Object</span><span class="p">.</span><span class="nx">entries</span><span class="p">(</span><span class="nx">googleFontReplacementsByOriginalName</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">                </span><span class="p">([</span><span class="nx">originalFontName</span><span class="p">,</span><span class="w"> </span><span class="nx">googleFont</span><span class="p">])</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">                    </span><span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"google_font_original_names"</span><span class="p">,</span><span class="w"> </span><span class="nx">originalFontName</span><span class="p">);</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">                    </span><span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"google_font_replacement_names"</span><span class="p">,</span><span class="w"> </span><span class="nx">googleFont</span><span class="p">.</span><span class="nx">fontName</span><span class="p">);</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">                    </span><span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"google_font_urls"</span><span class="p">,</span><span class="w"> </span><span class="nx">googleFont</span><span class="p">.</span><span class="nx">fontUrl</span><span class="p">);</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">                </span><span class="p">}</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">            </span><span class="p">);</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The <code>google_font_*</code> form fields no longer carry Google Fonts. The values the studio sends are local catalog fonts (<code>fontUrl: selectedFont.sourceUrl</code>, a <code>/vendor/fonts/...</code> path, <code>CustomTemplatePage.tsx:1267</code>). The backend helpers that once called Google are now stubs that consult the packaged catalog (<code>get_google_font_file_urls</code>, <code>check_google_font_availability</code>, <code>pptx_font_utils.py:258</code> and <code>:264</code>). The field names are kept for API compatibility.</p>
+</div>
+<p>The route forwards to <code>upload_fonts_and_preview_handler</code> (<code>fonts_and_slides_preview.py:1304</code>, via the thin wrapper in <code>servers/fastapi/templates/preview.py</code>). Its steps:</p>
+<ol>
+<li><strong>Validate the pairs.</strong> <code>font_files</code> and <code>original_font_names</code> must both be present and equal in length (400 otherwise). <code>_selected_google_font_maps</code> (<code>:76</code>) applies the same rule to the replacement names and URLs and returns <code>selected_fonts {replacement_name: url}</code> plus <code>replacements {original_name: replacement_name}</code>.</li>
+<li><strong>Save, validate and trim the PPTX.</strong> The file is written to a temp dir, validated as in Step 3, then <code>_trim_pptx_to_max_slides</code> (<code>:1086</code>) removes slides beyond the cap. The cap is <code>MAX_TEMPLATE_PREVIEW_SLIDES = 50</code> (<code>:149</code>; <code>_resolve_template_preview_slide_cap</code>, <code>:1069</code>). Trimming edits <code>ppt/presentation.xml</code>, its <code>.rels</code>, and <code>[Content_Types].xml</code> directly, and writes <code>&lt;stem&gt;-first-50.pptx</code>.</li>
+<li><strong>Create a session directory.</strong> <code>session_id = uuid.uuid4()</code> and the directory <code>&lt;uploads&gt;/template-previews/&lt;session_id&gt;</code> (<code>_get_template_preview_session_dir</code>, <code>:676</code>).</li>
+<li><strong>Fix fonts in the PPTX</strong> (<code>upload_fonts_and_fix_fonts_in_pptx</code>, <code>:1503</code>):<ul>
+<li>Extract embedded <code>.fntdata</code> fonts, convert EOT to TTF when needed, and copy them to <code>&lt;app_data&gt;/fonts/embedded/&lt;random uuid&gt;/&lt;name&gt;.ttf</code> (<code>_prepare_embedded_fonts</code>, <code>:1826</code>).</li>
+<li>Save uploaded font files with the 10 MB limit (<code>read_upload_with_size_limit</code>, <code>servers/fastapi/utils/font_uploads.py:148</code>), read their name tables with fontTools (<code>get_font_details</code>), and build <code>font_mapping {original: actual}</code> and <code>font_variant_mapping {original: {variant: actual}}</code> (<code>_save_uploaded_fonts_to_temp</code>, <code>:1769</code>).</li>
+<li>Add the catalog replacements to the same maps (<code>_add_google_font_replacements_to_mapping</code>, <code>:1468</code>). Uploaded files win over catalog picks for the same original name.</li>
+<li>For fonts still not replaced, reuse previously uploaded fonts from <code>font_uploads</code> when every required variant is covered.</li>
+<li>Rewrite font names inside the PPTX XML with <code>replace_fonts_in_pptx</code> (<code>pptx_font_utils.py:1069</code>) into a file named by <code>_build_modified_pptx_filename</code>. If there is no mapping at all, the original file is used unchanged.</li>
+<li>Persist uploaded fonts permanently with <code>persist_font_file</code> (<code>font_uploads.py:321</code>), which copies the file to <code>&lt;app_data&gt;/fonts/&lt;stem&gt;_&lt;8 hex&gt;.&lt;ext&gt;</code> and inserts a <code>font_uploads</code> row.</li>
+</ul>
+</li>
+<li><strong>Collect font URLs</strong> for the response (<code>_build_upload_preview_font_urls</code>, <code>:1246</code>): embedded fonts, uploaded fonts, and every remaining family that resolves in the packaged catalog. The catalog replacement URLs from step 1 are merged last (<code>fonts.update(selected_google_fonts)</code>).</li>
+<li><strong>Render previews</strong> (<code>create_slide_previews</code>, <code>:1712</code>, which calls <code>render_pptx_slides_to_images</code>, <code>:775</code>).</li>
+<li><strong>Persist the modified PPTX</strong> into the session directory (<code>upload_presentations</code>, <code>:1751</code>) and convert every local path to a URL with <code>_public_urls_for_local_paths</code> (<code>:1924</code>), which produces <code>/app_data/&lt;relative path&gt;</code> URLs through <code>absolute_fastapi_asset_url</code>.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>replace_fonts_in_pptx</code> documents itself as "Replace fonts in a PPTX file using python-pptx", but its python-pptx loop only runs when both <code>font_mapping</code> and <code>font_variant_mapping</code> are empty. The only caller skips the call in that case (<code>fonts_and_slides_preview.py:1672</code>: <code>if font_mapping: ... else: modified_pptx_path = pptx_path</code>), so in practice every rewrite goes through the raw XML path <code>_replace_fonts_in_pptx_xml</code> (<code>pptx_font_utils.py:1038</code>). Edit that function, not the python-pptx branch.</p>
+</div>
+<h3 id="how-previews-are-rendered-and-who-converts-pptx-to-json">How previews are rendered (and who converts PPTX to JSON)<a class="headerlink" href="#how-previews-are-rendered-and-who-converts-pptx-to-json" title="Permanent link">&para;</a></h3>
+<p>Python does not parse slide geometry. Both the conversion and the rendering are tasks for the Node <strong>export runtime</strong>, a <code>runner.mjs</code> resolved from <code>EXPORT_PACKAGE_ROOT</code> or a sibling <code>presentation-export</code> directory (<code>servers/fastapi/services/export_task_service.py:129</code> to <code>:151</code>) and spawned as a child process with <code>LITEPARSE_NODE_BINARY</code> (default <code>node</code>, <code>:124</code>). The runtime is synced into the image at build time (both <code>Dockerfile</code> and <code>Dockerfile.dev</code> run <code>node scripts/sync-presentation-export.cjs --force</code>); its internals are covered in <a href="../24-export-pipeline/">PPTX and PDF export</a>.</p>
+<p><code>render_pptx_slides_to_images</code> makes two runtime calls:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/fonts_and_slides_preview.py (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>    <span class="n">pptx_document</span> <span class="o">=</span> <span class="k">await</span> <span class="n">EXPORT_TASK_SERVICE</span><span class="o">.</span><span class="n">convert_pptx_to_json</span><span class="p">(</span><span class="n">modified_pptx_path</span><span class="p">)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">pptx_document</span><span class="o">.</span><span class="n">layouts</span><span class="p">:</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"PPTX-to-JSON returned no slides"</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">slide_layouts</span> <span class="o">=</span> <span class="n">pptx_document</span><span class="o">.</span><span class="n">layouts</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="k">if</span> <span class="n">max_slides</span><span class="p">:</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">slide_layouts</span> <span class="o">=</span> <span class="n">slide_layouts</span><span class="p">[:</span><span class="n">max_slides</span><span class="p">]</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">_preview_dimensions_from_pptx</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="n">modified_pptx_path</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="p">)</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="c1"># ...</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">rendered</span> <span class="o">=</span> <span class="k">await</span> <span class="n">EXPORT_TASK_SERVICE</span><span class="o">.</span><span class="n">render_jsons_to_images</span><span class="p">(</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>        <span class="n">data</span><span class="o">=</span><span class="n">slide_layouts</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>        <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">,</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        <span class="n">fonts</span><span class="o">=</span><span class="n">fonts</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<p><code>convert_pptx_to_json</code> (<code>export_task_service.py:687</code>) sends <code>{"type": "pptx-to-json", "pptx_path": ...}</code> and returns <code>PptxToJsonDocument {layouts: list[dict]}</code> (<code>:101</code>). <code>render_jsons_to_images</code> (<code>:580</code>) sends <code>{"type": "json-to-images", "jsons": [...], "width", "height", "fonts"}</code> and expects exactly one PNG path per slide; a count mismatch is a 500 (<code>fonts_and_slides_preview.py:836</code>). The preview width is always 1280 and the height follows the PPTX aspect ratio (<code>_preview_dimensions_from_document</code>, <code>:165</code>): the code comment explains that the export runtime normalizes PPTX-to-JSON coordinates to a 1280px-wide canvas, so a 1707x960 deck is captured at 1280x720.</p>
+<p>The previews are therefore a rendering of the <strong>parsed JSON</strong>, not of PowerPoint itself. That is intentional: the vision passes later compare the JSON against these pixels, so both views agree on fonts and geometry.</p>
+<p>Each preview is copied to <code>&lt;session_dir&gt;/slide_&lt;n&gt;.png</code> (<code>create_slide_previews</code>, <code>:1741</code>). The response:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">"slide_image_urls"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="s2">"http://localhost:8000/app_data/uploads/template-previews/3f1c.../slide_1.png"</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="s2">"http://localhost:8000/app_data/uploads/template-previews/3f1c.../slide_2.png"</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="nt">"pptx_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000/app_data/uploads/template-previews/3f1c.../deck-modified.pptx"</span><span class="p">,</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span><span class="nt">"modified_pptx_url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000/app_data/uploads/template-previews/3f1c.../deck-modified.pptx"</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="nt">"fonts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nt">"Brand Sans"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000/app_data/fonts/BrandSans_1a2b3c4d.ttf"</span><span class="p">,</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="nt">"Montserrat"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/vendor/fonts/sans_serif/montserrat/Montserrat[wght].ttf"</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The exact host prefix depends on <code>absolute_fastapi_asset_url</code>; the modified PPTX filename comes from <code>_build_modified_pptx_filename</code> (<code>:1033</code>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>_build_slide_preview_html</code> (<code>:692</code>) builds a full HTML document with Tailwind, Chart.js and the datalabels plugin. It is still covered by unit tests (<code>servers/fastapi/tests/test_pptx_font_utils.py:719</code>) but no production code path calls it anymore; previews come from the JSON renderer only.</p>
+</div>
+<h3 id="the-mcp-variant">The MCP variant<a class="headerlink" href="#the-mcp-variant" title="Permanent link">&para;</a></h3>
+<p>MCP clients cannot send multipart bodies, so <code>POST /template/mcp-upload</code> (<code>template.py:1220</code>) accepts base64. Each file is decoded with <code>base64.b64decode(..., validate=True)</code> (<code>_decode_mcp_upload</code>, <code>:211</code>); the PPTX may be up to 100 MiB, each font up to 10 MiB, and the combined decoded size is capped at <code>MCP_TEMPLATE_UPLOAD_MAX_TOTAL_BYTES = 100 * 1024 * 1024</code> (<code>:102</code>), with a pre-check on the encoded length in <code>McpTemplateUploadRequest.validate_combined_upload_size</code> (<code>:181</code>). The decoded bytes are wrapped in <code>UploadFile</code> objects and passed to the same <code>upload_fonts_and_slides_preview_handler</code>. MCP tooling in general is covered in <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</p>
+<h2 id="step-5-start-creation">Step 5: Start creation<a class="headerlink" href="#step-5-start-creation" title="Permanent link">&para;</a></h2>
+<p>From the preview step, the <strong>Generate Template</strong> button opens a name/description modal and then calls <code>handleCreateTemplate</code> (<code>CustomTemplatePage.tsx:1446</code>):</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/custom-template/CustomTemplatePage.tsx (excerpt)</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nx">TemplateService</span><span class="p">.</span><span class="nx">createTemplate</span><span class="p">({</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">          </span><span class="nx">pptx_url</span><span class="o">:</span><span class="w"> </span><span class="kt">state.previewData.modified_pptx_url</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">          </span><span class="nx">slide_image_urls</span><span class="o">:</span><span class="w"> </span><span class="kt">state.previewData.slide_image_urls</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">          </span><span class="nx">fonts</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">            </span><span class="p">...</span><span class="nx">state</span><span class="p">.</span><span class="nx">previewData</span><span class="p">.</span><span class="nx">fonts</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">            </span><span class="p">...</span><span class="nx">selectedLocalFontAssets</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">          </span><span class="p">},</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">          </span><span class="nx">name</span><span class="p">,</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">          </span><span class="nx">description</span><span class="o">:</span><span class="w"> </span><span class="kt">description</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">        </span><span class="p">});</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">        </span><span class="c1">// ...</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">        </span><span class="nx">router</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s2">"/templates?tab=custom"</span><span class="p">);</span>
+</span></code></pre></div>
+<p><code>TemplateService.createTemplate</code> (<code>app/(presentation-generator)/services/api/template.ts:205</code>) posts that body to <code>/api/v1/ppt/template/async</code>. The request model is:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/template.py (excerpt)</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">InitTemplateRequest</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">pptx_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>        <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>        <span class="c1"># ...</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="p">)</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">slide_image_urls</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="c1"># ...</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="p">)</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">fonts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>    <span class="n">icon_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">IconType</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_ICON_TYPE</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="n">generation_options</span><span class="p">:</span> <span class="n">LayoutGenerationOptions</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>        <span class="n">default_factory</span><span class="o">=</span><span class="n">LayoutGenerationOptions</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<p><code>LayoutGenerationOptions</code> (<code>servers/fastapi/templates/v2/models/layouts.py:34</code>) is <code>extra="forbid", strict=True</code> with three booleans, all default <code>true</code>: <code>text_growth</code>, <code>visual_replacement</code>, <code>flexible_grouping</code>. The semantic pass always runs.</p>
+<p><code>create_template</code> (<code>template.py:1574</code>) then:</p>
+<ol>
+<li>Resolves <code>pptx_url</code> to a file with <code>resolve_app_path_to_filesystem</code>. A URL that is not a file inside Presenton's own app-data (for example a host application's attachment id) is rejected with 400 before any task is stored (<code>:1581</code>).</li>
+<li>Pre-allocates <code>template_id = str(uuid.uuid4())</code>. The template row does not exist yet; the id is reserved in the task data so retries reuse it.</li>
+<li>Inserts an <code>AsyncTaskModel</code> with <code>type="template.create"</code>, <code>status=PENDING</code>, <code>message="Queued for template creation"</code>, and <code>payload</code> equal to the request (with <code>generation_options</code> included only if the caller sent it, <code>_explicit_template_generation_options</code>, <code>:558</code>).</li>
+<li>Sets <code>task.data</code> with <code>_template_task_progress_data</code> (<code>:396</code>).</li>
+<li>Schedules <code>_run_create_template_task(task.id, get_current_owner_id())</code> on <code>BackgroundTasks</code> and returns the task.</li>
+</ol>
+<p>The progress object stored in <code>task.data</code> and returned by the async-task API has this exact shape:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">"async_task_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6f0c..."</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">"template_v2_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a1b2c3d4-..."</span><span class="p">,</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">"attempt"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">"created_layouts"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nt">"remaining_layouts"</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">"slide_layout_statuses"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="p">{</span><span class="nt">"index"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"completed"</span><span class="p">},</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="p">{</span><span class="nt">"index"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pending"</span><span class="p">}</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Quarterly Review"</span><span class="p">,</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="nt">"thumbnail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://localhost:8000/app_data/uploads/template-previews/.../slide_1.png"</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><code>thumbnail</code> is the first non-empty slide image URL (<code>_template_request_thumbnail</code>, <code>:444</code>); <code>name</code> falls back to the PPTX filename without extension via <code>_derive_template_name</code> (<code>:455</code>), and finally to <code>"Untitled template"</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The background task runs in the same process as the API, through Starlette's <code>BackgroundTasks</code>. There is no queue or worker: if the process restarts mid-creation, the task stays <code>pending</code> forever and the template row is never written. Recovery is the retry route, which only accepts tasks in <code>ERROR</code> state (Step 9). The async-task table itself is described in <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</p>
+</div>
+<h2 id="step-6-prepare-the-template-source-in-the-background">Step 6: Prepare the template source in the background<a class="headerlink" href="#step-6-prepare-the-template-source-in-the-background" title="Permanent link">&para;</a></h2>
+<p><code>_run_create_template_task</code> (<code>template.py:1482</code>) restores the owner context (<code>set_current_owner_id(owner_id)</code>, <code>set_current_owner_is_admin(False)</code>; see <a href="../25-auth-and-multiuser/">Auth and multi-user</a>), opens its own session from <code>async_session_maker</code>, re-validates <code>task.payload</code> as a <code>CreateTemplateRequest</code>, sets <code>message="Creating template"</code> and then <code>"Generating slide layouts"</code>, and calls <code>_create_template_with_task_progress</code> (<code>:1403</code>).</p>
+<p>That function begins with <code>_prepare_template_source</code> (<code>:925</code>), shared with <code>init</code>:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/template.py (excerpt)</span><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>    <span class="n">pptx_json</span> <span class="o">=</span> <span class="k">await</span> <span class="n">EXPORT_TASK_SERVICE</span><span class="o">.</span><span class="n">convert_pptx_to_json</span><span class="p">(</span><span class="n">pptx_path</span><span class="p">)</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>        <span class="n">raw_layouts</span> <span class="o">=</span> <span class="n">RawSlideLayouts</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>            <span class="n">pptx_json</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"json"</span><span class="p">)</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="p">)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="c1"># ...</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>            <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>            <span class="n">detail</span><span class="o">=</span><span class="s2">"PPTX-to-JSON export produced invalid slide layout JSON"</span><span class="p">,</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    <span class="c1"># ...</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_layouts</span><span class="o">.</span><span class="n">layouts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">slide_image_urls</span><span class="p">):</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="c1"># ...</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="n">raw_layouts</span> <span class="o">=</span> <span class="n">RawSlideLayouts</span><span class="p">(</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>            <span class="n">layouts</span><span class="o">=</span><span class="n">raw_layouts</span><span class="o">.</span><span class="n">layouts</span><span class="p">[:</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">slide_image_urls</span><span class="p">)]</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>        <span class="p">)</span>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">slide_image_urls</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw_layouts</span><span class="o">.</span><span class="n">layouts</span><span class="p">):</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>            <span class="n">detail</span><span class="o">=</span><span class="s2">"Exactly one slide image is required for each slide layout"</span><span class="p">,</span>
+</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p>The PPTX is converted a second time (the preview step's JSON is not reused). The result validates into <code>RawSlideLayouts</code>, a list of <code>RawSlideLayout {id, description, elements}</code> (<code>layouts.py:44</code>); the element models are the Template v2 element union described in <a href="../16-template-v2-format/">Template v2 format</a>. Extra slides beyond the preview count are dropped silently, because the preview step may have trimmed the deck to 50 slides; extra preview images are an error. The function returns <code>(pptx_path, raw_layouts, raw_layouts_json, fonts)</code> where <code>fonts</code> is the request's font map cleaned by <code>_coerce_font_map</code> (<code>:863</code>, keeps only non-empty string keys and values).</p>
+<p>A first progress commit with zero completed layouts follows (<code>_commit_template_task_progress</code>, <code>:664</code>).</p>
+<h2 id="step-7-certify-every-slide-four-vision-passes">Step 7: Certify every slide (four vision passes)<a class="headerlink" href="#step-7-certify-every-slide-four-vision-passes" title="Permanent link">&para;</a></h2>
+<p><code>_generate_slide_layouts_with_task_progress</code> (<code>template.py:709</code>) is the async driver. It requires one image per raw slide, creates a <code>ThreadPoolExecutor(max_workers=min(MAX_PARALLEL_SLIDE_LAYOUTS, slide_count))</code> with <code>MAX_PARALLEL_SLIDE_LAYOUTS = 10</code> (<code>servers/fastapi/templates/v2/generation.py:47</code>), and submits one <code>generate_slide_layout</code> per slide with <code>max_tokens=SLIDE_LAYOUT_GENERATION_MAX_TOKENS</code>. Each submission runs inside <code>copy_context().run</code> so context variables such as the current owner survive the thread hop. As each future completes (<code>asyncio.as_completed</code>), the slide index is added to <code>completed_layout_indices</code> and progress is committed immediately, which is how the UI can show per-slide ticks. If any slide raises, the remaining tasks are cancelled and the error propagates.</p>
+<p><code>templates.v2.generation.generate_slide_layout</code> (<code>generation.py:612</code>) is a thin public wrapper over <code>certified_generation.generate_slide_layout</code> (<code>servers/fastapi/templates/v2/certified_generation.py:3651</code>). That is the core of the chapter.</p>
+<pre class="mermaid"><code>flowchart TD
+    S["RawSlideLayout + slide PNG"] --&gt; V{"visual_replacement and candidates?"}
+    V -- yes --&gt; VP["Pass 1: VisualDataReplacementPlan"]
+    V -- no --&gt; SM
+    VP -- "fails" --&gt; SM["Pass 2: SemanticSlideManifest"]
+    VP -- "ok: apply replacements" --&gt; SM
+    SM -- "fails" --&gt; FB["_fallback_slide_layout"]
+    SM -- ok --&gt; F{"flexible_grouping?"}
+    F -- yes --&gt; FP["Pass 3: FlexibleSlidePlan"]
+    F -- no --&gt; T
+    FP --&gt; T{"text_growth?"}
+    T -- yes --&gt; TP["Pass 4: TextCapacityPlan"]
+    T -- no --&gt; C
+    TP --&gt; C["Compile: up to 4 attempts"]
+    C -- "all fail" --&gt; FB
+    C -- ok --&gt; R["_replace_content_image_urls"]
+    FB --&gt; R
+    R --&gt; OUT["Certified SlideLayout"]</code></pre>
+<p>Every pass uses the same machinery, <code>_generate_structured_with_provider_fallback</code> (<code>certified_generation.py:4305</code>): a system prompt, a user message containing the slide image (as raw bytes when the URL resolves to a local file, <code>_openai_image_part</code>, <code>:4194</code>) and a JSON payload, a JSON Schema response format with <code>strict=False</code>, Pydantic validation of the parsed JSON, and an <code>extra_validator</code> that checks semantic rules against the source. On any exception it appends the bad response and a repair prompt and tries again:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/certified_generation.py (excerpt)</span><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>    <span class="n">response_schema</span> <span class="o">=</span> <span class="n">_llm_output_json_schema</span><span class="p">(</span><span class="n">output_model</span><span class="p">)</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="n">effective_max_tokens</span> <span class="o">=</span> <span class="n">max_tokens</span> <span class="ow">or</span> <span class="n">TEMPLATE_GENERATION_MAX_COMPLETION_TOKENS</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="n">attempts_per_provider</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">validation_retries</span><span class="p">)</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">last_error</span><span class="p">:</span> <span class="ne">Exception</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="k">for</span> <span class="n">provider</span> <span class="ow">in</span> <span class="n">providers</span> <span class="ow">or</span> <span class="n">_template_structured_providers</span><span class="p">():</span>
+</span></code></pre></div>
+<p>With <code>DEFAULT_VALIDATION_RETRIES = 5</code> (<code>:59</code>) that is <strong>five attempts in total</strong> per pass, not five retries after a first try. <code>_template_structured_providers</code> (<code>:4204</code>) returns a single provider built from the configured client and model (<code>get_client(config=get_llm_config())</code>, <code>get_model()</code>), resolved through the public <code>generation</code> module so tests and integrations can monkeypatch it. Gemini models get a special visual-data schema and an extra table-encoding instruction (<code>_response_schema_for_model</code>, <code>:4257</code>; <code>_messages_for_structured_provider</code>, <code>:4271</code>).</p>
+<h3 id="pass-1-visual-data-detection">Pass 1: visual data detection<a class="headerlink" href="#pass-1-visual-data-detection" title="Permanent link">&para;</a></h3>
+<p>Only when <code>options.visual_replacement</code> is true. <code>_visual_data_generation_payload</code> (<code>:1076</code>) sends the source layout id/description, every top-level element with its <code>source_index</code> (with <code>decorative</code> stripped), and <code>visual_region_candidates</code>: every <code>container</code>, <code>group</code> or non-icon <code>image</code> element at least 24x12 px, found recursively through <code>child</code> and <code>children</code> (<code>_visual_data_region_candidates_in_element</code>, <code>:1105</code>). Each candidate carries a path such as <code>elements.3.children.1</code>, its bounds, and a content preview.</p>
+<p>The model returns a <code>VisualDataReplacementPlan</code> (<code>layouts.py:497</code>): a list of replacements discriminated by <code>kind</code> (<code>chart</code>, <code>infographic</code>, <code>table</code>, <code>text-list</code>; <code>layouts.py:173</code>, <code>:390</code>, <code>:432</code>, <code>:449</code>). Each names a primary <code>path</code>, the extra top-level <code>consumed_paths</code> it absorbs, typed data, and (except for text lists) new bounds. The intent, per <code>DETECT_VISUAL_DATA_REGIONS_SYSTEM_PROMPT</code> (<code>:180</code>), is to turn a chart that the PPTX stored as a picture or as a pile of shapes into a real editable <code>chart</code> element. <code>_apply_visual_data_replacement_plan</code> (<code>:1291</code>) swaps the elements in. If the pass fails for any reason the exception is logged and the source regions are kept.</p>
+<h3 id="pass-2-semantic-manifest-the-only-mandatory-pass">Pass 2: semantic manifest (the only mandatory pass)<a class="headerlink" href="#pass-2-semantic-manifest-the-only-mandatory-pass" title="Permanent link">&para;</a></h3>
+<p><code>_semantic_generation_payload</code> (<code>:1555</code>) sends:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">"source_layout"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"slide_4"</span><span class="p">,</span><span class="w"> </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">},</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">"available_font_families"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Brand Sans"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Montserrat"</span><span class="p">],</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nt">"indexed_elements"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="nt">"source_index"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">"element"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"vector"</span><span class="p">,</span><span class="w"> </span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">}}],</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="nt">"editable_candidates"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">    </span><span class="p">{</span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"elements.2"</span><span class="p">,</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text"</span><span class="p">,</span><span class="w"> </span><span class="nt">"current_name"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="nt">"content_preview"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Quarterly results"</span><span class="p">}</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Candidates are all <code>text</code>, <code>image</code>, <code>text-list</code>, <code>table</code>, <code>chart</code> and supported <code>infographic</code> elements at any depth (<code>_SEMANTIC_ELEMENT_TYPES</code>, <code>:1054</code>). The system prompt <code>GENERATE_SLIDE_LAYOUT_SYSTEM_PROMPT</code> (<code>:111</code>) is long and opinionated. Its key rules: partition the elements into the smallest useful reusable components; keep a repeated collection (cards, steps, metrics) together in one component; mark replaceable content <code>decorative=false</code> and scaffolding (backgrounds, logos, frames, connectors, rings) <code>decorative=true</code>; name fields in generic <code>snake_case</code> from structure, never from sample content; set <code>is_icon</code>, an icon <code>color</code> and an <code>icon_type</code> (<code>bold</code>, <code>duotone</code>, <code>fill</code>, <code>light</code>, <code>regular</code>, <code>thin</code>) on every image annotation.</p>
+<p>The reply is a <code>SemanticSlideManifest</code> (<code>layouts.py:575</code>): <code>id</code> (snake_case, at most 80 chars), <code>description</code> (10 to 300 chars), <code>components</code> with <code>element_indices</code>, and one annotation per candidate path. <code>_validate_semantic_manifest</code> (<code>:1640</code>) enforces, among other things:</p>
+<ul>
+<li>every source index is assigned to exactly one component, in ascending order within each component;</li>
+<li><code>repeated_items</code> must be null in this pass;</li>
+<li>annotation paths equal the candidate paths exactly (it reports <code>missing=</code> and <code>extra=</code> lists in the error so the repair prompt can fix them);</li>
+<li>only image annotations may carry <code>is_icon</code>; icon annotations must carry <code>color</code> and <code>icon_type</code>;</li>
+<li>charts, infographics, tables and text lists can never be decorative.</li>
+</ul>
+<p>If this pass fails after five attempts, the slide does not fail. <code>generate_slide_layout</code> logs <code>"semantic pass failed; using fidelity-preserving fallback"</code> and returns <code>_fallback_slide_layout</code> (<code>:3874</code>). <code>_fallback_semantic_manifest</code> (<code>:3593</code>) puts every element into one component called <code>slide_content</code>, makes all text, charts, tables, lists and infographics editable, keeps images' existing <code>decorative</code> flag, and derives safe identifiers from the element names.</p>
+<h3 id="pass-3-flexible-regions">Pass 3: flexible regions<a class="headerlink" href="#pass-3-flexible-regions" title="Permanent link">&para;</a></h3>
+<p>Only when <code>options.flexible_grouping</code> is true. The payload is the manifest plus indexed elements (<code>_flexible_generation_payload</code>, <code>:1729</code>). The model returns a <code>FlexibleSlidePlan</code> (<code>layouts.py:696</code>, whose regions are <code>FlexibleRegionPlan</code> objects, <code>layouts.py:663</code>): at most one region per component, each a tree of flow nodes with <code>mode</code> <code>row</code>, <code>column</code>, <code>grid</code> or <code>group</code> and at least two items, each item either a list of source indices (a leaf) or a nested <code>flow_id</code>. <code>_validate_flexible_plan</code> (<code>:2512</code>) checks geometry: repeated items must be structurally equivalent (<code>_region_items_are_structurally_equivalent</code>, <code>:2649</code>), must not overlap, and regular repeats must have regular spacing (<code>_validate_regular_repeat_geometry</code>, <code>:2814</code>). Failure leaves <code>FlexibleSlidePlan(regions=[])</code>.</p>
+<p>When compiled (<code>_compile_flow_node</code>, <code>:3088</code>), a flow becomes a <code>flex</code>, <code>grid</code> or <code>group</code> element. A repeatable flow gets elastic limits, which is what lets generation produce three cards from a four-card source:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/certified_generation.py (excerpt)</span><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>    <span class="n">min_children</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">repeatable</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">base</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"group"</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"group"</span> <span class="k">else</span> <span class="s2">"grid"</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"grid"</span> <span class="k">else</span> <span class="s2">"flex"</span><span class="p">,</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>        <span class="s2">"name"</span><span class="p">:</span> <span class="n">flow</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        <span class="s2">"position"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>        <span class="s2">"size"</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>            <span class="s2">"width"</span><span class="p">:</span> <span class="n">node_bounds</span><span class="p">[</span><span class="s2">"width"</span><span class="p">],</span>
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>            <span class="s2">"height"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">compiled_height</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>        <span class="p">},</span>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>        <span class="s2">"children"</span><span class="p">:</span> <span class="n">children</span><span class="p">,</span>
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>    <span class="p">}</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>    <span class="k">if</span> <span class="n">mode</span> <span class="o">!=</span> <span class="s2">"group"</span><span class="p">:</span>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>        <span class="n">base</span><span class="p">[</span><span class="s2">"min_children"</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_children</span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>        <span class="n">base</span><span class="p">[</span><span class="s2">"max_children"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+</span></code></pre></div>
+<p>So a repeated region with 4 source items accepts 2 to 4 items, and one with 5 accepts 3 to 5. How the schema builder exposes these limits to the content LLM is covered in <a href="../17-template-to-slide/">From template to schema to slide</a>.</p>
+<h3 id="pass-4-text-capacity">Pass 4: text capacity<a class="headerlink" href="#pass-4-text-capacity" title="Permanent link">&para;</a></h3>
+<p>Only when <code>options.text_growth</code> is true. The payload adds <code>editable_text_boxes</code> (the non-decorative text elements with their paths, <code>_text_capacity_generation_payload</code>, <code>:1746</code>). The model returns <code>TextCapacityAdjustment</code> items (<code>layouts.py:716</code>) per path: <code>left_characters</code> and <code>right_characters</code> (0 to 200), <code>top_lines</code> and <code>bottom_lines</code> (0 to 12), and a horizontal and vertical alignment. It never returns pixels; the compiler converts characters and lines into geometry and refuses growth that would collide with other content.</p>
+<p>Independently of the LLM, every editable text box gets geometry-derived length limits (<code>_normalize_existing_text_box_limits</code>, <code>:2391</code>). The estimate is deliberately crude:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/certified_generation.py (excerpt)</span><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_estimated_text_capacity</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">capacity_units</span> <span class="o">=</span> <span class="n">_estimated_text_capacity_units</span><span class="p">(</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>        <span class="n">element</span><span class="p">,</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="n">max_lines</span><span class="o">=</span><span class="n">max_lines</span><span class="p">,</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="p">)</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="n">current_text</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>        <span class="nb">str</span><span class="p">(</span><span class="n">run</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"text"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">run</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"latex"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>        <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">element</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"runs"</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="p">)</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>        <span class="nb">len</span><span class="p">(</span><span class="n">current_text</span><span class="p">),</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>        <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">capacity_units</span> <span class="o">*</span> <span class="n">TEXT_CAPACITY_SAFETY_FACTOR</span><span class="p">),</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<p>Capacity units are <code>floor(width / char_width) * line_count</code>, where a character is <code>0.58 x font_size</code> wide (<code>0.62</code> when bold) plus letter spacing (<code>_estimated_text_character_width</code>, <code>:2449</code>), the font size defaults to 18 and the line height to <code>1.2 x font_size</code> (<code>_text_capacity_geometry</code>, <code>:2483</code>), and the line count is capped at 12. The safety factor is <code>TEXT_CAPACITY_SAFETY_FACTOR = 0.85</code> (<code>:62</code>). <code>max_length</code> is only ever raised, never lowered, and never set below the length of the sample text.</p>
+<h3 id="compile-and-certify">Compile and certify<a class="headerlink" href="#compile-and-certify" title="Permanent link">&para;</a></h3>
+<p>The four plans are fed to <code>_compile_semantic_layout</code> (<code>:2895</code>) with a fallback ladder:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/certified_generation.py (excerpt)</span><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>    <span class="n">compile_attempts</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>        <span class="p">(</span><span class="n">flexible_plan</span><span class="p">,</span> <span class="n">text_capacity_plan</span><span class="p">),</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>        <span class="p">(</span><span class="n">flexible_plan</span><span class="p">,</span> <span class="n">TextCapacityPlan</span><span class="p">(</span><span class="n">adjustments</span><span class="o">=</span><span class="p">[])),</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>        <span class="p">(</span><span class="n">FlexibleSlidePlan</span><span class="p">(</span><span class="n">regions</span><span class="o">=</span><span class="p">[]),</span> <span class="n">text_capacity_plan</span><span class="p">),</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>        <span class="p">(</span><span class="n">FlexibleSlidePlan</span><span class="p">(</span><span class="n">regions</span><span class="o">=</span><span class="p">[]),</span> <span class="n">TextCapacityPlan</span><span class="p">(</span><span class="n">adjustments</span><span class="o">=</span><span class="p">[])),</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>    <span class="p">]</span>
+</span></code></pre></div>
+<p>Duplicate combinations are skipped by a JSON signature. The compiler deep-copies the source elements, writes each annotation's <code>name</code>, <code>decorative</code>, <code>is_icon</code>, <code>color</code> and <code>icon_type</code> onto the element at its path, marks unsupported infographics decorative, applies text limits and growth, and then builds components. Two details matter when you modify it:</p>
+<ul>
+<li>Component <strong>positions</strong> are the bounding box of their elements on the 1280x720 canvas, and element positions are rewritten to be local to that box (<code>_localize_top_level_element</code>, <code>:3050</code>).</li>
+<li>Components are <strong>sorted by their lowest source index</strong>, not by the model's order. The code comment explains why: the model may return components in reading order, which could lift a full-slide background above the title and hide it.</li>
+</ul>
+<p><code>_certify_compiled_layout</code> (<code>:3491</code>) then rejects the result if any component is empty, any number is non-finite, any size is not positive, any <code>min_*</code> exceeds its <code>max_*</code> (<code>_SCHEMA_LIMIT_PAIRS</code>, <code>:1066</code>), a table row length differs from its column count, a chart series length differs from its categories, a <code>flex</code>/<code>grid</code> child count falls outside <code>min_children..max_children</code>, a grid's <code>columns x rows</code> cannot hold its children, or a component has editable elements but <code>get_component_schema</code> returns no schema. If all four attempts fail, the fidelity-preserving fallback is compiled instead.</p>
+<h3 id="placeholders-for-editable-images-and-icons">Placeholders for editable images and icons<a class="headerlink" href="#placeholders-for-editable-images-and-icons" title="Permanent link">&para;</a></h3>
+<p>The last step on every path is <code>_replace_content_image_urls</code> (<code>:3886</code>), which walks every element with <code>_replace_content_image_url_in_element</code> (<code>:3902</code>):</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/certified_generation.py (excerpt)</span><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">SlideImageElement</span><span class="p">)</span> <span class="ow">and</span> <span class="n">element</span><span class="o">.</span><span class="n">decorative</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">replace_visuals</span><span class="p">:</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>            <span class="n">element</span><span class="o">.</span><span class="n">decorative</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>        <span class="k">elif</span> <span class="n">element</span><span class="o">.</span><span class="n">is_icon</span><span class="p">:</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>            <span class="n">element</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">CONTENT_ICON_PLACEHOLDER_URL</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>            <span class="n">element</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">CONTENT_IMAGE_PLACEHOLDER_URL</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>            <span class="n">element</span><span class="o">.</span><span class="n">fit</span> <span class="o">=</span> <span class="n">ImageFit</span><span class="o">.</span><span class="n">COVER</span>
+</span></code></pre></div>
+<p>Editable photos become <code>/static/images/replaceable_template_image.png</code> with <code>fit: cover</code>; editable icons become <code>/static/icons/placeholder.svg</code>. Decorative images keep their original <code>/app_data/...</code> URL. With <code>visual_replacement=false</code>, editable images are instead frozen as decorative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>generate_slide_layout</code> never raises for LLM quality problems: semantic failure and compile failure both fall back to a one-component "preserve everything" layout. A template full of <code>slide_content</code> components with generic field names is the visible symptom of a weak or non-vision model. Check the logs for <code>semantic pass failed</code> before debugging the renderer.</p>
+</div>
+<p>After all slides finish, <code>_ensure_unique_async_slide_layout_ids</code> (<code>template.py:686</code>) suffixes duplicate ids with <code>_&lt;n&gt;</code>, and <code>_with_randomized_layout_ids</code> (<code>:833</code>) appends a random <code>_1000</code> to <code>_9999</code> suffix to every layout id, so a certified <code>title_with_image_cards</code> becomes, for example, <code>title_with_image_cards_4821</code>.</p>
+<h2 id="step-8-cluster-components-and-derive-the-theme-then-persist">Step 8: Cluster components and derive the theme, then persist<a class="headerlink" href="#step-8-cluster-components-and-derive-the-theme-then-persist" title="Permanent link">&para;</a></h2>
+<p>Two jobs run concurrently with <code>asyncio.gather</code> (<code>template.py:1447</code>), each in its own single-thread executor (<code>_run_template_generation_thread</code>, <code>:809</code>).</p>
+<h3 id="merged-components">Merged components<a class="headerlink" href="#merged-components" title="Permanent link">&para;</a></h3>
+<p><code>merge_similar_components</code> (<code>certified_generation.py:550</code>) flattens every component of every layout into one indexed list and sends compact summaries (<code>_component_clustering_summary</code>, <code>:600</code>: id, description, position, content bounds, the flattened element type hierarchy, and the editable JSON schema) to the LLM with <code>CLUSTER_SIMILAR_COMPONENTS_SYSTEM_PROMPT</code> (<code>:445</code>). The reply is a <code>SimilarComponentsList</code> of index groups; <code>_validate_similarity_groups</code> (<code>:623</code>) rejects out-of-range or repeated indices. <code>_build_merged_components</code> (<code>:642</code>) turns each group into a <code>MergedComponent {id, description, variants}</code> (<code>layouts.py:81</code>), and every component not in a group becomes its own singleton.</p>
+<p>A deterministic pass then runs: <code>_deduplicate_merged_components</code> (<code>:670</code>) computes a structural signature for every variant (<code>_component_duplicate_signature</code>, <code>:740</code>) and unions groups that share a signature. The signature ignores names and min/max limits (<code>_IGNORED_DUPLICATE_SCHEMA_KEYS</code>, <code>:79</code>), ignores replaceable content values (text runs, list items, image data, chart data; <code>_CONTENT_VALUE_KEYS_BY_ELEMENT_TYPE</code>, <code>:94</code>), and snaps positions and sizes to a grid relative to the component size (<code>_DUPLICATE_POSITION_GRID_UNITS = 5</code>, <code>:78</code>).</p>
+<p>If clustering raises a <code>ValidationError</code> or <code>ValueError</code>, <code>_merge_generated_components</code> (<code>template.py:626</code>) stores an empty <code>MergedComponents(components=[])</code> and creation continues. Merged components feed the editor's insert palette and the prompted-layout generator (Step 10).</p>
+<h3 id="semantic-theme">Semantic theme<a class="headerlink" href="#semantic-theme" title="Permanent link">&para;</a></h3>
+<p><code>generate_template_theme</code> (<code>servers/fastapi/templates/v2/theme.py:246</code>) profiles every color and font in the certified layouts (<code>build_theme_profile</code>, <code>:145</code>), asks the LLM to assign roles by profile id (<code>select_theme_roles_with_llm</code>, <code>:261</code>, 2 retries, 2,000 max tokens), falls back to <code>select_theme_roles_deterministically</code> (<code>:305</code>) on any error, and materializes a <code>PresentationThemeData</code> (<code>materialize_theme</code>, <code>:357</code>). If even that raises, <code>_generate_generated_theme</code> (<code>template.py:649</code>) stores <code>theme=None</code>. The profile, the role rules and the contrast repair are explained in <a href="../19-themes-and-fonts/">Themes and fonts</a>.</p>
+<h3 id="the-row">The row<a class="headerlink" href="#the-row" title="Permanent link">&para;</a></h3>
+<p><code>_build_created_template</code> (<code>template.py:1320</code>) assembles the <code>TemplateV2</code> row with the pre-allocated id:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/template.py (excerpt)</span><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>    <span class="k">return</span> <span class="n">TemplateV2</span><span class="p">(</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>        <span class="nb">id</span><span class="o">=</span><span class="n">template_id</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()),</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>        <span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="n">_derive_template_name</span><span class="p">(</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>            <span class="n">request</span><span class="o">.</span><span class="n">pptx_url</span><span class="p">,</span> <span class="n">pptx_path</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="p">),</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>        <span class="n">description</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>        <span class="n">raw_layouts</span><span class="o">=</span><span class="n">raw_layouts_json</span><span class="p">,</span>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>        <span class="n">merged_components</span><span class="o">=</span><span class="n">merged_components</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>            <span class="n">mode</span><span class="o">=</span><span class="s2">"json"</span><span class="p">,</span> <span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span>
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>        <span class="p">),</span>
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>        <span class="n">layouts</span><span class="o">=</span><span class="n">generated_layouts</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"json"</span><span class="p">,</span> <span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>        <span class="n">theme</span><span class="o">=</span><span class="p">(</span>
+</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>            <span class="n">generated_theme</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">"json"</span><span class="p">,</span> <span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>            <span class="k">if</span> <span class="n">generated_theme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="__span-16-15"><a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>            <span class="k">else</span> <span class="kc">None</span>
+</span><span id="__span-16-16"><a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>        <span class="p">),</span>
+</span><span id="__span-16-17"><a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>        <span class="n">assets</span><span class="o">=</span><span class="p">{</span>
+</span><span id="__span-16-18"><a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>            <span class="o">**</span><span class="n">_explicit_template_generation_options</span><span class="p">(</span><span class="n">request</span><span class="p">),</span>
+</span><span id="__span-16-19"><a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>            <span class="s2">"icon_type"</span><span class="p">:</span> <span class="n">icon_type</span><span class="p">,</span>
+</span><span id="__span-16-20"><a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>            <span class="s2">"icon_weight"</span><span class="p">:</span> <span class="n">icon_type</span><span class="p">,</span>
+</span><span id="__span-16-21"><a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>            <span class="s2">"fonts"</span><span class="p">:</span> <span class="n">available_fonts</span><span class="p">,</span>
+</span><span id="__span-16-22"><a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a>            <span class="s2">"slide_image_urls"</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">slide_image_urls</span><span class="p">,</span>
+</span><span id="__span-16-23"><a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a>            <span class="s2">"images"</span><span class="p">:</span> <span class="n">_collect_image_urls_from_layouts</span><span class="p">(</span><span class="n">raw_layouts_json</span><span class="p">),</span>
+</span><span id="__span-16-24"><a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a>        <span class="p">},</span>
+</span><span id="__span-16-25"><a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<p><code>icon_type</code> is the most common <code>icon_type</code> across all certified icon images (<code>_most_common_icon_type_in_layouts</code>, <code>:520</code>), falling back to the request's <code>icon_type</code>. <code>assets.images</code> lists every distinct <code>image.data</code> URL found in the <strong>raw</strong> layouts. <code>raw_layouts</code> is kept so a single slide can be re-certified later without re-uploading the PPTX. The column layout of <code>template_v2</code> is described in <a href="../16-template-v2-format/">Template v2 format</a>.</p>
+<p>On success the task becomes <code>COMPLETED</code> with <code>message="Template creation completed"</code>. On any exception it becomes <code>ERROR</code> with <code>message="Template creation failed"</code> and <code>error</code> set to an <code>APIErrorModel</code> dump; non-HTTP exceptions are reduced to a generic 500 <code>"Template creation failed"</code> so internal messages do not leak.</p>
+<h2 id="step-9-track-progress-and-retry">Step 9: Track progress and retry<a class="headerlink" href="#step-9-track-progress-and-retry" title="Permanent link">&para;</a></h2>
+<p>The template library polls. <code>useTemplateSummaries({ includeProcessingTemplateTasks: true })</code> (<code>app/(presentation-generator)/hooks/useTemplateSummaries.ts</code>) loads default and custom templates with two <code>GET /template/all?page_size=100&amp;default=...</code> calls, plus <code>GET /api/v1/async-tasks?type=template.create&amp;order_by=created_at&amp;order=desc&amp;limit=50&amp;offset=0&amp;created_at=&lt;one hour ago&gt;</code> (<code>services/api/template.ts:219</code>). It keeps tasks whose status is <code>pending</code> or <code>error</code> and re-polls every 30 seconds (<code>setInterval(..., 30000)</code>), refreshing the template list whenever a pending task was seen. The panel (<code>(dashboard)/templates/components/TemplatePanel.tsx:69</code>) offers a retry button whose handler calls the hook's <code>retryTemplateTask</code>, which in turn calls <code>TemplateService.retryTemplateCreateTask</code> (<code>useTemplateSummaries.ts:194</code>).</p>
+<p><code>retry_create_template</code> (<code>template.py:1626</code>) only accepts a task that exists (404), has type <code>template.create</code> (400), is in <code>ERROR</code> (409), still has a dict payload (409), and whose reserved <code>template_v2_id</code> does not already exist as a row (409 <code>"Template has already been created"</code>). It resets the same task to <code>PENDING</code>, increments <code>attempt</code>, and schedules the same background function. The whole PPTX is processed again from scratch.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>GET /template/all</code> filters out any template whose <code>layouts</code> is empty (<code>if layout_count == 0: continue</code>, <code>template.py:1164</code>), and paginates in Python after loading every row. A row created by <code>init</code> stays invisible in the library until at least one layout is patched in. The frontend applies the same rule again in <code>filterTemplatesWithLayouts</code>.</p>
+</div>
+<h2 id="step-10-the-incremental-routes">Step 10: The incremental routes<a class="headerlink" href="#step-10-the-incremental-routes" title="Permanent link">&para;</a></h2>
+<p>These routes exist for the per-slide flow, for the editor, and for API users who want control.</p>
+<p><strong><code>POST /template/init</code></strong> (<code>template.py:1277</code>) runs <code>_prepare_template_source</code> and immediately inserts a row with <code>layouts=None</code> and assets <code>{pptx_url, icon_type, icon_weight, fonts, slide_image_urls, images, layout_indexes: []}</code>. It returns the id as a JSON string.</p>
+<p><strong><code>POST /template/layouts/create</code></strong> (<code>:1789</code>) accepts <code>index</code> or <code>indices</code> (never both; at most <code>MAX_PARALLEL_SLIDE_LAYOUTS</code> = 10, unique, non-negative; <code>CreateTemplateLayoutsRequest._validate_indices</code>, <code>:241</code>). It loads <code>raw_layouts</code>, checks each index is in range and has a stored slide image, merges saved and override generation options (<code>_template_generation_options</code>, <code>:564</code>), and runs <code>_generate_indexed_slide_layouts</code> (<code>:1071</code>) in a thread. It <strong>returns</strong> <code>{layouts: [{index, layout}]}</code> but does not save anything.</p>
+<p><strong><code>PATCH /template/{id}/layouts</code></strong> (<code>:1929</code>) saves. It serializes concurrent patches to the same template with a per-template <code>asyncio.Lock</code> (<code>_get_template_layout_patch_lock</code>, <code>:916</code>) so out-of-order saves from parallel slide generations cannot overwrite each other. <code>_merge_template_layout_items</code> (<code>:1031</code>) keys existing layouts by their original slide index (stored in <code>assets.layout_indexes</code>), inserts or replaces the patched ones, sorts by index, and re-validates <code>SlideLayouts</code>. Duplicate layout ids are rejected by the <code>SlideLayouts</code> validator (test <code>test_patch_template_slide_layout_rejects_duplicate_layout_ids</code>, <code>test_template_api.py:1633</code>).</p>
+<p><strong><code>POST /template/generate-blocks</code></strong> (<code>:1874</code>) runs the Step 8 clustering and theme jobs on the saved layouts and stores <code>merged_components</code> and, if non-null, <code>theme</code>.</p>
+<p><strong><code>POST /template/layouts/generate</code></strong> (<code>:1700</code>) creates a brand-new layout from a text prompt. <code>generate_prompted_slide_layout</code> (<code>generation.py:631</code>) ranks existing layouts and merged components by how many prompt words (longer than two characters) appear in their ids and descriptions, sends at most 4 reference layouts and 8 reusable components (<code>PROMPTED_LAYOUT_MAX_REFERENCE_LAYOUTS</code>, <code>PROMPTED_LAYOUT_MAX_REUSABLE_COMPONENTS</code>, <code>:114</code>), trims the context to 160,000 characters, and asks for one <code>SlideLayout</code> under <code>GENERATE_PROMPTED_TEMPLATE_LAYOUT_SYSTEM_PROMPT</code> (<code>:88</code>). The extra validator requires a snake_case id matching <code>^[a-z][a-z0-9_]{2,79}$</code> that is not already used, at least one component, and at least one <code>decorative=false</code> element. Images marked editable get the standard placeholders. The result is a draft returned to the caller; the editor must save it.</p>
+<p><strong><code>PATCH /template/{id}</code></strong> (<code>:1976</code>) updates only the fields present in the body (<code>model_fields_set</code>): <code>name</code> (blank is 400), <code>description</code>, <code>merged_components</code> (validated), <code>layouts</code> (validated, <code>layout_indexes</code> recomputed, <code>icon_type</code> re-derived), <code>theme</code>, <code>thumbnail</code> (stored in <code>assets.thumbnail</code>; blank removes it), <code>fonts</code> (stored in <code>assets.fonts</code>), <code>icon_type</code>. An <code>id</code> in the body must match the path (400). A body with nothing to update returns the template without writing.</p>
+<div class="admonition note">
+<p class="admonition-title">The preview tool that production does not use</p>
+<p><code>templates/v2/tools.py</code> defines <code>PreviewSlideTool</code>, an LLM tool named <code>previewSlide</code> that renders a candidate <code>SlideLayout</code> to a 1280x720 PNG through the export runtime's <code>render_json_to_image</code> and saves debug artifacts to <code>&lt;app_data&gt;/preview_slide/&lt;slide&gt;/&lt;n&gt;.json|png</code>. <code>_generate_preview_candidate</code> (<code>generation.py:852</code>) implements a loop that lets the model call it at most twice (<code>MAX_PREVIEW_SLIDE_CALLS = 2</code>). In this snapshot that loop is exercised only by unit tests (<code>servers/fastapi/tests/unit/test_templates_v2_generation.py:141</code>); certified generation uses structured responses only, which matches the "Tool calling: Optional" row in <code>docs/template-v2.md</code>.</p>
+</div>
+<h2 id="step-11-the-template-editor">Step 11: The template editor<a class="headerlink" href="#step-11-the-template-editor" title="Permanent link">&para;</a></h2>
+<p>After creation, the library links to <code>/template-preview?templateV2Id=&lt;id&gt;</code> (<code>TemplatePanel.tsx:59</code>). <code>TemplatePreviewClient.tsx</code> loads the template with <code>GET /template/{id}</code> (<code>TemplateService.getTemplateDetails</code>, <code>services/api/template.ts:142</code>, which strips an optional <code>template-v2-</code> prefix from the id) and the theme with <code>GET /template/{id}/theme</code> (<code>TemplatePreviewClient.tsx:236</code>). Editing is allowed only when <code>!template.is_default</code> (<code>canEditTemplate</code>, <code>:275</code>).</p>
+<p>What can be edited, and how it is saved:</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Where</th>
+<th>Backend call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Move, resize, restyle elements on the Konva canvas</td>
+<td><code>handlePreviewLayoutChange</code> (<code>:405</code>)</td>
+<td>none until Save</td>
+</tr>
+<tr>
+<td>Edit layout <code>id</code> and <code>description</code></td>
+<td><code>handleLayoutMetadataChange</code> (<code>:451</code>)</td>
+<td>none until Save</td>
+</tr>
+<tr>
+<td>Edit a schema field's sample value, its min/max constraint, or toggle <code>decorative</code></td>
+<td><code>handleSchemaFieldChange</code> (<code>:493</code>), <code>handleSchemaConstraintChange</code> (<code>:512</code>), <code>handleSchemaDecorationChange</code> (<code>:529</code>)</td>
+<td>none until Save</td>
+</tr>
+<tr>
+<td>Preview content density (fill text and repeated arrays to min or max)</td>
+<td><code>applyContentDensity</code></td>
+<td>none (preview only)</td>
+</tr>
+<tr>
+<td>Duplicate a layout</td>
+<td><code>duplicateActiveLayout</code> (id suffixed <code>-copy</code>)</td>
+<td>none until Save</td>
+</tr>
+<tr>
+<td>Generate a new slide from a prompt</td>
+<td><code>TemplatePreviewClient.tsx:648</code></td>
+<td><code>POST /template/layouts/generate</code></td>
+</tr>
+<tr>
+<td>Re-certify the active slide from the original PPTX</td>
+<td><code>reconstructActiveLayout</code> (<code>:783</code>)</td>
+<td><code>POST /template/layouts/create</code></td>
+</tr>
+<tr>
+<td>Save</td>
+<td><code>saveTemplate</code> (<code>:1046</code>)</td>
+<td><code>PATCH /template/{id}</code> with the full template, edited <code>layouts</code> and <code>layout_count</code></td>
+</tr>
+<tr>
+<td>Delete</td>
+<td><code>:1139</code></td>
+<td><code>DELETE /template/{id}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Before saving, the editor dispatches <code>COMMIT_TEMPLATE_V2_INLINE_TEXT_EVENT</code> and waits one tick so an open inline text editor flushes its pending change (<code>:1064</code>). <code>buildTemplateSavePayload</code> (<code>template-preview/components/editor/templatePreviewUtils.ts:1179</code>) clones the loaded template record and replaces <code>layouts</code>, <code>name</code>, <code>id</code> and <code>layout_count</code>. Every <code>TemplateService</code> write invalidates the 5-minute theme cache for that template (<code>invalidateTemplateTheme</code>). The Konva canvas and inline text editing are the same components the slide editor uses; see <a href="../22-slide-editor/">Slide editor</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The studio also contains a second, per-slide creation path in <code>useTemplateCreation.ts</code> (<code>generateTemplateV2</code>, <code>:446</code>): <code>init</code>, then one <code>layouts/create</code> call per slide (<code>TEMPLATE_V2_LAYOUT_BATCH_SIZE = 1</code>, awaited sequentially), a <code>PATCH .../layouts</code> after each, then <code>generate-blocks</code>. In this snapshot <code>CustomTemplatePage</code> destructures only <code>retrySlide</code> from that part of the hook, so the button path is the async route. If you wire <code>initTemplateCreation</code> back in, remember that it processes slides one at a time and never benefits from the ten-thread pool.</p>
+</div>
+<h2 id="step-12-turning-a-stored-template-into-a-bundled-template">Step 12: Turning a stored template into a bundled template<a class="headerlink" href="#step-12-turning-a-stored-template-into-a-bundled-template" title="Permanent link">&para;</a></h2>
+<p>Two Node scripts turn a stored template into the bundle format that the 16 built-in templates under <code>templates/&lt;id&gt;/template.json</code> use. Both are pure file transformations; neither talks to the API.</p>
+<h3 id="scriptsconvert-templatemjs"><code>scripts/convert-template.mjs</code><a class="headerlink" href="#scriptsconvert-templatemjs" title="Permanent link">&para;</a></h3>
+<p><code>node scripts/convert-template.mjs &lt;input.json&gt; [--output &lt;path&gt;] [--app-data &lt;dir&gt;]</code> converts a template JSON (for example a <code>GET /template/{id}</code> response saved to disk) into the bundle format:</p>
+<ol>
+<li><code>buildTargetShape</code> (<code>scripts/convert-template.mjs:81</code>) keeps exactly <code>id</code>, <code>name</code>, <code>description</code>, <code>thumbnail</code>, <code>merged_components</code>, <code>layouts</code>, <code>fonts</code> (<code>TOP_LEVEL_KEYS</code>, <code>:17</code>). <code>layouts</code> and <code>merged_components</code> may be arrays or wrapped objects (<code>{layouts: [...]}</code>, <code>{components: [...]}</code>) and are unwrapped. <code>id</code> falls back to the output directory name; <code>thumbnail</code> falls back to the first <code>assets.slide_image_urls</code> entry; <code>fonts</code> comes from <code>assets.fonts</code> or <code>fonts</code>.</li>
+<li><code>replaceEditableImages</code> (<code>:116</code>) rewrites every non-decorative image's <code>data</code> to the icon or image placeholder, exactly like Step 7.</li>
+<li><code>planAssets</code> (<code>:206</code>) finds every string that points into app-data (<code>/app_data/...</code> URLs, <code>app_data/...</code> paths, or absolute paths under the app-data root) or into a sibling <code>static/</code> folder, verifies each file exists, and plans a copy into <code>&lt;output dir&gt;/static/</code>. The thumbnail is renamed <code>thumbnail.&lt;ext&gt;</code>; name collisions get a 12-character SHA-256 suffix. Every planned path is checked with <code>assertInside</code> so a crafted path cannot escape the root.</li>
+<li><code>rewriteStrings</code> (<code>:257</code>) replaces those strings with <code>static/&lt;name&gt;</code>, the files are copied, stale files in <code>static/</code> are deleted (<code>cleanStaticDirectory</code>, <code>:268</code>), and the JSON is written with two-space indentation.</li>
+</ol>
+<p>At startup, <code>default_templates.py</code> rewrites <code>static/...</code> back to <code>/app_data/templates/&lt;id&gt;/static/...</code> and copies the folder into app-data; see <a href="../17-template-to-slide/">From template to schema to slide</a>.</p>
+<h3 id="scriptsconvert-presentation-templatemjs"><code>scripts/convert-presentation-template.mjs</code><a class="headerlink" href="#scriptsconvert-presentation-templatemjs" title="Permanent link">&para;</a></h3>
+<p><code>node scripts/convert-presentation-template.mjs &lt;presentation.json&gt; [--output] [--app-data] [--id] [--name] [--description] [--thumbnail]</code> starts from a <strong>presentation</strong> detail response instead. This lets a designer tweak slides in the normal editor and fold those edits back into the template. <code>buildTemplateFromPresentation</code> (<code>scripts/convert-presentation-template.mjs:133</code>):</p>
+<ol>
+<li>Reads the presentation's <code>layout</code> (the copied template payload), its <code>merged_components</code>, and its <code>slides</code>.</li>
+<li>Collects each slide's edited <code>ui</code> tree keyed by its <code>layout</code> id; two slides with conflicting edits of the same layout are an error.</li>
+<li>For each edited layout, finds every original component in the original merged catalog by deep equality (<code>findVariant</code>, <code>:80</code>; exactly one match required), replaces that variant with the edited component, marks removed components, and appends components that were added in the editor as new singleton groups.</li>
+<li>Verifies every final component is present in the final catalog, then hands the result to <code>convertTemplateData</code> for asset packaging.</li>
+</ol>
+<p>The scripts are covered by <code>scripts/convert-template.test.mjs</code> and <code>scripts/convert-presentation-template.test.mjs</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>TOP_LEVEL_KEYS</code> in <code>convert-template.mjs</code> does not include <code>theme</code>, yet every bundled <code>template.json</code> in this snapshot has a <code>theme</code> block. Running the converter on a template drops its theme; you have to add it back by hand (or extend <code>buildTargetShape</code>) before committing a bundle, otherwise <code>get_template_theme</code> will derive a deterministic theme at first request.</p>
+</div>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The studio does three requests: <code>POST /fonts/check</code>, <code>POST /template/fonts-upload-and-slides-preview</code> (font fixing, PPTX-to-JSON and Chromium previews in the Node export runtime, capped at 50 slides), and <code>POST /template/async</code>, which runs creation as an in-process background task with per-slide progress in <code>async_task.data</code>.</li>
+<li>Each slide is certified by up to four schema-validated vision passes (visual data, semantic manifest, flexible regions, text capacity), each with five total attempts, followed by a four-step compile ladder and a fidelity-preserving fallback, all with up to 10 slides in parallel.</li>
+<li>Text limits come from a character-width heuristic with a 0.85 safety factor; repeatable flows accept from half to all of their source items.</li>
+<li>Component clustering and the semantic theme run in parallel after certification; both degrade gracefully (empty catalog, deterministic or no theme).</li>
+<li>Incremental routes (<code>init</code>, <code>layouts/create</code>, <code>PATCH .../layouts</code>, <code>generate-blocks</code>, <code>layouts/generate</code>) let the editor re-certify or invent single slides, and built-in templates are read-only.</li>
+<li><code>convert-template.mjs</code> and <code>convert-presentation-template.mjs</code> package stored templates and edited decks into <code>templates/&lt;id&gt;/template.json</code> plus <code>static/</code> assets.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../19-themes-and-fonts/">Themes and fonts</a> to see how the theme derived here and the font maps collected here are stored, overridden and applied in the browser.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../17-template-to-slide/" class="md-footer__link md-footer__link--prev" aria-label="Previous: From template to schema to slide">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                From template to schema to slide
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../19-themes-and-fonts/" class="md-footer__link md-footer__link--next" aria-label="Next: Themes and fonts">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Themes and fonts
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

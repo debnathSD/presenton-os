@@ -1,0 +1,3973 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/28-ci-tests-security/">
+      
+      
+        <link rel="prev" href="../27-electron/">
+      
+      
+        <link rel="next" href="../../superset/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>CI, tests, security - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#ci-tests-security" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CI, tests, security
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-workflow-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The workflow inventory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-codeqlyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: codeql.yml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-test-allyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: test-all.yml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: test-all.yml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-test-repository-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 test-repository-tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-test-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 test-fastapi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-test-nextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 test-nextjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-running-the-same-checks-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Running the same checks locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-export-runtime-regressionsyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: export-runtime-regressions.yml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-the-release-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: The release workflows
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-fastapi-test-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The FastAPI test suite
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: The FastAPI test suite">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-shared-fixtures-testsconftestpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Shared fixtures (tests/conftest.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-the-regression-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 The regression snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-running-a-subset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Running a subset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-the-node-test-suites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: The Node test suites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: The Node test suites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-serversnextjstests-node-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 servers/nextjs/tests (node --test)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-cypress-component-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Cypress component tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-root-scripts-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Root scripts/ tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-electron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Electron
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-what-the-suites-cover-mapped-to-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: What the suites cover, mapped to features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-security-hardening-catalogue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Security hardening catalogue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: Security hardening catalogue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-path-traversal-and-file-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Path traversal and file access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-ssrf-and-outbound-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 SSRF and outbound requests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-svg-and-html-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 SVG and HTML sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-font-descriptor-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Font descriptor validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-dependency-pinning-and-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Dependency pinning and overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-log-safety-escaping-not-redaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Log safety (escaping, not redaction)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#97-file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.7 File permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#98-mime-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.8 MIME handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#99-auth-on-docs-and-openapijson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.9 Auth on /docs and /openapi.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#910-codeql" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.10 CodeQL
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-contributor-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Contributor checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-workflow-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The workflow inventory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-codeqlyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: codeql.yml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-test-allyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: test-all.yml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: test-all.yml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-test-repository-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 test-repository-tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-test-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 test-fastapi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-test-nextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 test-nextjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-running-the-same-checks-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Running the same checks locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-export-runtime-regressionsyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: export-runtime-regressions.yml
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-the-release-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: The release workflows
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-fastapi-test-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The FastAPI test suite
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: The FastAPI test suite">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-shared-fixtures-testsconftestpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Shared fixtures (tests/conftest.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-the-regression-snapshot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 The regression snapshot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-running-a-subset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Running a subset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-the-node-test-suites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: The Node test suites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: The Node test suites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-serversnextjstests-node-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 servers/nextjs/tests (node --test)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-cypress-component-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Cypress component tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-root-scripts-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Root scripts/ tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-electron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Electron
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-what-the-suites-cover-mapped-to-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: What the suites cover, mapped to features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-security-hardening-catalogue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Security hardening catalogue
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: Security hardening catalogue">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-path-traversal-and-file-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Path traversal and file access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-ssrf-and-outbound-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 SSRF and outbound requests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-svg-and-html-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 SVG and HTML sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-font-descriptor-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Font descriptor validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-dependency-pinning-and-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Dependency pinning and overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-log-safety-escaping-not-redaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Log safety (escaping, not redaction)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#97-file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.7 File permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#98-mime-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.8 MIME handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#99-auth-on-docs-and-openapijson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.9 Auth on /docs and /openapi.json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#910-codeql" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.10 CodeQL
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-contributor-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Contributor checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="ci-tests-security">CI, tests, security<a class="headerlink" href="#ci-tests-security" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>.github/workflows/*.yml</code>, <code>.github/workflows/README.md</code>, <code>test-local.sh</code>, <code>package.json</code>, <code>servers/fastapi/pyproject.toml</code>, <code>servers/fastapi/tests/**</code>, <code>servers/nextjs/package.json</code>, <code>servers/nextjs/tests/*.test.mjs</code>, <code>servers/nextjs/cypress/security/*</code>, <code>scripts/*.test.mjs</code>, <code>scripts/glob-security-checks.cjs</code>, <code>servers/fastapi/utils/{safe_logging,validators,mime_types,path_helpers,file_utils,asset_directory_utils,export_permissions}.py</code>, <code>servers/nextjs/app/api/update-svg/route.ts</code>, <code>nginx.conf</code>, <code>CONTRIBUTING.md</code>  ·  <strong>Builds on:</strong> <a href="../25-auth-and-multiuser/">Auth and multi-user</a>, <a href="../26-docker-and-deployment/">Docker build and deployment</a>, <a href="../27-electron/">Electron desktop app</a>  ·  <strong>Time:</strong> ~40 min</p>
+</div>
+<p>This chapter is the quality and safety layer of the repository. It first walks through every GitHub Actions workflow (what triggers it, what it runs, what it proves, which secrets it touches), then the three test suites (FastAPI pytest, Next.js <code>node --test</code> plus Cypress, and the root <code>scripts/</code> tests) and how to run each locally. The second half is a catalogue of the security hardening found in the code, each item with its <code>path:line</code>, so that when you change a file you know which protection you are touching. It ends with the contributor checklist from <code>CONTRIBUTING.md</code>.</p>
+<h2 id="step-1-the-workflow-inventory">Step 1: The workflow inventory<a class="headerlink" href="#step-1-the-workflow-inventory" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+  subgraph Triggers
+    P["push to main"]
+    PR["pull_request to main"]
+    REL["release published"]
+    BR["push to electron-linux-ubuntu22"]
+    MAN["workflow_dispatch"]
+  end
+  P --&gt; T["test-all.yml"]
+  PR --&gt; T
+  P --&gt; C["codeql.yml"]
+  PR --&gt; C
+  P --&gt; X["export-runtime-regressions.yml (path filtered)"]
+  PR --&gt; X
+  REL --&gt; D["docker-release.yml"]
+  REL --&gt; R["sync-releaes-to-r2.yml"]
+  BR --&gt; L["electron-linux-ubuntu22.yml"]
+  MAN --&gt; T
+  MAN --&gt; C
+  MAN --&gt; X
+  MAN --&gt; D
+  MAN --&gt; L</code></pre>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Triggers</th>
+<th>Jobs</th>
+<th>Secrets and permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>codeql.yml</code></td>
+<td>push to <code>main</code> and <code>fix/security-and-vulnerabilities</code>, PR to <code>main</code>, manual</td>
+<td><code>analyze</code> matrix over <code>actions</code>, <code>javascript-typescript</code>, <code>python</code></td>
+<td><code>security-events: write</code>, <code>actions: read</code>; no secrets</td>
+</tr>
+<tr>
+<td><code>test-all.yml</code></td>
+<td>push to <code>main</code>, PR to <code>main</code>, manual</td>
+<td><code>test-repository-tools</code>, <code>test-fastapi</code>, <code>test-nextjs</code></td>
+<td><code>contents: read</code>; no secrets</td>
+</tr>
+<tr>
+<td><code>export-runtime-regressions.yml</code></td>
+<td>push to <code>main</code> and the security branch, PR to <code>main</code>, only when <code>scripts/**</code>, <code>package.json</code>, <code>package-lock.json</code> or the workflow change; manual</td>
+<td><code>test</code> matrix over <code>ubuntu-latest</code>, <code>windows-latest</code></td>
+<td><code>contents: read</code>; no secrets</td>
+</tr>
+<tr>
+<td><code>docker-release.yml</code></td>
+<td><code>release: published</code>, manual</td>
+<td><code>build-and-push</code></td>
+<td><code>packages: write</code>; <code>GITHUB_TOKEN</code> for GHCR</td>
+</tr>
+<tr>
+<td><code>electron-linux-ubuntu22.yml</code></td>
+<td>push to <code>electron-linux-ubuntu22</code>, manual</td>
+<td><code>build-and-release</code></td>
+<td><code>RELEASE_REPO_TOKEN</code></td>
+</tr>
+<tr>
+<td><code>sync-releaes-to-r2.yml</code></td>
+<td><code>release: published</code></td>
+<td><code>upload</code> in environment <code>sync_r2</code></td>
+<td><code>GITHUB_TOKEN</code>, <code>R2_ACCESS_KEY</code>, <code>R2_SECRET_KEY</code>, <code>R2_ACCOUNT_ID</code></td>
+</tr>
+</tbody>
+</table>
+<p>Every workflow declares a top-level <code>permissions:</code> block that starts from <code>contents: read</code>, so the default <code>GITHUB_TOKEN</code> is read-only unless a job widens it.</p>
+<div class="admonition info">
+<p class="admonition-title">Not part of upstream</p>
+<p>The mirror that hosts this tutorial also contains <code>.github/workflows/docs-pages.yml</code>, which builds the MkDocs site under <code>tutorial/</code>. It is not part of the Presenton source and is not discussed further.</p>
+</div>
+<h2 id="step-2-codeqlyml">Step 2: <code>codeql.yml</code><a class="headerlink" href="#step-2-codeqlyml" title="Permanent link">&para;</a></h2>
+<p>Static analysis for three languages (<code>.github/workflows/codeql.yml:17</code> to <code>:55</code>):</p>
+<div class="language-yaml highlight"><span class="filename">.github/workflows/codeql.yml (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">      </span><span class="nt">fail-fast</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">actions</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">javascript-typescript</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">python</span><span class="p p-Indicator">]</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Checkout source</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">          </span><span class="nt">persist-credentials</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Initialize CodeQL</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github/codeql-action/init@v4</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">          </span><span class="nt">languages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.language }}</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">          </span><span class="nt">build-mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">none</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">          </span><span class="nt">queries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security-extended</span>
+</span></code></pre></div>
+<ul>
+<li><code>build-mode: none</code> means CodeQL extracts source without compiling. Nothing is built or published.</li>
+<li><code>queries: security-extended</code> runs the broader security query pack, not only the default.</li>
+<li><code>persist-credentials: false</code> keeps the checkout token out of <code>.git/config</code>.</li>
+<li>Results are uploaded to code scanning and also kept as a <code>codeql-&lt;language&gt;</code> SARIF artifact for 14 days (<code>:49</code> to <code>:55</code>).</li>
+<li><code>concurrency: codeql-&lt;workflow&gt;-&lt;ref&gt;</code> with <code>cancel-in-progress: true</code> (<code>:13</code> to <code>:15</code>) cancels superseded runs on the same branch.</li>
+</ul>
+<p>The <code>actions</code> language scans the workflow files themselves. Separately, third-party actions in other workflows are pinned by commit SHA (for example <code>astral-sh/setup-uv@d0cc045d...</code> in <code>test-all.yml:63</code> and every <code>docker/*</code> action in <code>docker-release.yml:32</code> to <code>:62</code>).</p>
+<h2 id="step-3-test-allyml">Step 3: <code>test-all.yml</code><a class="headerlink" href="#step-3-test-allyml" title="Permanent link">&para;</a></h2>
+<p>Three independent jobs on <code>ubuntu-latest</code> (<code>.github/workflows/test-all.yml:13</code> to <code>:111</code>).</p>
+<h3 id="31-test-repository-tools">3.1 <code>test-repository-tools</code><a class="headerlink" href="#31-test-repository-tools" title="Permanent link">&para;</a></h3>
+<p>Node 20, <code>npm ci</code> at the repository root, then:</p>
+<ol>
+<li><code>npm test</code>: runs <code>test:template-converter</code> and seven other <code>node --test</code> files under <code>scripts/</code> (<code>package.json:8</code>).</li>
+<li><code>npm run sync:presentation-export</code>: downloads the pinned <code>@presenton/export-core</code> (<code>presentationExportVersion: v1.0.51</code>, <code>package.json:4</code>) into <code>presentation-export/</code>.</li>
+<li><code>npm run check:presentation-export</code>: <code>sync-presentation-export.cjs --check-only</code> validates it without downloading.</li>
+</ol>
+<p>This proves the template converters still work and that the export runtime version pinned for Docker can actually be installed.</p>
+<h3 id="32-test-fastapi">3.2 <code>test-fastapi</code><a class="headerlink" href="#32-test-fastapi" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><span class="filename">.github/workflows/test-all.yml (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="w">    </span><span class="nt">env</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">      </span><span class="nt">APP_DATA_DIRECTORY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/presenton-app-data</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">      </span><span class="nt">TEMP_DIRECTORY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/tmp/presenton-temp</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="nt">DATABASE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite+aiosqlite:////tmp/presenton-test.db</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">      </span><span class="nt">DISABLE_ANONYMOUS_TRACKING</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">DISABLE_IMAGE_GENERATION</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+</span></code></pre></div>
+<p>Python 3.11 (matching <code>requires-python = "&gt;=3.11,&lt;3.12"</code>, <code>servers/fastapi/pyproject.toml:11</code>), <code>uv sync --locked --dev</code> (fails if <code>uv.lock</code> is out of date), create the two directories, then <code>uv run --locked python -m pytest --verbose --tb=short</code> (<code>:68</code> to <code>:75</code>). The workflow configures no LLM key or other secret, so the suite has to pass without network access to a model.</p>
+<h3 id="33-test-nextjs">3.3 <code>test-nextjs</code><a class="headerlink" href="#33-test-nextjs" title="Permanent link">&para;</a></h3>
+<p>Node 20, <code>npm ci</code> in <code>servers/nextjs</code>, then in order: <code>npm test</code> (which is <code>node --test</code>, <code>servers/nextjs/package.json</code> script <code>test</code>), <code>npm run lint</code> (<code>eslint .</code>), <code>npm run build</code> with <code>NEXT_PUBLIC_FAST_API=http://localhost:8000</code> and <code>NEXT_PUBLIC_URL=http://localhost:3000</code>, and <code>npx cypress run --component --browser electron</code> (<code>:95</code> to <code>:111</code>). A production build failing (type errors, bad imports) fails CI even if no test covers the file.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: Node versions differ between workflows</p>
+<p><code>test-all.yml</code> uses Node 20, while <code>export-runtime-regressions.yml</code>, the Linux Electron build, and the Docker image use Node 22. A syntax or API only available in Node 22 can pass the export regression job and fail <code>test-all</code>, or the reverse.</p>
+</div>
+<h3 id="34-running-the-same-checks-locally">3.4 Running the same checks locally<a class="headerlink" href="#34-running-the-same-checks-locally" title="Permanent link">&para;</a></h3>
+<p><code>test-local.sh</code> reproduces the workflow (<code>test-local.sh:32</code> to <code>:61</code>). It requires <code>uv</code>, <code>npm</code> and <code>node</code> on <code>PATH</code>, runs the three groups through <code>run_check</code>, counts failures instead of stopping at the first, and exits non-zero if any failed. The FastAPI group uses <code>/tmp/presenton-tests/{app-data,temp}</code> and <code>sqlite+aiosqlite:////tmp/presenton-tests/test.db</code>. <code>.github/workflows/README.md</code> documents running each group on its own with the same commands.</p>
+<h2 id="step-4-export-runtime-regressionsyml">Step 4: <code>export-runtime-regressions.yml</code><a class="headerlink" href="#step-4-export-runtime-regressionsyml" title="Permanent link">&para;</a></h2>
+<p>A narrow, cross-platform job (<code>.github/workflows/export-runtime-regressions.yml:1</code> to <code>:39</code>): when anything under <code>scripts/</code> or the root <code>package*.json</code> changes, run <code>npm ci --ignore-scripts --no-audit --no-fund</code> and <code>npm test</code> on both <code>ubuntu-latest</code> and <code>windows-latest</code> with Node 22 and a 15-minute timeout. The Windows leg exists because <code>scripts/sync-presentation-export.cjs</code> and <code>scripts/run-node-script.mjs</code> spawn processes and build paths, and the tests check for shell-argument and path handling bugs (Step 7). <code>--ignore-scripts</code> means no package install script runs during CI.</p>
+<h2 id="step-5-the-release-workflows">Step 5: The release workflows<a class="headerlink" href="#step-5-the-release-workflows" title="Permanent link">&para;</a></h2>
+<p>These are covered in their own chapters; the summary here is what they verify.</p>
+<ul>
+<li><code>docker-release.yml</code> builds <code>linux/amd64,linux/arm64</code> with QEMU and Buildx, tags <code>ghcr.io/presenton/presenton:&lt;release tag&gt;</code> (or <code>:dev</code> on manual dispatch), uses the GitHub Actions cache, and then verifies with <code>docker buildx imagetools inspect</code> that both platforms are present in the manifest (<code>.github/workflows/docker-release.yml:44</code> to <code>:77</code>). It does not run tests against the image. See <a href="../26-docker-and-deployment/">Docker build and deployment</a>.</li>
+<li><code>electron-linux-ubuntu22.yml</code> builds the Linux <code>.deb</code> and <code>.AppImage</code> on Ubuntu 22.04 and asserts both exist before uploading. <code>sync-releaes-to-r2.yml</code> mirrors published release assets to the <code>presenton-desktop/&lt;version&gt;</code> R2 prefix with rclone. See <a href="../27-electron/">Electron desktop app</a>.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: one release event, two workflows</p>
+<p>Publishing a GitHub release triggers both <code>docker-release.yml</code> and <code>sync-releaes-to-r2.yml</code>. The R2 job expects desktop installers named <code>Presenton-&lt;version&gt;.&lt;ext&gt;</code> on that release; a Docker-only release will make it fail.</p>
+</div>
+<h2 id="step-6-the-fastapi-test-suite">Step 6: The FastAPI test suite<a class="headerlink" href="#step-6-the-fastapi-test-suite" title="Permanent link">&para;</a></h2>
+<h3 id="61-layout">6.1 Layout<a class="headerlink" href="#61-layout" title="Permanent link">&para;</a></h3>
+<p><code>[tool.pytest.ini_options] testpaths = ["tests"]</code> (<code>servers/fastapi/pyproject.toml:72</code> to <code>:73</code>). Dev dependencies are only <code>pytest&gt;=9.0.3</code> and <code>pytest-cov&gt;=7.1.0</code> (<code>:66</code> to <code>:70</code>); there is no <code>pytest-asyncio</code>, so async code is driven with <code>asyncio.run(...)</code> inside synchronous tests, through FastAPI's <code>TestClient</code>, or with <code>@pytest.mark.anyio</code> and an <code>anyio_backend</code> fixture, which uses the pytest plugin that ships with the transitive <code>anyio</code> dependency (for example <code>servers/fastapi/tests/test_image_generation_comfyui.py:157</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Files</th>
+<th>Test functions (approx.)</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tests/unit/</code></td>
+<td>95</td>
+<td>~790</td>
+<td>One module or one security property per file: auth middleware, API keys, owner isolation, provider discovery, export permissions, safe logging, regex bounds, migrations</td>
+</tr>
+<tr>
+<td><code>tests/integration/</code></td>
+<td>6</td>
+<td>~70</td>
+<td>Full routers mounted on a throwaway <code>FastAPI()</code> with a temporary SQLite engine: auth endpoints, image provider test, images, generation flow, Presenton OAuth login, slide edit</td>
+</tr>
+<tr>
+<td><code>tests/regression/</code></td>
+<td>1 + <code>snapshots/outline_generation.json</code></td>
+<td>1</td>
+<td>Golden-output check of outline generation with a scripted LLM stream</td>
+</tr>
+<tr>
+<td><code>tests/edge_cases/</code></td>
+<td>1</td>
+<td>3</td>
+<td>Empty input rejected by validation, very large input, invalid LLM payload mapped to a structured HTTP error</td>
+</tr>
+<tr>
+<td><code>tests/</code> (top level)</td>
+<td>11</td>
+<td>~114</td>
+<td>Chat, documents loader, image generation backends (ComfyUI, Open WebUI, OpenAI-compatible), LiteParse, mem0, PPTX fonts, generation API</td>
+</tr>
+<tr>
+<td><code>tests/mocks/</code></td>
+<td><code>llm.py</code>, <code>normalizers.py</code></td>
+<td></td>
+<td><code>FakeLLMClient</code>, <code>content_event(chunk)</code>, <code>normalize_payload</code> (sorts dict keys, collapses whitespace)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-shared-fixtures-testsconftestpy">6.2 Shared fixtures (<code>tests/conftest.py</code>)<a class="headerlink" href="#62-shared-fixtures-testsconftestpy" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fake_async_session</code></td>
+<td>A <code>FakeAsyncSession</code> that records <code>add</code>, <code>add_all</code>, <code>delete</code>, counts <code>commit</code>, returns preset objects from <code>get</code>, and returns empty results from <code>execute</code> and <code>scalars</code> (<code>servers/fastapi/tests/conftest.py:8</code> to <code>:56</code>)</td>
+</tr>
+<tr>
+<td><code>snapshots_dir</code></td>
+<td><code>tests/regression/snapshots</code> (<code>:59</code> to <code>:61</code>)</td>
+</tr>
+<tr>
+<td><code>load_snapshot</code></td>
+<td>A loader that parses a JSON snapshot by name (<code>:64</code> to <code>:70</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Most security tests build their own fixtures instead. The pattern in <code>tests/unit/test_desktop_security.py:28</code> to <code>:73</code> is representative: <code>monkeypatch.setenv</code> the runtime variables, create a temp-file SQLite engine with <code>create_async_engine("sqlite+aiosqlite:///...")</code>, create only the needed tables, seed rows, override <code>get_async_session</code>, mount the real routers and middleware on a new <code>FastAPI()</code>, and yield a <code>TestClient</code>. <code>tests/integration/test_auth_endpoints.py</code> adds an autouse fixture that wraps every test in <code>patch.dict("os.environ")</code>, because settings endpoints write provider values into <code>os.environ</code>.</p>
+<h3 id="63-the-regression-snapshot">6.3 The regression snapshot<a class="headerlink" href="#63-the-regression-snapshot" title="Permanent link">&para;</a></h3>
+<p><code>tests/regression/test_outline_generation_snapshots.py</code> patches <code>get_model</code>, <code>get_client</code>, <code>get_llm_config</code>, <code>get_generate_kwargs</code> and <code>stream_generate_events</code> in <code>utils/llm_calls/generate_presentation_outlines.py</code>, feeds four <code>content_event</code> chunks that together form <code>{"slides":[{"content":"## Intro\n- Point A\n- Point B"},{"content":"## Details\n1. Item one\n2. Item two"}]}</code>, collects the streamed output, validates it as <code>PresentationOutlineModel</code>, normalizes it, and compares it with the snapshot. It pins the streaming contract described in <a href="../08-standard-pipeline/">Standard generation pipeline</a> without any network.</p>
+<h3 id="64-running-a-subset">6.4 Running a subset<a class="headerlink" href="#64-running-a-subset" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">cd</span><span class="w"> </span>servers/fastapi
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>uv<span class="w"> </span>sync<span class="w"> </span>--locked<span class="w"> </span>--dev
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nv">APP_DATA_DIRECTORY</span><span class="o">=</span>/tmp/presenton-tests/app-data<span class="w"> </span><span class="nv">TEMP_DIRECTORY</span><span class="o">=</span>/tmp/presenton-tests/temp<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nv">DATABASE_URL</span><span class="o">=</span>sqlite+aiosqlite:////tmp/presenton-tests/test.db<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>uv<span class="w"> </span>run<span class="w"> </span>--locked<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/unit/test_owner_isolation.py<span class="w"> </span>-q
+</span></code></pre></div>
+<p>Coverage is configured but not run in CI: <code>[tool.coverage.run]</code> uses statement coverage (<code>branch = false</code>) and omits <code>tests/*</code>, virtualenvs, <code>alembic/versions/*</code> and <code>scripts/*</code> (<code>servers/fastapi/pyproject.toml:77</code> to <code>:92</code>). Add <code>--cov</code> to the pytest command to use it.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: tests read the real environment</p>
+<p>Many modules read <code>os.environ</code> at call time (<code>utils/get_env.py</code>). A variable such as <code>DISABLE_AUTH=true</code> or <code>PRESENTON_ELECTRON=true</code> exported in your shell changes middleware behavior and can make auth tests fail or, worse, pass for the wrong reason. Run tests from a clean shell, as CI does.</p>
+</div>
+<h2 id="step-7-the-node-test-suites">Step 7: The Node test suites<a class="headerlink" href="#step-7-the-node-test-suites" title="Permanent link">&para;</a></h2>
+<h3 id="71-serversnextjstests-node-test">7.1 <code>servers/nextjs/tests</code> (<code>node --test</code>)<a class="headerlink" href="#71-serversnextjstests-node-test" title="Permanent link">&para;</a></h3>
+<p><code>npm test</code> runs every <code>*.test.mjs</code> under <code>servers/nextjs/tests/</code> with Node's built-in runner. Tests that need TypeScript sources bundle them on the fly with esbuild into a temp <code>.cjs</code> file and <code>require</code> it (for example <code>tests/desktop-security.test.mjs:16</code> to <code>:45</code>, <code>tests/font-descriptor-security.test.mjs:13</code> to <code>:17</code>). The files cover rendering (<code>flow-layout-text-sizing</code>, <code>latex-html-text-rendering</code>, <code>infographic-rendering</code>, <code>vector-arrow-rendering</code>, <code>template-v2-*</code>), client behavior (<code>presentation-autosave</code>, <code>clipboard</code>, <code>wheel-slide-navigation</code>, <code>provider-setup-navigation</code>), backend reachability (<code>backend-connectivity</code>, <code>runtime-provider-config</code>), and five security files:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it pins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>desktop-security.test.mjs</code></td>
+<td>The desktop transport guard on every path, <code>Host</code>/<code>Origin</code> checks, CSRF on <code>/api/user-config</code> (415 for <code>text/plain</code>), redaction of provider keys for non-admin users, document reader path restrictions, Electron cookie and header injection. Detailed in <a href="../27-electron/">Electron desktop app</a></td>
+</tr>
+<tr>
+<td><code>svg-route-security.test.mjs</code></td>
+<td><code>/api/update-svg</code>: paint-value escaping, CDATA handling, bounded scanning of unterminated sections, outside-root and symlink rejection, time-of-check races, size bound (Step 9.3)</td>
+</tr>
+<tr>
+<td><code>font-descriptor-security.test.mjs</code></td>
+<td>Font-family parsing cannot backtrack exponentially on <code>\!</code> runs; runs the probe in a child with a 2000 ms timeout (<code>:21</code> to <code>:30</code>)</td>
+</tr>
+<tr>
+<td><code>dependency-security.test.mjs</code></td>
+<td>Behavior of patched dependencies: Windows service query output from <code>systeminformation</code>, inherited attribute objects, math rendering trust flags, ESLint brace expansion, Markdown attribute tokenizer bounds, <code>postcss-selector-parser</code> with many classes, the Cypress query parser</td>
+</tr>
+<tr>
+<td><code>font-cors.test.mjs</code></td>
+<td><code>next.config.mjs</code> grants <code>Access-Control-Allow-Origin: *</code> only to <code>/vendor/fonts/:path*</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-cypress-component-tests">7.2 Cypress component tests<a class="headerlink" href="#72-cypress-component-tests" title="Permanent link">&para;</a></h3>
+<p><code>servers/nextjs/cypress.config.ts</code> enables component testing with the Next.js framework and webpack bundler and sets <code>allowCypressEnv: false</code>. The specs live in <code>cypress/security/</code> and run in Cypress's Electron browser in CI:</p>
+<table>
+<thead>
+<tr>
+<th>Spec</th>
+<th>Test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dependencies.cy.ts</code></td>
+<td>DOMPurify with <code>USE_PROFILES: { html, svg, svgFilters }</code> keeps a heading, its <code>data-slide-title</code>, an SVG circle and an <code>&lt;img src&gt;</code>, and removes <code>&lt;script&gt;</code>, <code>onload</code>, <code>onerror</code> and <code>javascript:</code> links</td>
+</tr>
+<tr>
+<td><code>editors.cy.tsx</code></td>
+<td>Serialized editor DOM does not copy inherited event handlers; inline text edits, undo, formatting and LaTeX atoms still work</td>
+</tr>
+<tr>
+<td><code>math.cy.ts</code></td>
+<td>Equations stay measurable and exportable as SVG images</td>
+</tr>
+</tbody>
+</table>
+<p>These run in a real browser DOM, which Node tests cannot provide.</p>
+<h3 id="73-root-scripts-tests">7.3 Root <code>scripts/</code> tests<a class="headerlink" href="#73-root-scripts-tests" title="Permanent link">&para;</a></h3>
+<p><code>npm test</code> at the root (<code>package.json:8</code>) runs:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Pins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>convert-template.test.mjs</code>, <code>convert-presentation-template.test.mjs</code></td>
+<td>Template conversion output shape and failure before writing on missing assets or unmapped layouts</td>
+</tr>
+<tr>
+<td><code>package-metadata.test.mjs</code></td>
+<td>Application versions stay aligned; Docker and Electron use the same pinned export runtime; sync preserves a mounted runtime root</td>
+</tr>
+<tr>
+<td><code>desktop-export.test.mjs</code></td>
+<td>Startup Node helpers keep literal paths and arguments; export credentials are scoped to the two desktop origins</td>
+</tr>
+<tr>
+<td><code>sync-presentation-export.test.mjs</code></td>
+<td>Cache paths never reach shell arguments; glibc vs musl detection; Sharp native package validation; rejection of known-vulnerable versions and nested engine copies</td>
+</tr>
+<tr>
+<td><code>user-config-env.test.mjs</code></td>
+<td>Env-to-config normalization, DALL-E to GPT Image 2 migration</td>
+</tr>
+<tr>
+<td><code>export-permissions.test.mjs</code></td>
+<td>Export files get group-only read access; symlinks are not followed; startup keeps config and recovery files owner-only</td>
+</tr>
+<tr>
+<td><code>document-parser-security.test.mjs</code></td>
+<td>LiteParse's OCR HTTP stack (<code>axios</code> with <code>follow-redirects</code>) strips credentials when a redirect crosses origins</td>
+</tr>
+<tr>
+<td><code>sync-document-dependencies.test.mjs</code></td>
+<td>The document parser volume is replaced or repaired when stale, and a failed install never leaves a trusted cache marker</td>
+</tr>
+</tbody>
+</table>
+<h3 id="74-electron">7.4 Electron<a class="headerlink" href="#74-electron" title="Permanent link">&para;</a></h3>
+<p><code>cd electron &amp;&amp; npm run test:security</code> compiles <code>app/</code> and runs <code>scripts/security-dependencies.test.cjs</code> and <code>scripts/private-storage.test.cjs</code>. This suite is not in any workflow.</p>
+<h2 id="step-8-what-the-suites-cover-mapped-to-features">Step 8: What the suites cover, mapped to features<a class="headerlink" href="#step-8-what-the-suites-cover-mapped-to-features" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Representative tests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth, sessions, roles</td>
+<td><code>tests/integration/test_auth_endpoints.py</code>, <code>tests/unit/test_session_auth_middleware.py</code>, <code>test_auth_bootstrap.py</code>, <code>test_auth_schemas.py</code></td>
+</tr>
+<tr>
+<td>API keys and MCP auth</td>
+<td><code>tests/unit/test_api_keys.py</code>, <code>test_mcp_server_auth.py</code>, <code>test_nginx_mcp_config.py</code></td>
+</tr>
+<tr>
+<td>Multi-user isolation</td>
+<td><code>tests/unit/test_owner_isolation.py</code>, <code>test_asset_ownership_security.py</code>, <code>test_mem0_session_scope_security.py</code></td>
+</tr>
+<tr>
+<td>Generation pipeline</td>
+<td><code>tests/unit/test_generate_presentation_outlines.py</code>, <code>test_generate_presentation_structure.py</code>, <code>test_generate_slide_content.py</code>, <code>tests/integration/test_presentation_generation_flow.py</code>, the regression snapshot</td>
+</tr>
+<tr>
+<td>Providers</td>
+<td><code>test_available_models.py</code>, <code>test_model_availability*.py</code>, <code>test_ollama*.py</code>, <code>test_openrouter_providers.py</code>, <code>test_openai_discovery_security.py</code>, <code>test_presenton_cloud*.py</code></td>
+</tr>
+<tr>
+<td>Export</td>
+<td><code>test_export_cookie_header.py</code>, <code>test_export_permissions.py</code>, <code>scripts/export-permissions.test.mjs</code></td>
+</tr>
+<tr>
+<td>Desktop</td>
+<td><code>test_desktop_security.py</code>, <code>servers/nextjs/tests/desktop-security.test.mjs</code></td>
+</tr>
+<tr>
+<td>Dependency advisories</td>
+<td><code>test_python_advisory_regressions.py</code> (Authlib JWS), <code>test_dependency_dos_regressions.py</code> (JOSE and ASN.1 bounds), <code>test_certifi_security.py</code>, <code>test_dns_advisory_regression.py</code>, <code>servers/nextjs/tests/dependency-security.test.mjs</code></td>
+</tr>
+</tbody>
+</table>
+<p>There is no end-to-end test that drives a browser against a running Docker image, and no test that calls a real LLM.</p>
+<h2 id="step-9-security-hardening-catalogue">Step 9: Security hardening catalogue<a class="headerlink" href="#step-9-security-hardening-catalogue" title="Permanent link">&para;</a></h2>
+<p>Each entry below names the protection, where it lives, and what breaks if you remove it.</p>
+<h3 id="91-path-traversal-and-file-access">9.1 Path traversal and file access<a class="headerlink" href="#91-path-traversal-and-file-access" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Protection</th>
+<th>Location</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Containment by canonical path</td>
+<td><code>servers/fastapi/utils/asset_directory_utils.py:169</code> to <code>:180</code></td>
+<td><code>_existing_file_within(candidate, root)</code> resolves both with <code>os.path.realpath</code>, requires the candidate to start with <code>root + os.sep</code> (so <code>images-other</code> cannot satisfy <code>images</code>), and requires a regular file</td>
+</tr>
+<tr>
+<td>Per-asset-root containment for <code>/app_data</code></td>
+<td><code>servers/fastapi/utils/asset_directory_utils.py:128</code> to <code>:137</code></td>
+<td>The root is <code>app_data/&lt;first segment&gt;</code>, so a symlink inside <code>images/</code> cannot read private config elsewhere in app data</td>
+</tr>
+<tr>
+<td>Owner-scoped resolution</td>
+<td><code>servers/fastapi/utils/asset_directory_utils.py:183</code> to <code>:198</code>, <code>:201</code> to <code>:219</code></td>
+<td><code>_app_data_url_allowed</code> applies the same rules as nginx's <code>auth_request</code> (<code>is_app_data_path_authorized</code>); absolute paths are only accepted under app data, the owner's temp subfolder, or <code>static/</code></td>
+</tr>
+<tr>
+<td>Owner directories</td>
+<td><code>servers/fastapi/utils/asset_directory_utils.py:23</code> to <code>:30</code></td>
+<td><code>images/</code>, <code>exports/</code>, <code>uploads/</code> become <code>&lt;root&gt;/users/&lt;owner_id&gt;</code> when a principal is set</td>
+</tr>
+<tr>
+<td>Upload type and size</td>
+<td><code>servers/fastapi/utils/validators.py:8</code> to <code>:48</code></td>
+<td><code>validate_files</code> rejects files larger than <code>max_size</code> MB; a file is accepted when either its client-declared <code>Content-Type</code> or its filename extension is in <code>accepted_types</code> (<code>_is_accepted_file_type</code>), so this is a declared-type filter, not a content check</td>
+</tr>
+<tr>
+<td>Generated file names</td>
+<td><code>servers/fastapi/utils/file_utils.py:13</code> to <code>:31</code></td>
+<td><code>get_file_name_with_random_uuid</code> appends <code>----&lt;uuid4&gt;</code> and applies <code>os.path.basename</code> only to string paths (an <code>UploadFile.filename</code> is used as given); <code>get_original_file_name</code> reverses it. In this snapshot only <code>get_original_file_name</code> has a production caller (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:459</code>)</td>
+</tr>
+<tr>
+<td>nginx <code>/static/</code> trailing slash</td>
+<td><code>nginx.conf:144</code> to <code>:157</code></td>
+<td>The comment explains that a bare <code>location /static</code> would let <code>/static../server.py</code> resolve through <code>alias</code> to any file under <code>/app</code></td>
+</tr>
+<tr>
+<td>nginx <code>disable_symlinks on</code></td>
+<td><code>nginx.conf:159</code> to <code>:211</code></td>
+<td>Every <code>/app_data/*</code> location refuses to serve symlinks; all except <code>fonts</code> and <code>templates</code> also require <code>auth_request /_auth_check</code></td>
+</tr>
+<tr>
+<td>SVG route containment</td>
+<td><code>servers/nextjs/app/api/update-svg/route.ts:89</code> to <code>:166</code></td>
+<td>Only <code>/static/icons/*.svg</code>; rejects NUL bytes; checks containment before and after <code>realpath</code>; opens with <code>O_NOFOLLOW</code>; stats the open handle (not the path) to defeat swap races; caps at 5 MB (<code>:16</code>) both by <code>stat</code> and while streaming</td>
+</tr>
+<tr>
+<td>Electron <code>read-file</code> IPC</td>
+<td><code>electron/app/utils/readable-file-access.ts:45</code> to <code>:70</code></td>
+<td>Only <code>.txt</code> files under app-data subfolders or temp, re-checked after <code>realpath</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>path_helpers.py</code> and <code>file_utils.py</code> are not traversal guards</p>
+<p><code>get_resource_path</code> and <code>get_writable_path</code> (<code>servers/fastapi/utils/path_helpers.py:15</code> to <code>:29</code>) simply join a relative path onto the working directory or <code>APP_DATA_DIRECTORY</code> with <code>os.path.abspath</code>; they do not check containment. <code>file_utils.py</code> only manipulates names. Pass user input through <code>resolve_app_path_to_filesystem</code> or <code>_existing_file_within</code>, never through these helpers.</p>
+</div>
+<h3 id="92-ssrf-and-outbound-requests">9.2 SSRF and outbound requests<a class="headerlink" href="#92-ssrf-and-outbound-requests" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Protection</th>
+<th>Location</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model discovery URL validation</td>
+<td><code>servers/fastapi/utils/available_models.py:120</code> to <code>:151</code></td>
+<td>Rejects control characters and backslashes, non-<code>http(s)</code> schemes, missing host, any query or fragment, <code>\ % ? #</code> in the decoded path, and <code>.</code> or <code>..</code> path segments, then applies a strict full-match regex</td>
+</tr>
+<tr>
+<td>No redirects in discovery</td>
+<td><code>servers/fastapi/utils/available_models.py:187</code> to <code>:192</code>, <code>:209</code></td>
+<td>aiohttp <code>allow_redirects=False</code> with a 3xx mapped to an error ("configure the final API URL"); the OpenAI SDK gets <code>DefaultAsyncHttpxClient(follow_redirects=False)</code></td>
+</tr>
+<tr>
+<td>Ollama URL validation</td>
+<td><code>servers/fastapi/utils/ollama.py:46</code> to <code>:70</code></td>
+<td>The same checks (a missing scheme defaults to <code>http://</code>), canonicalized through yarl's <code>URL</code></td>
+</tr>
+<tr>
+<td>No redirects to Ollama</td>
+<td><code>servers/fastapi/utils/ollama.py:117</code> to <code>:125</code>, <code>:186</code> to <code>:190</code></td>
+<td>A 3xx on <code>/api/tags</code> becomes <code>502</code>; a 3xx on <code>/api/pull</code> is reported as an SSE <code>error</code> event</td>
+</tr>
+<tr>
+<td>Request intent for provider overrides</td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:16</code> to <code>:40</code>, <code>:51</code> to <code>:57</code></td>
+<td>On <code>GET /api/v1/ppt/ollama/models/available</code> with auth enabled, an <code>ollama_url</code> override is honored only if <code>Origin</code>/<code>Referer</code> match the app's own origin, the configured public URLs, or the desktop origins, or <code>Sec-Fetch-Site: same-origin</code>; "must originate from the app, not merely carry an admin cookie" (<code>:54</code>)</td>
+</tr>
+<tr>
+<td>OpenRouter, Presenton Cloud, OAuth</td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openrouter.py:108</code>, <code>servers/fastapi/services/presenton_cloud.py:164</code>, <code>:209</code>, <code>servers/fastapi/api/v1/auth/presenton_oauth.py:84</code></td>
+<td>All disable redirects</td>
+</tr>
+<tr>
+<td>Community catalog</td>
+<td><code>servers/fastapi/services/community_presentations.py:205</code> to <code>:233</code></td>
+<td>Path must match <code>(?:/[1-9][0-9]*)?</code>; redirects are an error <code>community_redirect_not_allowed</code>; disabled community opens no connection</td>
+</tr>
+<tr>
+<td>Credential stripping on redirects in dependencies</td>
+<td><code>scripts/document-parser-security.test.mjs:12</code>, <code>electron/scripts/security-dependencies.test.cjs:7</code></td>
+<td>Tests that <code>follow-redirects</code> and electron-builder's <code>HttpExecutor</code> drop <code>Authorization</code> across origins</td>
+</tr>
+</tbody>
+</table>
+<p>Tests: <code>servers/fastapi/tests/unit/test_openai_discovery_security.py</code> (invalid roots never reach either transport, redirects rejected without follow-up), <code>test_ollama_request_security.py</code> (cross-site navigation never reaches the network helper), <code>test_ollama_transport_security.py</code>, <code>test_community_request_security.py</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: the URL checks do not block private addresses</p>
+<p>None of these validators reject <code>localhost</code>, <code>127.0.0.1</code> or RFC 1918 addresses; local Ollama and LiteLLM are first-class use cases. The defenses are that the discovery endpoints are admin-only in <code>SessionAuthMiddleware</code> and that the Ollama discovery override must come from the app's own origin (the only caller of <code>_require_provider_request_intent</code>). If you expose provider discovery to non-admin users, you will need an address-range check as well.</p>
+</div>
+<h3 id="93-svg-and-html-sanitization">9.3 SVG and HTML sanitization<a class="headerlink" href="#93-svg-and-html-sanitization" title="Permanent link">&para;</a></h3>
+<p>The SVG recoloring endpoint <code>/api/update-svg</code> is public by design (<code>servers/nextjs/proxy.ts:87</code> to <code>:95</code> lists it as auth-exempt, because Konva and <code>&lt;img&gt;</code> load it directly). Its defenses:</p>
+<ol>
+<li>Only local icons: anything not under <code>/static/icons/</code> returns <code>400 {"error":"Only /static/icons SVG sources are supported"}</code> (<code>servers/nextjs/app/api/update-svg/route.ts:196</code> to <code>:202</code>). There is no remote fetch, so no SSRF.</li>
+<li>Every style parameter goes through a validator in <code>servers/nextjs/lib/svg-color.ts</code>: <code>normalizeSvgColor</code> (<code>:289</code> to <code>:316</code>) returns <code>null</code> for anything containing a double or single quote, <code>&lt;</code>, <code>&gt;</code>, a backtick, <code>{</code>, <code>}</code>, <code>;</code>, CR or LF (<code>UNSAFE_SVG_VALUE_CHARS</code>, <code>:19</code>) and otherwise accepts only hex colors (a bare hex value gets a <code>#</code> prefix), a list of CSS color functions, or a bare keyword; <code>normalizeSvgNumberish</code> (<code>:318</code> to <code>:329</code>) accepts only a number with an optional CSS unit; line caps and joins are matched against fixed sets.</li>
+<li>The file must contain <code>&lt;svg</code>; <code>transformSvgMarkup</code> then escapes values at insertion (covered by <code>svg-route-security.test.mjs:57</code> to <code>:78</code>).</li>
+<li>The response is <code>image/svg+xml; charset=utf-8</code> with <code>Cache-Control: no-store</code> (<code>route.ts:223</code> to <code>:229</code>).</li>
+</ol>
+<p>Slide HTML rendered by the app is passed through DOMPurify with explicit forbidden tags (for example <code>SANITIZE_CONFIG</code> in <code>app/(presentation-generator)/components/SmartHtmlSlide.tsx:25</code> onward), and the Cypress spec in Step 7.2 checks that profile.</p>
+<h3 id="94-font-descriptor-validation">9.4 Font descriptor validation<a class="headerlink" href="#94-font-descriptor-validation" title="Permanent link">&para;</a></h3>
+<p><code>fontFamilyFromFontDescriptor</code> (<code>servers/nextjs/components/slide-editor/text/local-fonts.ts:615</code> to <code>:618</code>) extracts the family with an anchored pattern <code>^[^"]*"((?:\\.|[^"\\])*)"\s*$</code>. The comment notes that generated descriptors contain one quoted family and anchoring the opening quote prevents the engine from retrying at every position. <code>tests/font-descriptor-security.test.mjs:21</code> to <code>:40</code> feeds 1000 repetitions of an escaped character with no closing quote, in a child process with a 2 s timeout, and requires it to finish. On the Python side <code>tests/unit/test_regex_security.py</code> does the same for font-name normalization, chart parsing and table parsing.</p>
+<h3 id="95-dependency-pinning-and-overrides">9.5 Dependency pinning and overrides<a class="headerlink" href="#95-dependency-pinning-and-overrides" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Location</th>
+<th>Pins</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>uv lockfile</td>
+<td><code>servers/fastapi/uv.lock</code>, enforced by <code>uv sync --locked</code> in CI and <code>uv export --frozen</code> in Docker (<code>Dockerfile:15</code>)</td>
+<td>Every Python dependency</td>
+</tr>
+<tr>
+<td>uv constraints</td>
+<td><code>servers/fastapi/pyproject.toml:43</code> to <code>:46</code></td>
+<td><code>joserfc&gt;=1.7.6</code>, <code>pyasn1&gt;=0.6.5</code> as transitive floors</td>
+</tr>
+<tr>
+<td>Exact pins</td>
+<td><code>servers/fastapi/pyproject.toml:35</code></td>
+<td><code>llmai==0.3.15</code></td>
+</tr>
+<tr>
+<td>npm overrides (Next.js)</td>
+<td><code>servers/nextjs/package.json:86</code> onward</td>
+<td><code>systeminformation&gt;=5.33.16</code>, <code>brace-expansion@^1.0.0 -&gt; 1.1.21</code>, <code>brace-expansion@^2.0.0 -&gt; 2.1.7</code>, <code>postcss-selector-parser 6.1.5</code> under <code>@tailwindcss/typography</code>, <code>minimatch@&gt;=9 &lt;11.0.1 -&gt; ^11.0.3</code>, <code>glob@&gt;=9 &lt;14.0.2 -&gt; ^14.0.3</code></td>
+</tr>
+<tr>
+<td>npm overrides (Electron)</td>
+<td><code>electron/package.json:101</code> to <code>:111</code></td>
+<td><code>sharp ^0.35.5</code> and <code>zod ^4.6.6</code> under LiteParse, <code>minimatch ^3.1.5</code> under <code>serve-handler</code>, plus the same minimatch and glob ranges</td>
+</tr>
+<tr>
+<td>npm overrides (root)</td>
+<td><code>package.json:20</code> to <code>:25</code></td>
+<td><code>sharp</code> and <code>zod</code> under LiteParse</td>
+</tr>
+<tr>
+<td>Exact tool versions</td>
+<td><code>electron/package.json:94</code> to <code>:95</code></td>
+<td><code>electron 42.11.16</code>, <code>electron-builder 26.15.0</code></td>
+</tr>
+<tr>
+<td>Pinned Chromium snapshot</td>
+<td><code>Dockerfile:95</code> to <code>:96</code></td>
+<td>Chromium from a dated <code>snapshot.debian.org</code> archive</td>
+</tr>
+<tr>
+<td>Action SHAs</td>
+<td><code>test-all.yml:63</code>, <code>docker-release.yml:32</code> to <code>:62</code></td>
+<td>Third-party actions by commit</td>
+</tr>
+<tr>
+<td>Glob regression checks</td>
+<td><code>scripts/glob-security-checks.cjs:8</code> to <code>:65</code></td>
+<td>Modern <code>minimatch</code> respects <code>braceExpandMax</code> (64) under a 128 MB heap; aborted <code>glob</code> walks stop reading directories; the legacy matcher still works. Registered from <code>electron/scripts/security-dependencies.test.cjs:46</code> to <code>:50</code></td>
+</tr>
+</tbody>
+</table>
+<p>The overrides are paired with behavior tests (<code>dependency-security.test.mjs</code>, the advisory regression tests in <code>servers/fastapi/tests/unit/</code>) so that removing an override, or a dependency upgrade that reintroduces a bug, is caught by CI rather than by an advisory feed.</p>
+<h3 id="96-log-safety-escaping-not-redaction">9.6 Log safety (escaping, not redaction)<a class="headerlink" href="#96-log-safety-escaping-not-redaction" title="Permanent link">&para;</a></h3>
+<p><code>servers/fastapi/utils/safe_logging.py</code> protects log integrity:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/safe_logging.py (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">_CONTROL_ESCAPES</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">code</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\\</span><span class="s2">x</span><span class="si">{</span><span class="n">code</span><span class="si">:</span><span class="s2">02x</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span> <span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="mi">127</span><span class="p">,</span> <span class="mi">160</span><span class="p">))</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">_CONTROL_ESCAPES</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="mi">9</span><span class="p">:</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">t"</span><span class="p">,</span> <span class="mh">0x2028</span><span class="p">:</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">u2028"</span><span class="p">,</span> <span class="mh">0x2029</span><span class="p">:</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">u2029"</span><span class="p">})</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">_escape_controls</span><span class="p">(</span><span class="n">rendered</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="k">return</span> <span class="n">rendered</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\r</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">r"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">n"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\x1b</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">x1b"</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">_CONTROL_ESCAPES</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>safe_log(logger, level, message, *args)</code> (<code>:29</code> to <code>:44</code>) formats the message exactly like <code>logging</code> would, then escapes CR, LF, ESC, C0/C1 controls and Unicode line separators, so an attacker-controlled value (an export URL, a provider error) cannot forge extra log lines or send terminal escape codes. Exceptions are re-rendered with the traceback text escaped too (<code>:16</code> to <code>:26</code>), and a formatting error logs a fixed message instead of raising (<code>:36</code> to <code>:38</code>). <code>tests/unit/test_log_callsite_security.py:10</code> to <code>:22</code> checks a real call site with a URL containing <code>\nFORGED\r\x1b[2J</code>.</p>
+<p>Secret redaction is handled elsewhere and narrowly: <code>_redact_url_credentials</code> replaces <code>user:pass@</code> in the SearXNG URL with <code>***:***@</code> before logging (<code>servers/fastapi/utils/web_search.py:219</code> to <code>:226</code>), image provider test calls accept the placeholder <code>__configured__</code> instead of a real key so the UI never echoes stored keys (<code>servers/fastapi/api/v1/ppt/endpoints/images.py:53</code> to <code>:61</code>), and non-admin users receive redacted settings from <code>/api/user-config</code> (Step 7.1).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>safe_log</code> does not remove secrets</p>
+<p>Do not assume that routing a value through <code>safe_log</code> hides it. It only escapes control characters. Never log API keys, <code>Authorization</code> headers or cookies.</p>
+</div>
+<h3 id="97-file-permissions">9.7 File permissions<a class="headerlink" href="#97-file-permissions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Location</th>
+<th>Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>userConfig.json</code> and <code>.bak</code> (FastAPI)</td>
+<td><code>servers/fastapi/utils/user_config_store.py:25</code> to <code>:32</code>, <code>:180</code> to <code>:192</code></td>
+<td>Temp file created with <code>O_CREAT</code> and <code>O_EXCL</code> and <code>0o600</code>, <code>fsync</code>, <code>os.replace</code>, then <code>chmod 0o600</code>; existing files (and the <code>.bak</code>) are re-chmodded on every <code>read_user_config_file</code> call (<code>:202</code> to <code>:205</code>)</td>
+</tr>
+<tr>
+<td><code>userConfig.json</code> (Docker start-up)</td>
+<td><code>start.js:73</code> (<code>chmodBestEffort</code>), <code>:105</code>, <code>:133</code>, <code>:145</code>, <code>:164</code></td>
+<td><code>0o600</code>; <code>chmodBestEffort</code> tolerates read-only or foreign-owned volumes (Kubernetes, OpenShift)</td>
+</tr>
+<tr>
+<td><code>userConfig.json</code> (Electron)</td>
+<td><code>electron/app/utils/user-config-store.ts:105</code> to <code>:209</code></td>
+<td>Lock, temp and backup files <code>0o600</code>; parent directory <code>0o700</code> via <code>ensurePrivateDirectory</code></td>
+</tr>
+<tr>
+<td>Export artifacts</td>
+<td><code>servers/fastapi/utils/export_permissions.py:5</code> to <code>:6</code>, <code>:47</code>; called from <code>servers/fastapi/services/export_task_service.py:271</code>, <code>:814</code>, <code>:842</code></td>
+<td>Directories <code>0o750</code>, files <code>0o640</code>, group set to <code>www-data</code> or <code>nginx</code> when running as root, so nginx can serve exports without making them world-readable; symlinks are skipped and artifacts outside managed roots raise</td>
+</tr>
+<tr>
+<td>Export permissions (Node)</td>
+<td><code>scripts/export-permissions.cjs:4</code> to <code>:60</code></td>
+<td>Same contract for the Node export runner</td>
+</tr>
+<tr>
+<td>Electron export task file</td>
+<td><code>electron/app/ipc/export_handlers.ts:97</code></td>
+<td><code>wx</code>, <code>0o600</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="98-mime-handling">9.8 MIME handling<a class="headerlink" href="#98-mime-handling" title="Permanent link">&para;</a></h3>
+<p><code>init_sandbox_safe_mimetypes()</code> (<code>servers/fastapi/utils/mime_types.py:23</code> to <code>:40</code>), called at import time in <code>servers/fastapi/api/main.py:29</code>, initializes Python's <code>mimetypes</code> with <code>files=[]</code> so it never reads OS MIME databases (sandboxed macOS builds are denied <code>/etc/apache2/mime.types</code>), then registers explicit types for <code>.avif</code>, <code>.docx</code>, <code>.gif</code>, <code>.jpeg</code>, <code>.jpg</code>, <code>.otf</code>, <code>.pdf</code>, <code>.png</code>, <code>.pptx</code>, <code>.svg</code>, <code>.ttf</code>, <code>.webp</code>, <code>.woff</code>, <code>.woff2</code>, <code>.xlsx</code>. Static responses therefore have deterministic <code>Content-Type</code> headers on every platform. <code>tests/unit/test_mime_types.py:6</code> checks that no system file is read.</p>
+<h3 id="99-auth-on-docs-and-openapijson">9.9 Auth on <code>/docs</code> and <code>/openapi.json</code><a class="headerlink" href="#99-auth-on-docs-and-openapijson" title="Permanent link">&para;</a></h3>
+<p><code>SessionAuthMiddleware._PROTECTED_NON_API_PATHS = {"/docs", "/openapi.json", "/redoc"}</code> (<code>servers/fastapi/api/middlewares.py:42</code>) and <code>_requires_auth</code> returns true for them (<code>:44</code> to <code>:53</code>). The interactive API documentation, which reveals every route and schema, therefore requires a session or API key in account mode. In desktop mode the transport guard still requires the desktop token (<code>tests/unit/test_desktop_security.py:76</code> to <code>:79</code>). Details of principal resolution are in <a href="../25-auth-and-multiuser/">Auth and multi-user</a>.</p>
+<h3 id="910-codeql">9.10 CodeQL<a class="headerlink" href="#910-codeql" title="Permanent link">&para;</a></h3>
+<p>Step 2. The <code>security-extended</code> suite over Python, TypeScript/JavaScript and the workflows themselves runs on every push and PR to <code>main</code>.</p>
+<pre class="mermaid"><code>flowchart TB
+  subgraph Request["Inbound request"]
+    A["Desktop transport guard"] --&gt; B["Session or API key principal"]
+    B --&gt; C["owner_id contextvar scoping"]
+  end
+  subgraph Files["File access"]
+    D["realpath containment"] --&gt; E["owner-scoped app_data roots"]
+    E --&gt; F["nginx auth_request and disable_symlinks"]
+  end
+  subgraph Outbound["Outbound calls"]
+    G["URL validation"] --&gt; H["no redirects"]
+    H --&gt; I["origin intent check for overrides"]
+  end
+  subgraph Supply["Supply chain"]
+    J["locks, overrides, constraints"] --&gt; K["behavior regression tests"]
+    K --&gt; L["CodeQL security-extended"]
+  end</code></pre>
+<h2 id="step-10-contributor-checklist">Step 10: Contributor checklist<a class="headerlink" href="#step-10-contributor-checklist" title="Permanent link">&para;</a></h2>
+<p><code>CONTRIBUTING.md</code> sets the ground rules:</p>
+<ul>
+<li>Scope: contributions are focused on the Electron application (desktop app, FastAPI backend, Next.js frontend, local runtime integrations), and "Contributions outside <code>electron/</code> may not be accepted at this time" (<code>CONTRIBUTING.md:16</code> to <code>:25</code>, <code>:129</code>).</li>
+<li>Workflow: fork, branch (examples <code>feature/add-template-support</code>, <code>fix/export-pptx-error</code>, <code>docs/update-readme</code>), open a PR (<code>:44</code> to <code>:59</code>).</li>
+<li>A signed Contributor License Agreement is required; PRs without a CLA for more than 30 days may be closed (<code>:119</code> to <code>:125</code>).</li>
+<li>PRs must run locally in both development and build environments, be small and focused, explain what and why, and include screenshots for UI changes (<code>:127</code> to <code>:134</code>).</li>
+<li>AI-assisted PRs are welcome but must say so, state the testing done, and confirm the code was reviewed (<code>:138</code> to <code>:146</code>).</li>
+</ul>
+<p>Combined with the CI above, a practical pre-PR checklist is:</p>
+<ol>
+<li><code>./test-local.sh</code> passes (repository tools, FastAPI, Next.js tests, lint, build, Cypress).</li>
+<li>If you touched <code>electron/</code>: <code>npm run typecheck</code>, <code>npm run lint:main</code>, <code>npm run test:security</code>, and <code>npm run dev</code> starts.</li>
+<li>If you touched <code>scripts/</code> or root <code>package*.json</code>: <code>npm test</code> also on Windows, or rely on <code>export-runtime-regressions.yml</code>.</li>
+<li>New routes: decide public or protected in <code>SessionAuthMiddleware</code>, and confirm the desktop guard behavior.</li>
+<li>New file reads: go through <code>_existing_file_within</code> or <code>resolve_app_path_to_filesystem</code>.</li>
+<li>New outbound HTTP: validate the URL and disable redirects, matching Step 9.2.</li>
+<li>New dependencies: lockfile updated; if PyInstaller cannot trace it, update <code>servers/fastapi/server.spec</code>.</li>
+<li>Logs: use <code>safe_log</code> for request-derived values and never log secrets.</li>
+</ol>
+<p>The repository is Apache License 2.0 (<code>LICENSE</code>), with third-party notices aggregated in <code>NOTICE</code> (regenerated by <code>scripts/rebuild_notice_all.py</code>). <code>VISION.md</code> states the guiding goal behind many of these measures: generation that runs locally, inside private networks, and in air-gapped environments.</p>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Six upstream workflows exist: CodeQL (three languages, <code>security-extended</code>), <code>test-all</code> (repository tools, FastAPI pytest, Next.js tests plus lint, build and Cypress), cross-platform export regressions, and three release workflows for GHCR, Linux desktop builds and R2.</li>
+<li>The FastAPI suite has about 980 test functions across <code>unit</code>, <code>integration</code>, <code>regression</code>, <code>edge_cases</code> and the top-level files, runs with plain pytest (plus <code>asyncio.run</code> or the <code>anyio</code> marker), and uses temp SQLite engines with real routers instead of a shared app fixture.</li>
+<li>Next.js tests run on <code>node --test</code> with esbuild bundling, Cypress covers sanitization in a real DOM, and root <code>scripts/</code> tests guard the export runtime, permissions and document parser.</li>
+<li>Path access is guarded by canonical containment and owner-scoped roots (not by <code>path_helpers.py</code>), outbound calls validate URLs and refuse redirects, and the SVG route accepts only local icons with validated paint values.</li>
+<li><code>safe_logging.py</code> prevents log forging but does not redact secrets; config files are <code>0o600</code>, exports <code>0o640</code> with a proxy group, and MIME types are deterministic.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Part VII starts the Superset design: continue with <a href="../../superset/">Part VII landing</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../27-electron/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Electron desktop app">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Electron desktop app
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../superset/" class="md-footer__link md-footer__link--next" aria-label="Next: Part VII: Data-Bound Documents for Apache Superset">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Part VII: Data-Bound Documents for Apache Superset
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

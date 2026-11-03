@@ -1,0 +1,5217 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/appendix-files/">
+      
+      
+        <link rel="prev" href="../appendix-endpoints/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>File index - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#file-index" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              File index
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../presenton/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-how-to-read-this-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: How to read this index
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-repository-root-docs-and-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Repository root, docs and CI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-fastapi-entry-points-and-app-wiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: FastAPI entry points and app wiring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-fastapi-auth-admin-and-small-routers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: FastAPI auth, admin and small routers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-fastapi-endpoint-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: FastAPI endpoint modules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-fastapi-pydantic-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: FastAPI Pydantic models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-fastapi-sql-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: FastAPI SQL models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-fastapi-enums-and-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: FastAPI enums and constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-fastapi-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: FastAPI services
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-fastapi-chat-assistant-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: FastAPI chat assistant services
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-fastapi-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: FastAPI utilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-fastapi-llm-calls-and-oauth-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: FastAPI LLM calls and OAuth utilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-13-fastapi-template-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 13: FastAPI template package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-14-template-v2-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 14: Template v2 engine
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-15-nextjs-app-shell-routes-and-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 15: Next.js app shell, routes and pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-16-nextjs-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 16: Next.js components
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-17-nextjs-lib-store-utils-and-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 17: Next.js lib, store, utils and types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-18-electron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 18: Electron
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-19-root-scripts-and-built-in-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 19: Root scripts and built-in templates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-how-to-read-this-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: How to read this index
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-repository-root-docs-and-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Repository root, docs and CI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-fastapi-entry-points-and-app-wiring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: FastAPI entry points and app wiring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-fastapi-auth-admin-and-small-routers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: FastAPI auth, admin and small routers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-fastapi-endpoint-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: FastAPI endpoint modules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-fastapi-pydantic-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: FastAPI Pydantic models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-fastapi-sql-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: FastAPI SQL models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-fastapi-enums-and-constants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: FastAPI enums and constants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-fastapi-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: FastAPI services
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-fastapi-chat-assistant-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: FastAPI chat assistant services
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-fastapi-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: FastAPI utilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-fastapi-llm-calls-and-oauth-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: FastAPI LLM calls and OAuth utilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-13-fastapi-template-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 13: FastAPI template package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-14-template-v2-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 14: Template v2 engine
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-15-nextjs-app-shell-routes-and-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 15: Next.js app shell, routes and pages
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-16-nextjs-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 16: Next.js components
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-17-nextjs-lib-store-utils-and-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 17: Next.js lib, store, utils and types
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-18-electron" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 18: Electron
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-19-root-scripts-and-built-in-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 19: Root scripts and built-in templates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="file-index">File index<a class="headerlink" href="#file-index" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> the whole repository at snapshot <code>571461f</code>  ·  <strong>Builds on:</strong> <a href="../presenton/02-repository-tour/">Repository tour</a>  ·  <strong>Time:</strong> reference, skim as needed</p>
+</div>
+<p>This appendix is an annotated map of roughly 320 source and configuration files, grouped by directory, chosen because they carry behavior you will meet when reading or changing Presenton. Each row gives the file's line count at the snapshot, a one-line statement of its responsibility written after reading it, and the chapter that explains it in depth. Use it as a lookup table: find the file behind a stack trace, an endpoint, or a concept, then jump to the chapter.</p>
+<h2 id="step-1-how-to-read-this-index">Step 1: How to read this index<a class="headerlink" href="#step-1-how-to-read-this-index" title="Permanent link">&para;</a></h2>
+<p>Every table has the same four columns: <strong>File</strong> (path relative to the repository root), <strong>Lines</strong> (<code>wc -l</code> at the snapshot), <strong>Responsibility</strong>, and <strong>Ch.</strong> (the chapter that covers it, as a link). Chapter numbers map to these pages:</p>
+<table>
+<thead>
+<tr>
+<th>Ch.</th>
+<th>Page</th>
+<th>Ch.</th>
+<th>Page</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>02</td>
+<td><a href="../presenton/02-repository-tour/">Repository tour</a></td>
+<td>16</td>
+<td><a href="../presenton/16-template-v2-format/">Template v2 format</a></td>
+</tr>
+<tr>
+<td>03</td>
+<td><a href="../presenton/03-runtime-topology/">Runtime topology</a></td>
+<td>17</td>
+<td><a href="../presenton/17-template-to-slide/">From template to schema to slide</a></td>
+</tr>
+<tr>
+<td>04</td>
+<td><a href="../presenton/04-running-locally/">Running it locally</a></td>
+<td>18</td>
+<td><a href="../presenton/18-custom-templates/">Custom templates from PPTX</a></td>
+</tr>
+<tr>
+<td>05</td>
+<td><a href="../presenton/05-fastapi-startup/">FastAPI app and startup</a></td>
+<td>19</td>
+<td><a href="../presenton/19-themes-and-fonts/">Themes and fonts</a></td>
+</tr>
+<tr>
+<td>06</td>
+<td><a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a></td>
+<td>20</td>
+<td><a href="../presenton/20-nextjs-architecture/">Next.js architecture</a></td>
+</tr>
+<tr>
+<td>07</td>
+<td><a href="../presenton/07-data-model/">Data model</a></td>
+<td>21</td>
+<td><a href="../presenton/21-user-journey/">User journey</a></td>
+</tr>
+<tr>
+<td>08</td>
+<td><a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a></td>
+<td>22</td>
+<td><a href="../presenton/22-slide-editor/">Slide editor</a></td>
+</tr>
+<tr>
+<td>09</td>
+<td><a href="../presenton/09-prompts-and-schemas/">Prompts and schemas</a></td>
+<td>23</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">Settings, onboarding, auth UI</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="../presenton/10-streaming/">Streaming (SSE)</a></td>
+<td>24</td>
+<td><a href="../presenton/24-export-pipeline/">PPTX and PDF export</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="../presenton/11-document-ingestion/">Document ingestion</a></td>
+<td>25</td>
+<td><a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="../presenton/12-images-icons-search/">Images, icons, web search</a></td>
+<td>26</td>
+<td><a href="../presenton/26-docker-and-deployment/">Docker build and deployment</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><a href="../presenton/13-smart-mode/">Smart mode</a></td>
+<td>27</td>
+<td><a href="../presenton/27-electron/">Electron desktop app</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><a href="../presenton/14-editing-and-chat/">Editing and chat assistant</a></td>
+<td>28</td>
+<td><a href="../presenton/28-ci-tests-security/">CI, tests, security</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>For every HTTP route, see the <a href="../appendix-endpoints/">Endpoint index</a>; for terms, the <a href="../appendix-glossary/">Glossary</a>.</p>
+<pre class="mermaid"><code>flowchart TB
+    ROOT["repository root: Dockerfile, start.js, nginx.conf"]
+    ROOT --&gt; FA["servers/fastapi: Python backend"]
+    ROOT --&gt; NX["servers/nextjs: Next.js frontend"]
+    ROOT --&gt; EL["electron: desktop wrapper"]
+    ROOT --&gt; SC["scripts: build, sync, converters"]
+    ROOT --&gt; TP["templates: 16 built-in designs"]
+    FA --&gt; FAAPI["api: routers and middleware"]
+    FA --&gt; FAM["models and models/sql"]
+    FA --&gt; FAS["services and services/chat"]
+    FA --&gt; FAU["utils and utils/llm_calls"]
+    FA --&gt; FAT["templates and templates/v2"]
+    NX --&gt; NXA["app: routes, pages, API routes"]
+    NX --&gt; NXC["components and slide-editor"]
+    NX --&gt; NXL["lib, store, utils"]</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Several concerns are implemented twice, once per runtime, and must be changed together: the user-config file lock (<code>servers/fastapi/utils/user_config_store.py</code>, <code>servers/nextjs/lib/user-config-store.ts</code>, <code>electron/app/utils/user-config-store.ts</code>), the desktop token guard (<code>servers/fastapi/api/v1/auth/desktop.py</code>, <code>servers/nextjs/lib/desktop-auth.ts</code>, <code>electron/app/utils/desktop-auth.ts</code>), the readable-file allowlist (<code>servers/nextjs/lib/readable-local-file.ts</code>, <code>electron/app/utils/readable-file-access.ts</code>), and the slide and outline limits (<code>servers/fastapi/constants/presentation.py</code>, <code>servers/nextjs/utils/presentationLimits.ts</code>).</p>
+</div>
+<h2 id="step-2-repository-root-docs-and-ci">Step 2: Repository root, docs and CI<a class="headerlink" href="#step-2-repository-root-docs-and-ci" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>README.md</code></td>
+<td>985</td>
+<td>User-facing documentation: features, Docker run commands, environment variables, API usage examples.</td>
+<td><a href="../presenton/02-repository-tour/">02</a></td>
+</tr>
+<tr>
+<td><code>VISION.md</code></td>
+<td>17</td>
+<td>Project vision statement: local, private, model-agnostic visual document generation.</td>
+<td><a href="../presenton/01-what-is-presenton/">01</a></td>
+</tr>
+<tr>
+<td><code>Dockerfile</code></td>
+<td>153</td>
+<td>Production image: Python and Node toolchains, LiteParse, export runtime, nginx, FastAPI and Next.js builds; entrypoint <code>node start.js</code>.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>Dockerfile.dev</code></td>
+<td>93</td>
+<td>Development image with source bind mounts; installs LiteParse with Tesseract OCR.</td>
+<td><a href="../presenton/04-running-locally/">04</a></td>
+</tr>
+<tr>
+<td><code>docker-compose.yml</code></td>
+<td>534</td>
+<td>Services <code>production</code>, <code>production-gpu</code>, <code>development</code>, <code>development-gpu</code> plus named volumes for node modules, LiteParse and the export runtime.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>nginx.conf</code></td>
+<td>213</td>
+<td>Port 80 reverse proxy: <code>/</code> to Next.js, <code>/api/v1/</code> and <code>/api/v2/</code> to FastAPI, <code>/mcp</code> to the MCP server, <code>/static/</code> and <code>/app_data/</code> from disk with <code>auth_request</code>.</td>
+<td><a href="../presenton/03-runtime-topology/">03</a></td>
+</tr>
+<tr>
+<td><code>start.js</code></td>
+<td>738</td>
+<td>Container supervisor: seeds <code>userConfig.json</code> from env, starts nginx (<code>service nginx start</code>) and, alongside it, FastAPI (8000), Next.js (3000), MCP (8001) and optional Ollama; waits for FastAPI, Next.js and nginx to be ready.</td>
+<td><a href="../presenton/03-runtime-topology/">03</a></td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td>26</td>
+<td>Root Node package: version <code>0.9.12-beta</code>, <code>presentationExportVersion</code> <code>v1.0.51</code>, LiteParse and sharp dependencies, converter and sync scripts.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>layouts.json</code></td>
+<td>6670</td>
+<td>A sample Template v2 layouts document (top-level <code>layouts</code> array). No code in the snapshot references this file by name.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>test-local.sh</code></td>
+<td>83</td>
+<td>Runs the same test and build checks as <code>.github/workflows/test-all.yml</code> locally.</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>test_server.py</code></td>
+<td>78</td>
+<td>Stub HTTP server answering <code>GET /versions</code> for testing the Electron update checker.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>.do/deploy.template.yaml</code></td>
+<td>25</td>
+<td>DigitalOcean App Platform spec using <code>ghcr.io/presenton/presenton:latest</code> on port 80.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/test-all.yml</code></td>
+<td>111</td>
+<td>Main CI: Python and Node tests and builds on push and pull request to <code>main</code>.</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/codeql.yml</code></td>
+<td>55</td>
+<td>CodeQL static analysis.</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/export-runtime-regressions.yml</code></td>
+<td>39</td>
+<td>Regression tests for the export runtime sync scripts, triggered by <code>scripts/**</code> and package changes.</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/docker-release.yml</code></td>
+<td>77</td>
+<td>Builds and publishes the Docker image on release.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/sync-releaes-to-r2.yml</code></td>
+<td>56</td>
+<td>Uploads release assets to Cloudflare R2 on release (the filename keeps its upstream typo).</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/electron-linux-ubuntu22.yml</code></td>
+<td>110</td>
+<td>Electron Linux test release on the <code>electron-linux-ubuntu22</code> branch.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>.github/workflows/docs-pages.yml</code></td>
+<td>48</td>
+<td>Publishes this tutorial to GitHub Pages when <code>tutorial/**</code> changes.</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>docs/template-v2.md</code></td>
+<td>176</td>
+<td>Upstream architecture note on Template v2.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>docs/presentation-generation-modes.md</code></td>
+<td>134</td>
+<td>Upstream note on Standard versus Smart modes and <code>PRESENTATION_GENERATION_MODE</code>.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>docs/presenton-resource-usage.md</code></td>
+<td>181</td>
+<td>Upstream resource usage report, including the five-step Standard flow.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>docs/multi-docker-build.md</code></td>
+<td>94</td>
+<td>Multi-architecture Docker release instructions.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>docs/amazon-bedrock.md</code></td>
+<td>191</td>
+<td>Configuring the Amazon Bedrock provider.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-3-fastapi-entry-points-and-app-wiring">Step 3: FastAPI entry points and app wiring<a class="headerlink" href="#step-3-fastapi-entry-points-and-app-wiring" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/server.py</code></td>
+<td>29</td>
+<td>Uvicorn launcher: <code>--port</code> (required), <code>--reload</code>, <code>--log-level</code>; binds <code>127.0.0.1</code> and serves <code>api.main:app</code>.</td>
+<td><a href="../presenton/05-fastapi-startup/">05</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/main.py</code></td>
+<td>118</td>
+<td>Creates the <code>FastAPI</code> app, includes seven routers, mounts <code>/app_data/*</code> and <code>/static</code>, adds CORS, <code>UserConfigEnvUpdateMiddleware</code>, <code>SessionAuthMiddleware</code>, and the icon 404 fallback.</td>
+<td><a href="../presenton/05-fastapi-startup/">05</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/lifespan.py</code></td>
+<td>68</td>
+<td>Startup: logging, app-data dir, <code>migrate_database_on_startup</code>, <code>create_db_and_tables</code>, admin bootstrap, fail interrupted tasks, provider settings migration, default template import, env reload.</td>
+<td><a href="../presenton/05-fastapi-startup/">05</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/middlewares.py</code></td>
+<td>152</td>
+<td><code>UserConfigEnvUpdateMiddleware</code> (reload config per request) and <code>SessionAuthMiddleware</code> (desktop guard, public and admin path rules, owner context, cloud proxy, app-data ownership).</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/migrations.py</code></td>
+<td>329</td>
+<td>Alembic driver: revision constants, schema-based revision inference for legacy databases, orphan revision repair, <code>migrate_database_on_startup</code>.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/alembic/env.py</code></td>
+<td>98</td>
+<td>Alembic environment; the <code>alembic/versions/</code> directory holds 24 migrations from <code>00b3c27a13bc_init</code> to the unified API key change.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/mcp_server.py</code></td>
+<td>480</td>
+<td>FastMCP server built from <code>openai_spec.json</code>: tool allowlist and renames, instructions text, <code>PresentonTokenVerifier</code>, internal session cookie injection, port 8001.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/openai_spec.json</code></td>
+<td>1 (144 KB)</td>
+<td>Committed, minified OpenAPI document consumed by the MCP server; regenerated manually.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/scripts/generate_openapi_spec.py</code></td>
+<td>20</td>
+<td>Writes <code>app.openapi()</code> to <code>openai_spec.json</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/scripts/warm_fastembed_cache.py</code></td>
+<td>55</td>
+<td>Pre-downloads FastEmbed weights at image build: AllMiniLML6V2 for icons, and Mem0's default embedder models.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/pyproject.toml</code></td>
+<td>92</td>
+<td>Python dependencies, including <code>llmai==0.3.15</code>, <code>fastmcp&gt;=4.1.2,&lt;5</code>, <code>fastapi-users</code>, <code>fastembed-vectorstore</code>, <code>mem0ai[nlp]</code>.</td>
+<td><a href="../presenton/02-repository-tour/">02</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/router.py</code></td>
+<td>40</td>
+<td><code>API_V1_PPT_ROUTER</code> (<code>/api/v1/ppt</code>) including the seventeen endpoint routers.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v2/router.py</code></td>
+<td>7</td>
+<td><code>API_V2_ROUTER</code> (<code>/api/v2</code>).</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v2/ppt/router.py</code></td>
+<td>7</td>
+<td><code>API_V2_PPT_ROUTER</code> (<code>/ppt</code>) including the v2 presentation router.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-4-fastapi-auth-admin-and-small-routers">Step 4: FastAPI auth, admin and small routers<a class="headerlink" href="#step-4-fastapi-auth-admin-and-small-routers" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/router.py</code></td>
+<td>201</td>
+<td><code>/api/v1/auth</code> status, verify, setup, login and logout; sets and deletes the <code>presenton_session</code> cookie.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/users.py</code></td>
+<td>233</td>
+<td>FastAPI Users integration: legacy-aware password helper, username user DB, <code>VersionedJWTStrategy</code> (claims <code>sub</code>, <code>av</code>), <code>read_user_from_cookie</code>, <code>get_current_admin</code>, <code>serialize_user</code>.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/principal.py</code></td>
+<td>71</td>
+<td><code>AuthPrincipal</code> dataclass and <code>resolve_request_principal</code>: cookie JWT first, then Bearer API key.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/config.py</code></td>
+<td>107</td>
+<td>Cookie name and 30-day TTL, <code>AUTH_SECRET_KEY</code> creation, legacy PBKDF2 hash verification, mirroring admin credentials into <code>userConfig.json</code>.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/context.py</code></td>
+<td>34</td>
+<td><code>ContextVar</code>s for the current owner id and admin flag, used by ORM scoping and asset directories.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/assets.py</code></td>
+<td>123</td>
+<td>Owner-scoped <code>StaticFiles</code> mounts for <code>/app_data/*</code>, private versus shared roots, traversal-safe path normalization and authorization.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/desktop.py</code></td>
+<td>48</td>
+<td>Electron desktop guard: checks <code>Host</code>, <code>Origin</code> and the <code>x-presenton-desktop-token</code> header or cookie with <code>hmac.compare_digest</code>.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/bootstrap.py</code></td>
+<td>151</td>
+<td>Startup admin bootstrap: migrates the legacy single admin or creates one from <code>AUTH_USERNAME</code> and <code>AUTH_PASSWORD</code>; honors <code>RESET_AUTH</code> and <code>AUTH_OVERRIDE_FROM_ENV</code>; backfills legacy ownership.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/internal.py</code></td>
+<td>25</td>
+<td><code>authenticated_internal_request_headers</code>: mints a session cookie for internal server-to-server calls.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/schemas.py</code></td>
+<td>81</td>
+<td>Pydantic request and response models for users and API keys (username 3 to 128 chars without spaces, password 8 to 128, login accepts 6).</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/auth/presenton_oauth.py</code></td>
+<td>312</td>
+<td><code>/api/v1/auth/presenton/*</code>: OAuth device flow linking the global Presenton Cloud provider.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/admin/router.py</code></td>
+<td>264</td>
+<td><code>/api/v1/admin/*</code>: API keys, provider settings, user management.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/async_tasks/router.py</code></td>
+<td>84</td>
+<td><code>/api/v1/async-tasks</code> list and status endpoints over <code>async_tasks</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/webhook/router.py</code></td>
+<td>53</td>
+<td>Webhook subscribe and unsubscribe.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/mock/router.py</code></td>
+<td>36</td>
+<td>Two mock endpoints returning sample webhook payload shapes.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-5-fastapi-endpoint-modules">Step 5: FastAPI endpoint modules<a class="headerlink" href="#step-5-fastapi-endpoint-modules" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py</code></td>
+<td>3393</td>
+<td>The core of the Standard pipeline: create, prepare, SSE stream (Standard and Smart), update, export, one-shot generate (sync and async), edit and derive, plus layout, TOC, structure normalization and slide <code>ui</code> hydration helpers.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/outlines.py</code></td>
+<td>276</td>
+<td>Outline read, replace, and SSE generation stream with document loading and <code>dirtyjson</code> parsing.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/slide.py</code></td>
+<td>180</td>
+<td>Single-slide LLM edit for structured content and for HTML.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py</code></td>
+<td>2175</td>
+<td>Template v2 lifecycle: list, PPTX preview upload, init, async create and retry, layout generate, create and patch, block merge and theme, metadata update, get, delete, MCP upload.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/files.py</code></td>
+<td>184</td>
+<td>Multipart and base64 (MCP) document upload to temp storage, decompose to text, update temp file.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py</code></td>
+<td>172</td>
+<td>Font upload, list, delete, and PPTX font check.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py</code></td>
+<td>372</td>
+<td>Image provider test, stock search, generation, uploads, and the image library.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/icons.py</code></td>
+<td>21</td>
+<td><code>GET /icons/search</code> over <code>ICON_FINDER_SERVICE</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py</code></td>
+<td>165</td>
+<td>Chat conversations, history, delete, message and streaming message (SSE).</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/community.py</code></td>
+<td>49</td>
+<td>Community catalog list and detail, proxied to the Presenton community API.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/generation.py</code></td>
+<td>58</td>
+<td>Token defaults for a provider and model via <code>llmai.prepare_generation</code> with profiles <code>BALANCED</code> and <code>MODEL_MAX</code>.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py</code></td>
+<td>349</td>
+<td>ChatGPT (Codex) OAuth: PKCE initiate, poll, manual exchange, refresh, status, logout.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py</code></td>
+<td>70</td>
+<td>Ollama supported, available and library model lists, and SSE model pull; trusted-origin check for URL overrides.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openai.py</code></td>
+<td>22</td>
+<td>OpenAI-compatible model discovery.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openrouter.py</code></td>
+<td>164</td>
+<td>OpenRouter upstream provider discovery with redirect refusal and URL validation.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/anthropic.py</code></td>
+<td>21</td>
+<td>Anthropic model discovery.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/google.py</code></td>
+<td>16</td>
+<td>Google model discovery.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/api/v2/ppt/endpoints/presentation.py</code></td>
+<td>298</td>
+<td>Smart mode REST API: create the Smart presentation, generate and export (sync), or queue <code>presentation.smart.generate</code> (async) with progress updates.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>servers/fastapi/api/v1/ppt/endpoints/slide.py</code> imports four private helpers from <code>presentation.py</code> (<code>_apply_template_content_to_ui</code>, <code>_get_presentation_stream_layout</code>, <code>_hydrate_template_slide_ui</code>, <code>_template_slide_ui</code>). The leading underscore does not mean "module private" here; renaming them breaks the slide router at import time.</p>
+</div>
+<h2 id="step-6-fastapi-pydantic-models">Step 6: FastAPI Pydantic models<a class="headerlink" href="#step-6-fastapi-pydantic-models" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/models/generate_presentation_request.py</code></td>
+<td>64</td>
+<td><code>GeneratePresentationRequest</code> (Standard one-shot API, default template <code>general</code>) and <code>GenerateSmartPresentationRequest</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/presentation_outline_model.py</code></td>
+<td>35</td>
+<td><code>SlideOutlineModel</code> (Markdown <code>content</code>, word-limited) and <code>PresentationOutlineModel</code> (max 50 slides).</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/presentation_structure_model.py</code></td>
+<td>6</td>
+<td><code>PresentationStructureModel</code>: <code>slides</code> is a list of layout indexes.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/presentation_with_slides.py</code></td>
+<td>27</td>
+<td>Response model joining presentation fields with its slides, <code>generation_mode</code>, <code>type</code>, <code>can_regenerate</code>.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/presentation_and_path.py</code></td>
+<td>11</td>
+<td><code>PresentationAndPath</code> and <code>PresentationPathAndEditPath</code> (export results).</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/presentation_from_template.py</code></td>
+<td>14</td>
+<td><code>EditPresentationRequest</code> and <code>SlideContentUpdate</code> for <code>/edit</code> and <code>/derive</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/presentation_layout.py</code></td>
+<td>5</td>
+<td>Re-export of <code>PresentationLayoutModel</code> and <code>SlideLayoutModel</code> from <code>templates.presentation_layout</code>.</td>
+<td><a href="../presenton/17-template-to-slide/">17</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sse_response.py</code></td>
+<td>56</td>
+<td>SSE frame builders: <code>SSEResponse</code>, <code>SSEStatusResponse</code>, <code>SSETraceResponse</code>, <code>SSEErrorResponse</code>, <code>SSECompleteResponse</code>. All emit <code>event: response</code>.</td>
+<td><a href="../presenton/10-streaming/">10</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/chat.py</code></td>
+<td>54</td>
+<td>Chat request, response, history and attachment models.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/image_prompt.py</code></td>
+<td>25</td>
+<td><code>ImagePrompt</code> with optional <code>theme_prompt</code> and paired <code>target_width</code>/<code>target_height</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/image_provider_test.py</code></td>
+<td>24</td>
+<td><code>ImageProviderTestConfig</code> posted to <code>/images/test</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/theme_data.py</code></td>
+<td>34</td>
+<td><code>PresentationThemeData</code>: color roles and text font.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/user_config.py</code></td>
+<td>163</td>
+<td><code>UserConfig</code>: every recognized configuration key (provider, models, keys, image and web search settings).</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/api_error_model.py</code></td>
+<td>13</td>
+<td><code>APIErrorModel</code> (<code>status_code</code>, <code>detail</code>), also the failed webhook body.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/decomposed_file_info.py</code></td>
+<td>6</td>
+<td><code>DecomposedFileInfo</code> (<code>name</code>, <code>file_path</code>).</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/json_path_guide.py</code></td>
+<td>14</td>
+<td><code>DictGuide</code>, <code>ListGuide</code>, <code>JsonPathGuide</code>: addresses for nested keys inside slide content.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-7-fastapi-sql-models">Step 7: FastAPI SQL models<a class="headerlink" href="#step-7-fastapi-sql-models" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/models/sql/presentation.py</code></td>
+<td>125</td>
+<td><code>presentations</code> table and <code>PresentationVersion</code> (<code>v1-standard</code>, <code>v2-standard</code>): content, outlines, layout, structure, theme, fonts, <code>generation_mode</code>, <code>community_design_ids</code>, <code>owner_id</code>.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/slide.py</code></td>
+<td>45</td>
+<td><code>slides</code> table: <code>layout_group</code>, <code>layout</code>, <code>index</code>, <code>content</code>, <code>html_content</code>, <code>speaker_note</code>, <code>properties</code>, <code>ui</code>; <code>get_new_slide</code> copier.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/template_v2.py</code></td>
+<td>60</td>
+<td><code>template_v2</code> table: string id, <code>raw_layouts</code>, <code>layouts</code>, <code>components</code>, <code>merged_components</code>, <code>theme</code>, <code>assets</code>, <code>is_default</code>.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/user.py</code></td>
+<td>45</td>
+<td><code>user</code> table (SQLAlchemy declarative): username, <code>admin_slot</code>, password hash, flags, <code>auth_version</code>.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/api_key.py</code></td>
+<td>55</td>
+<td><code>api_keys</code> table: 16-hex id, secret hash, encrypted token, owner and creator, expiry, last use, revocation.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/async_task.py</code></td>
+<td>61</td>
+<td><code>async_tasks</code> table: <code>task-&lt;hex&gt;</code> id, <code>type</code>, <code>status</code>, <code>message</code>, <code>error</code>, <code>data</code>, hidden <code>payload</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/async_presentation_generation_status.py</code></td>
+<td>30</td>
+<td>Older <code>async_presentation_generation_tasks</code> table, still created and owner-scoped.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/chat_history_message.py</code></td>
+<td>49</td>
+<td><code>chat_history_messages</code>: per-conversation ordered messages with <code>tool_calls</code>.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/image_asset.py</code></td>
+<td>28</td>
+<td><code>ImageAsset</code> (no explicit <code>__tablename__</code>, so the table is <code>imageasset</code>): generated or uploaded image path, <code>is_uploaded</code>, <code>extras</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/font_upload.py</code></td>
+<td>31</td>
+<td><code>font_uploads</code>: stored font file plus parsed family, subfamily, weight and width metadata.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/webhook_subscription.py</code></td>
+<td>31</td>
+<td><code>webhook_subscriptions</code>: <code>webhook-&lt;hex&gt;</code> id, <code>url</code>, <code>secret</code>, <code>event</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/provider_settings.py</code></td>
+<td>23</td>
+<td><code>provider_settings</code> singleton (id 1) holding provider configuration as JSON.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/presenton_cloud_provider.py</code></td>
+<td>33</td>
+<td><code>presenton_cloud_provider</code> singleton: issuer, subject, email, encrypted access token, expiry.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/key_value.py</code></td>
+<td>8</td>
+<td><code>KeyValueSqlModel</code> (table <code>keyvaluesqlmodel</code>): generic key and JSON value rows.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/models/sql/ollama_pull_status.py</code></td>
+<td>9</td>
+<td><code>OllamaPullStatus</code> (table <code>ollamapullstatus</code>): Ollama model pull progress rows.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-8-fastapi-enums-and-constants">Step 8: FastAPI enums and constants<a class="headerlink" href="#step-8-fastapi-enums-and-constants" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/enums/llm_provider.py</code></td>
+<td>20</td>
+<td>Sixteen text providers, from <code>ollama</code> to <code>codex</code>.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/image_provider.py</code></td>
+<td>13</td>
+<td>Nine image providers: <code>pexels</code>, <code>pixabay</code>, <code>gemini_flash</code>, <code>nanobanana_pro</code>, <code>gpt-image-2</code>, <code>gpt-image-1.5</code>, <code>comfyui</code>, <code>open_webui</code>, <code>openai_compatible</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/web_search_provider.py</code></td>
+<td>11</td>
+<td><code>auto</code>, <code>native</code>, <code>searxng</code>, <code>tavily</code>, <code>exa</code>, <code>brave</code>, <code>serper</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/tone.py</code></td>
+<td>11</td>
+<td><code>default</code>, <code>casual</code>, <code>professional</code>, <code>funny</code>, <code>educational</code>, <code>sales_pitch</code>.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/verbosity.py</code></td>
+<td>8</td>
+<td><code>concise</code>, <code>standard</code>, <code>text-heavy</code>.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/async_task_status.py</code></td>
+<td>7</td>
+<td><code>pending</code>, <code>completed</code>, <code>error</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/webhook_event.py</code></td>
+<td>6</td>
+<td><code>presentation.generation.completed</code>, <code>presentation.generation.failed</code>.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/enums/llm_call_type.py</code></td>
+<td>8</td>
+<td>Structured or unstructured, streaming or not.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/constants/presentation.py</code></td>
+<td>53</td>
+<td><code>MAX_NUMBER_OF_SLIDES = 50</code>, <code>MAX_OUTLINE_WORDS</code> (default 100), discovery and ordering of default templates.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/constants/llm.py</code></td>
+<td>26</td>
+<td>Default model id per provider and the supported Codex models.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/constants/documents.py</code></td>
+<td>88</td>
+<td>Accepted upload extensions and MIME types per document family.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/constants/supported_ollama_models.py</code></td>
+<td>354</td>
+<td>Curated Ollama model families with sizes, and the merge with pulled models.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-9-fastapi-services">Step 9: FastAPI services<a class="headerlink" href="#step-9-fastapi-services" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/services/database.py</code></td>
+<td>152</td>
+<td>Async engine and session maker, SQLite foreign keys, owner-scoped SELECT criteria via <code>do_orm_execute</code>, owner stamping in <code>before_flush</code>, table creation.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/api_keys.py</code></td>
+<td>133</td>
+<td><code>sk-presenton-&lt;id&gt;.&lt;secret&gt;</code> format, issue, verify (hash plus expiry and revocation), Fernet encryption for reveal.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/async_tasks.py</code></td>
+<td>52</td>
+<td><code>fail_interrupted_async_tasks</code>: marks tasks left pending by a restart as errors at startup.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/webhook_service.py</code></td>
+<td>55</td>
+<td>Sends webhook POSTs to every matching subscription, with Bearer secret; errors are printed only.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/concurrent_service.py</code></td>
+<td>40</td>
+<td><code>CONCURRENT_SERVICE.run_task</code>: fire-and-forget <code>asyncio</code> tasks with an optional delay.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/provider_settings.py</code></td>
+<td>191</td>
+<td>Read, sanitize, merge and save the provider settings row; mirror to <code>userConfig.json</code>; migrate from the file at startup.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/presenton_cloud.py</code></td>
+<td>219</td>
+<td>Presenton Cloud credential storage (encrypted), token validity, authenticated cloud requests, revoke.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/presenton_cloud_proxy.py</code></td>
+<td>708</td>
+<td>Forwards selected API and asset paths to Presenton Cloud when <code>LLM=presenton</code>, and syncs results locally.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/presenton_cloud_persistence.py</code></td>
+<td>246</td>
+<td>Writes cloud-created presentations and slides into the local tables.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/community_presentations.py</code></td>
+<td>473</td>
+<td>Community API client, id normalization (max 3), reference loading (max 6 slides, 90,000 characters), design context prompt.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/documents_loader.py</code></td>
+<td>357</td>
+<td><code>DocumentsLoader</code>: routes PDF, text, office, image and other files to LiteParse, the office extractor or OCR; cleans extracted text.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/liteparse_service.py</code></td>
+<td>469</td>
+<td>Runs the Node LiteParse runner as a subprocess (<code>LITEPARSE_DPI</code>, <code>LITEPARSE_NUM_WORKERS</code>, 600 s timeout).</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/office_document_service.py</code></td>
+<td>171</td>
+<td>Pure-XML text extraction for DOCX, PPTX, XLSX and ODF files.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/document_conversion_service.py</code></td>
+<td>89</td>
+<td>Converts images to PNG with Pillow (EXIF-aware) before OCR.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/score_based_chunker.py</code></td>
+<td>163</td>
+<td>Heading-scored Markdown chunker.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/temp_file_service.py</code></td>
+<td>191</td>
+<td>Owner-scoped temp directory creation, path validation and cleanup (<code>TEMP_FILE_SERVICE</code>).</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/image_generation_service.py</code></td>
+<td>1144</td>
+<td>Dispatch to OpenAI, Gemini, ComfyUI, Open WebUI, OpenAI-compatible, Pexels and Pixabay; size and ratio mapping; ComfyUI workflow injection.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/icon_finder_service.py</code></td>
+<td>179</td>
+<td>Lazy FastEmbed vector store over the bundled icon catalog; <code>search_icons</code> by weight.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/export_task_service.py</code></td>
+<td>863</td>
+<td>Runs the Node export runtime (<code>export</code>, PPTX to HTML or JSON, HTML or JSON to images) and moves outputs into owner directories.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/mem0_oss_memory.py</code></td>
+<td>218</td>
+<td>One shared Mem0 OSS client per process, configured from env, with operation locks.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/mem0_presentation_memory_service.py</code></td>
+<td>245</td>
+<td>Per-presentation Mem0 memory: store generation context, outlines and slide edits; retrieve context (<code>MEM0_TOP_K</code> 8, 6000 characters).</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-10-fastapi-chat-assistant-services">Step 10: FastAPI chat assistant services<a class="headerlink" href="#step-10-fastapi-chat-assistant-services" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/services/chat/service.py</code></td>
+<td>887</td>
+<td><code>PresentationChatService</code>: builds the turn, runs the LLM tool loop (<code>MAX_TOOL_ROUNDS = 40</code>), parses attachments, persists turns, streams events.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/tools.py</code></td>
+<td>1863</td>
+<td><code>ChatTools</code>: tool definitions (camelCase names such as <code>addNewSlide</code>, <code>getAvailableLayouts</code>, <code>searchSlide</code>) and their executors, with argument repair.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/schemas.py</code></td>
+<td>1065</td>
+<td>Strict Pydantic input schemas for every chat tool.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/prompts.py</code></td>
+<td>250</td>
+<td>Standard and Smart chat system prompts and <code>build_system_prompt</code>.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/memory_layer.py</code></td>
+<td>4131</td>
+<td><code>PresentationChatMemoryLayer</code>: reads and mutates presentation state for tools (outlines, slides, layouts, insert boxes, smart HTML).</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/slide_ui_helpers.py</code></td>
+<td>2271</td>
+<td>Validation and normalization of slide <code>ui</code> element trees: charts, tables, images, vectors, infographics.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/sql_chat_history.py</code></td>
+<td>275</td>
+<td>SQL persistence of chat threads: load, append, replace, delete, list.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/chat_memory_store.py</code></td>
+<td>354</td>
+<td>Legacy chat memory store, read when migrating old threads.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/conversation_store.py</code></td>
+<td>80</td>
+<td><code>ChatConversationStore.load_history</code>: loads and migrates legacy history into SQL.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/llm_tools.py</code></td>
+<td>9</td>
+<td>Returns only function tools for chat; web search is deliberately not added.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/presentation_context_store.py</code></td>
+<td>5</td>
+<td>Alias: <code>PresentationContextStore</code> is <code>PresentationChatMemoryLayer</code>.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/services/chat/infographic_catalog.py</code></td>
+<td>3</td>
+<td>Compatibility re-export of <code>utils.infographic_catalog</code>.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-11-fastapi-utilities">Step 11: FastAPI utilities<a class="headerlink" href="#step-11-fastapi-utilities" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/utils/llm_config.py</code></td>
+<td>524</td>
+<td>Builds the <code>llmai</code> client config per provider (<code>match</code> on <code>LLMProvider</code>), generation defaults (profile, max tokens, reasoning), Codex token refresh.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_provider.py</code></td>
+<td>193</td>
+<td>Provider selection predicates (<code>is_openai_selected</code> and others), model resolution, <code>get_llm_client</code>.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_utils.py</code></td>
+<td>535</td>
+<td>Structured generation with schema-validation retries, streaming events, token estimates, disconnect polling, generation metrics.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_client_error_handler.py</code></td>
+<td>76</td>
+<td>Maps provider exceptions to HTTP errors, including the Codex re-auth marker header.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/available_models.py</code></td>
+<td>252</td>
+<td>Model listing for OpenAI-compatible, Together, Anthropic and Google endpoints with URL validation.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/model_availability.py</code></td>
+<td>226</td>
+<td>Pre-flight check that the configured LLM and image provider are usable.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/provider_error_messages.py</code></td>
+<td>187</td>
+<td>Safe user-facing messages for invalid keys, moderation blocks and model access errors.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/get_env.py</code></td>
+<td>488</td>
+<td>One getter per environment variable, plus generation mode, community flag, auth and Electron flags.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/set_env.py</code></td>
+<td>379</td>
+<td>Matching setters used when loading configuration into the process environment.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/user_config.py</code></td>
+<td>619</td>
+<td><code>get_user_config</code>, <code>update_env_with_user_config</code> (file and DB settings into env), Codex token write-back.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/user_config_store.py</code></td>
+<td>219</td>
+<td>Locked, atomic, retried read and write of <code>userConfig.json</code> with a backup copy.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/db_utils.py</code></td>
+<td>126</td>
+<td>Database URL resolution (default SQLite <code>fastapi.db</code> in app data), async driver rewrite for PostgreSQL and MySQL, pool settings.</td>
+<td><a href="../presenton/07-data-model/">07</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/asset_directory_utils.py</code></td>
+<td>235</td>
+<td>Owner-scoped <code>images</code>, <code>exports</code>, <code>uploads</code> directories and conversions between filesystem paths and <code>/app_data</code> URLs.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/process_slides.py</code></td>
+<td>453</td>
+<td>Asset hydration: finds <code>__image_prompt__</code> and <code>__icon_query__</code> keys in slide content, adds placeholders, fetches images and icons, writes URLs back.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/schema_utils.py</code></td>
+<td>428</td>
+<td>JSON Schema surgery: add or remove fields, strict mode, <code>$ref</code> resolution, validation error formatting, constraint sentences for prompts.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/dict_utils.py</code></td>
+<td>89</td>
+<td>Path-based get and set in nested dicts, <code>deep_update</code>.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/outline_utils.py</code></td>
+<td>205</td>
+<td>Title extraction, outline counts with TOC and title slide, TOC count, image URLs in outlines.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/outline_limits.py</code></td>
+<td>68</td>
+<td>Word counting and trimming that enforce <code>MAX_OUTLINE_WORDS</code>.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/ppt_utils.py</code></td>
+<td>82</td>
+<td>Finds the TOC or list layout index by regex for TOC insertion.</td>
+<td><a href="../presenton/08-standard-pipeline/">08</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/web_search.py</code></td>
+<td>330</td>
+<td>Native versus external web search routing and SearXNG, Tavily, Exa, Brave and Serper clients.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/image_provider.py</code></td>
+<td>61</td>
+<td>Image provider selection predicates and "image generation disabled" flag.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/image_generation_error.py</code></td>
+<td>86</td>
+<td>Normalizes image provider exceptions into HTTP errors and per-slide warnings.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/icon_weights.py</code></td>
+<td>54</td>
+<td>Phosphor weights (<code>bold</code> default, <code>duotone</code>, <code>fill</code>, <code>light</code>, <code>regular</code>, <code>thin</code>) and normalization.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/infographic_catalog.py</code></td>
+<td>639</td>
+<td>Catalog of infographic types (timeline, funnel, gauge, matrix and more) with default sizes and data normalization.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/latex_text.py</code></td>
+<td>349</td>
+<td>Parses <code>&lt;latex&gt;</code> tags and Markdown bold into text runs for template text elements.</td>
+<td><a href="../presenton/17-template-to-slide/">17</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/smart_slide_layout.py</code></td>
+<td>289</td>
+<td>Static HTML inspection of Smart slides (1280x720) for overflow and overlap risks.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/font_uploads.py</code></td>
+<td>463</td>
+<td>Font file validation, size limits, persistence, metadata extraction, listing, deletion, variant lookup.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/export_utils.py</code></td>
+<td>75</td>
+<td><code>export_presentation</code>: builds the <code>/pdf-maker</code> URL (cookie in the fragment) and calls the export runtime.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/export_permissions.py</code></td>
+<td>86</td>
+<td>Sets group-readable permissions on exported files so nginx can serve them.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/filename_utils.py</code></td>
+<td>18</td>
+<td>Byte-limited safe export basename.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/mcp_public_urls.py</code></td>
+<td>52</td>
+<td>Detects MCP requests by header and makes result links absolute.</td>
+<td><a href="../presenton/15-api-async-mcp/">15</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/sse.py</code></td>
+<td>38</td>
+<td><code>safe_sse_stream</code>: wraps a generator, turns late exceptions into an SSE <code>error</code> frame, runs cleanup.</td>
+<td><a href="../presenton/10-streaming/">10</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/validators.py</code></td>
+<td>48</td>
+<td>Upload count, size and type validation.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/ollama.py</code></td>
+<td>231</td>
+<td>Ollama HTTP helpers: list pulled models, library catalog, streaming pull.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/ocr_language.py</code></td>
+<td>126</td>
+<td>Maps UI language names to OCR language codes.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/path_helpers.py</code></td>
+<td>29</td>
+<td>Resource and writable path resolution relative to the process working directory.</td>
+<td><a href="../presenton/05-fastapi-startup/">05</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/mime_types.py</code></td>
+<td>40</td>
+<td>Registers explicit MIME types so static serving does not depend on the host database.</td>
+<td><a href="../presenton/05-fastapi-startup/">05</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/safe_logging.py</code></td>
+<td>50</td>
+<td>Logging with control-character escaping to prevent log injection.</td>
+<td><a href="../presenton/28-ci-tests-security/">28</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/runtime_limits.py</code></td>
+<td>66</td>
+<td>Memory snapshots and a bounded text buffer for subprocess output.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-12-fastapi-llm-calls-and-oauth-utilities">Step 12: FastAPI LLM calls and OAuth utilities<a class="headerlink" href="#step-12-fastapi-llm-calls-and-oauth-utilities" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/generate_presentation_outlines.py</code></td>
+<td>405</td>
+<td>Outline prompts and streaming generation, with web search status events.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/generate_presentation_structure.py</code></td>
+<td>211</td>
+<td>Picks a layout index per outline slide (structured output), including the slides-Markdown variant.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/generate_slide_content.py</code></td>
+<td>275</td>
+<td>Fills one slide's JSON schema from its outline, adding <code>__speaker_note__</code>.</td>
+<td><a href="../presenton/09-prompts-and-schemas/">09</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/generate_smart_presentation.py</code></td>
+<td>936</td>
+<td>Smart deck prompts, HTML sanitizing rules, slide parsing, slide count resolution (default 8, max 50), up to 8 attempts.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/generate_web_search_query.py</code></td>
+<td>74</td>
+<td>Generates a search query for external web search.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/select_slide_type_on_edit.py</code></td>
+<td>92</td>
+<td>Chooses a slide layout for an edit prompt.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/edit_slide.py</code></td>
+<td>167</td>
+<td>Rewrites a slide's structured content from a prompt.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/llm_calls/edit_slide_html.py</code></td>
+<td>95</td>
+<td>Rewrites a slide's HTML from a prompt and extracts the HTML from the reply.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/oauth/openai_codex.py</code></td>
+<td>614</td>
+<td>Python port of the Codex ChatGPT OAuth flow: authorize URL, callback server on port 1455, token exchange and refresh, account profile.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/utils/oauth/pkce.py</code></td>
+<td>23</td>
+<td>PKCE verifier and challenge generation.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-13-fastapi-template-package">Step 13: FastAPI template package<a class="headerlink" href="#step-13-fastapi-template-package" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/templates/default_templates.py</code></td>
+<td>316</td>
+<td>Imports <code>templates/*/template.json</code> into <code>template_v2</code> rows (<code>is_default=True</code>) at startup, copies static assets, removes stale defaults.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/presentation_layout.py</code></td>
+<td>62</td>
+<td><code>SlideLayoutModel</code> (id, name, description, <code>json_schema</code>) and <code>PresentationLayoutModel</code> (name, <code>ordered</code>, icon type, slides).</td>
+<td><a href="../presenton/17-template-to-slide/">17</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/preview.py</code></td>
+<td>62</td>
+<td>Thin wrappers exposing the font check and fonts-plus-preview handlers.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/fonts_and_slides_preview.py</code></td>
+<td>1934</td>
+<td>PPTX font check, font upload and replacement, slide preview rendering with local fonts, Tailwind and Chart.js assets.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/pptx_font_utils.py</code></td>
+<td>1669</td>
+<td>OOXML font extraction, theme typeface resolution, Google Fonts lookup, font replacement inside PPTX XML.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-14-template-v2-engine">Step 14: Template v2 engine<a class="headerlink" href="#step-14-template-v2-engine" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/fastapi/templates/v2/models/elements.py</code></td>
+<td>694</td>
+<td>Pydantic element models matching the frontend: text, image, text-list, table, vector, chart, infographic, container, flex, grid, group.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/models/layouts.py</code></td>
+<td>977</td>
+<td>Raw and final slide layouts, components, merged components, generation options and the visual-replacement planning models.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/schema.py</code></td>
+<td>1548</td>
+<td>Converts a layout into the content JSON Schema the LLM fills; only elements with <code>decorative: false</code> become fields.</td>
+<td><a href="../presenton/17-template-to-slide/">17</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/content.py</code></td>
+<td>87</td>
+<td>Applies generated content to element structures, including repeated top-level groups.</td>
+<td><a href="../presenton/17-template-to-slide/">17</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/theme.py</code></td>
+<td>806</td>
+<td>Builds a color and font profile from layouts, picks theme roles (LLM or deterministic), enforces contrast.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/generation.py</code></td>
+<td>1371</td>
+<td>Facade for PPTX-to-template generation: parallel per-slide layout generation (max 10 workers), prompted layouts, component merging; delegates to <code>certified_generation</code>.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/certified_generation.py</code></td>
+<td>4633</td>
+<td>Multi-pass layout generation: visual data regions, flexible regions, text capacity, component clustering, validation retries (5).</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/fastapi/templates/v2/tools.py</code></td>
+<td>123</td>
+<td><code>previewSlide</code> LLM tool that renders a candidate layout for the model to inspect.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-15-nextjs-app-shell-routes-and-pages">Step 15: Next.js app shell, routes and pages<a class="headerlink" href="#step-15-nextjs-app-shell-routes-and-pages" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/nextjs/proxy.ts</code></td>
+<td>176</td>
+<td>Request proxy (Next.js middleware): desktop guard, rewrites <code>/api/v1</code>, <code>/api/v2</code>, <code>/app_data</code>, <code>/static</code> to FastAPI, session check for <code>/api/*</code>, <code>/pdf-maker</code> export session cookie.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/next.config.mjs</code></td>
+<td>80</td>
+<td>Standalone output in <code>.next-build</code>, image remote patterns, unoptimized images for Electron, CORS header for vendored fonts.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/layout.tsx</code></td>
+<td>73</td>
+<td>Root layout and metadata.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/page.tsx</code></td>
+<td>28</td>
+<td><code>/</code>: shows <code>AuthGate</code> until setup and sign-in are done (skipped when auth is disabled), then <code>Home</code> inside <code>ConfigurationInitializer</code>.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/providers.tsx</code></td>
+<td>12</td>
+<td>Redux <code>Provider</code> wrapper.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/ConfigurationInitializer.tsx</code></td>
+<td>387</td>
+<td>Loads auth status, runtime config, <code>/api/user-config</code> and Presenton status; fills Redux and routes to setup when unconfigured.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/ChatGptAuthRedirectHandler.tsx</code></td>
+<td>57</td>
+<td>Reacts to Codex re-auth events by redirecting to settings.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/MixpanelInitializer.tsx</code></td>
+<td>24</td>
+<td>Initializes anonymous analytics unless disabled.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(export)/pdf-maker/page.tsx</code></td>
+<td>26</td>
+<td><code>/pdf-maker?id=...</code> entry used by the headless export browser.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(export)/pdf-maker/PdfMakerPage.tsx</code></td>
+<td>321</td>
+<td>Fetches the deck through <code>/api/export-presentation-data/{id}</code> with <code>x-export-cookie</code>, renders every slide at print size.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/layout.tsx</code></td>
+<td>13</td>
+<td>Requires an app session for every generator route and wraps in <code>ConfigurationInitializer</code>.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/(dashboard)/layout.tsx</code></td>
+<td>25</td>
+<td>Dashboard sidebar; hides Templates in Smart-only mode and Community when disabled.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/(dashboard)/dashboard/components/DashboardPage.tsx</code></td>
+<td>620</td>
+<td>Presentation list, duplicate, delete, blank deck dialog.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/(dashboard)/settings/SettingPage.tsx</code></td>
+<td>509</td>
+<td>Settings page: text, image and web search providers, Codex and Presenton account, privacy.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/(dashboard)/admin/AdminPanel.tsx</code></td>
+<td>901</td>
+<td>Admin UI: users, password resets, API keys.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/(dashboard)/templates/components/TemplateLibraryUi.tsx</code></td>
+<td>175</td>
+<td>Template library grid.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/(dashboard)/community/components/CommunityPage.tsx</code></td>
+<td>511</td>
+<td>Community design browser.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/upload/components/UploadPage.tsx</code></td>
+<td>691</td>
+<td>Prompt and document form: uploads files, decomposes them, calls <code>/presentation/create</code>, routes to the outline or presentation page.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/outline/components/OutlinePage.tsx</code></td>
+<td>499</td>
+<td>Outline editing and template selection.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/outline/hooks/useOutlineStreaming.ts</code></td>
+<td>264</td>
+<td>Consumes <code>/outlines/stream/{id}</code> SSE into Redux.</td>
+<td><a href="../presenton/10-streaming/">10</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/outline/hooks/usePresentationGeneration.ts</code></td>
+<td>153</td>
+<td>Calls <code>/presentation/prepare</code> and navigates to <code>/presentation?id=...&amp;stream=true</code>.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/presentation/components/PresentationPage.tsx</code></td>
+<td>1055</td>
+<td>Editor page shell: slides, side panel, chat, presentation mode.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/presentation/components/PresentationHeader.tsx</code></td>
+<td>823</td>
+<td>Header actions including export through <code>POST /api/export-presentation</code> or the Electron IPC bridge.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/presentation/components/Chat.tsx</code></td>
+<td>3443</td>
+<td>Chat assistant panel: streaming replies, tool activity, attachments, conversation list.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/presentation/hooks/usePresentationStreaming.ts</code></td>
+<td>723</td>
+<td>Consumes <code>/presentation/stream/{id}</code> SSE (chunks, slide assets, Smart HTML, metrics).</td>
+<td><a href="../presenton/10-streaming/">10</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/presentation/hooks/useAutoSave.tsx</code></td>
+<td>212</td>
+<td>Debounced auto-save through <code>PATCH /presentation/update</code>.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/presentation/utils/streamAssetMerge.ts</code></td>
+<td>140</td>
+<td>Merges <code>slide_assets</code> updates without overwriting already-resolved asset URLs.</td>
+<td><a href="../presenton/10-streaming/">10</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/custom-template/hooks/useTemplateCreation.ts</code></td>
+<td>877</td>
+<td>Step-by-step custom template flow: font check, preview upload, init, per-slide layouts, blocks.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/template-preview/components/TemplatePreviewClient.tsx</code></td>
+<td>1371</td>
+<td>Template preview and editor at <code>/template-preview?templateV2Id=...</code>.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/documents-preview/components/DocumentPreviewPage.tsx</code></td>
+<td>310</td>
+<td>Shows extracted document text before generation (Electron reads files through IPC).</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/components/SmartHtmlSlide.tsx</code></td>
+<td>320</td>
+<td>Renders a Smart slide's <code>html_content</code> with Tailwind and Chart.js runtimes.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/components/TemplateV2HtmlSlidePreview.tsx</code></td>
+<td>473</td>
+<td>Read-only HTML render of a Template v2 slide <code>ui</code>.</td>
+<td><a href="../presenton/17-template-to-slide/">17</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/components/V1ContentRender.tsx</code></td>
+<td>262</td>
+<td>Renderer for legacy <code>v1-standard</code> slides.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/presentation-generation.ts</code></td>
+<td>368</td>
+<td>API client for create, blank, prepare, update, slide update, files, outlines, images, icons, regenerate.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/dashboard.ts</code></td>
+<td>127</td>
+<td>API client for list, get, delete, duplicate.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/template.ts</code></td>
+<td>347</td>
+<td>API client for templates and async template tasks.</td>
+<td><a href="../presenton/18-custom-templates/">18</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/chat.ts</code></td>
+<td>410</td>
+<td>API client for chat endpoints, including the SSE reader.</td>
+<td><a href="../presenton/14-editing-and-chat/">14</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/images.ts</code></td>
+<td>135</td>
+<td>API client for image search, generation, upload, library and provider test.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/community.ts</code></td>
+<td>162</td>
+<td>API client for community designs with error state mapping.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/(presentation-generator)/services/api/api-error-handler.ts</code></td>
+<td>172</td>
+<td><code>ApiResponseHandler</code> and <code>ApiResponseError</code> for uniform error handling.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+</tbody>
+</table>
+<p>The 11 <code>servers/nextjs/app/api/**/route.ts</code> files are listed with their methods in <a href="../appendix-endpoints/">Endpoint index</a>, Step 10.</p>
+<h2 id="step-16-nextjs-components">Step 16: Next.js components<a class="headerlink" href="#step-16-nextjs-components" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/nextjs/components/Auth/AuthGate.tsx</code></td>
+<td>454</td>
+<td>First-run setup and login screens.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/Home.tsx</code></td>
+<td>41</td>
+<td>Admin onboarding wizard (provider setup in <code>PresentonMode</code>, then <code>FinalStep</code>); non-admin users are redirected to <code>/upload</code>.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/LLMSelection.tsx</code></td>
+<td>405</td>
+<td>Text provider picker and per-provider configuration forms.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/AdvancedTextProviderSettings.tsx</code></td>
+<td>625</td>
+<td>Generation profile, max output tokens and reasoning settings; reads <code>/generation/defaults</code>.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/ImageSelectionConfig.tsx</code></td>
+<td>399</td>
+<td>Image provider picker and its fields.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/OnBoarding/PresentonMode.tsx</code></td>
+<td>1779</td>
+<td>Onboarding provider setup, including model discovery calls.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/OnBoarding/OnboardingPresentonAccount.tsx</code></td>
+<td>503</td>
+<td>Presenton Cloud account linking during onboarding (device flow UI).</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/OnBoarding/FinalStep.tsx</code></td>
+<td>126</td>
+<td>Final onboarding step: telemetry choice and saving config through <code>/api/user-config</code>.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/README.md</code></td>
+<td>1289</td>
+<td>Upstream developer documentation for the Template v2 editor.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/types.ts</code></td>
+<td>745</td>
+<td>Editor element and infographic types; stage geometry in canvas pixels.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/model/core.ts</code></td>
+<td>199</td>
+<td>Stage constants (1280x720), raw <code>ui</code> types, selection types, history limit.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/model/model.ts</code></td>
+<td>2336</td>
+<td>Pure functions that update components and elements inside a slide <code>ui</code> (move, resize, delete, scale).</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/model/element-model.ts</code></td>
+<td>249</td>
+<td>Element box, text, font, fill and table accessors.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/surface/TemplateV2KonvaSlide.tsx</code></td>
+<td>3400</td>
+<td>The Konva editing surface: local <code>uiDraft</code>, selection, toolbars, <code>commitUi</code> into undo history and Redux.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/surface/nodes.tsx</code></td>
+<td>6548</td>
+<td>Konva node renderers for every component and element type.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/text/TiptapInlineTextEditor.tsx</code></td>
+<td>1028</td>
+<td>Tiptap-based inline rich-text editing over the canvas.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/importing/template-v2-import.ts</code></td>
+<td>2235</td>
+<td>Adapts Template v2 API responses into editor decks and slides.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/charts/TemplateV2ChartJsElement.tsx</code></td>
+<td>1203</td>
+<td>Chart element rendering with Chart.js.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/components/slide-editor/tables/TemplateV2TableElement.tsx</code></td>
+<td>522</td>
+<td>Table element rendering and cell editing.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-17-nextjs-lib-store-utils-and-types">Step 17: Next.js lib, store, utils and types<a class="headerlink" href="#step-17-nextjs-lib-store-utils-and-types" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/nextjs/lib/template-v2-json-to-html.ts</code></td>
+<td>4145</td>
+<td>Converts a Template v2 slide <code>ui</code> into standalone HTML (1280x720) for previews and export.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/run-bundled-presentation-export.ts</code></td>
+<td>272</td>
+<td>Locates <code>presentation-export/</code> and runs the export runtime for PDF or PPTX.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/server-auth-role.ts</code></td>
+<td>70</td>
+<td><code>authStatusForRequest</code> (calls FastAPI <code>/api/v1/auth/status</code>) and <code>requireAdminApi</code>.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/desktop-auth.ts</code></td>
+<td>44</td>
+<td>Desktop token guard for Next.js requests.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/fastapi-internal.ts</code></td>
+<td>51</td>
+<td>FastAPI base URL and auth headers for server-side calls.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/runtime-provider-config.ts</code></td>
+<td>45</td>
+<td>Reads <code>userConfig.json</code> and redacts credential fields to <code>__configured__</code>.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/user-config-store.ts</code></td>
+<td>232</td>
+<td>Locked read and update of <code>userConfig.json</code> from Node.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/readable-local-file.ts</code></td>
+<td>143</td>
+<td>Owner-scoped allowlist for reading local files.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/template-theme.ts</code></td>
+<td>354</td>
+<td>Template theme defaults, normalization and resolution for a presentation.</td>
+<td><a href="../presenton/19-themes-and-fonts/">19</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/svg-color.ts</code></td>
+<td>576</td>
+<td>SVG recoloring and <code>/api/update-svg</code> URL building.</td>
+<td><a href="../presenton/12-images-icons-search/">12</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/tailwind-browser.ts</code></td>
+<td>49</td>
+<td>Injects the pinned Tailwind browser runtime for Smart HTML.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/chart-browser.ts</code></td>
+<td>136</td>
+<td>Loads Chart.js and its data-labels plugin in the browser.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/lib/math.ts</code></td>
+<td>148</td>
+<td>LaTeX normalization, rendering and SVG data URIs.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/store/store.ts</code></td>
+<td>18</td>
+<td>Redux store with four reducers.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/store/slices/presentationGeneration.ts</code></td>
+<td>608</td>
+<td>Presentation data, outlines, streaming flags, slide mutations, chat HTML selection.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/store/slices/undoRedoSlice.ts</code></td>
+<td>142</td>
+<td>Slide history with undo and redo.</td>
+<td><a href="../presenton/22-slide-editor/">22</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/store/slices/userConfig.ts</code></td>
+<td>32</td>
+<td><code>llm_config</code> and the current user role.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/store/slices/presentationGenUpload.ts</code></td>
+<td>34</td>
+<td>Upload page state (<code>pptGenUpload</code>).</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/api.ts</code></td>
+<td>416</td>
+<td><code>getApiUrl</code>, <code>getFastAPIUrl</code>, backend reachability, asset URL resolution.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/auth.ts</code></td>
+<td>20</td>
+<td><code>isAuthDisabled()</code> from <code>DISABLE_AUTH</code>.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/serverAuth.ts</code></td>
+<td>121</td>
+<td><code>getServerAuthStatus</code>, <code>requireAppSession</code>, <code>requireAdminSession</code> for server components.</td>
+<td><a href="../presenton/25-auth-and-multiuser/">25</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/storeHelpers.ts</code></td>
+<td>425</td>
+<td>LLM config normalization and validation, saving through <code>/api/user-config</code>.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/providerConstants.ts</code></td>
+<td>325</td>
+<td>UI lists of text, image and web search providers and quality options.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/providerUtils.ts</code></td>
+<td>460</td>
+<td>Provider switching and Ollama model listing and pulling.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/presentationGenerationMode.ts</code></td>
+<td>34</td>
+<td>Normalizes <code>PRESENTATION_GENERATION_MODE</code> and picks the initial mode.</td>
+<td><a href="../presenton/13-smart-mode/">13</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/presentationLimits.ts</code></td>
+<td>58</td>
+<td>Frontend copies of the slide and outline word limits.</td>
+<td><a href="../presenton/21-user-journey/">21</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/chatgptAuth.ts</code></td>
+<td>127</td>
+<td>Codex re-auth detection and logout helper.</td>
+<td><a href="../presenton/23-settings-and-auth-ui/">23</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/utils/mixpanel.ts</code></td>
+<td>350</td>
+<td>Analytics events honoring <code>/api/telemetry-status</code>.</td>
+<td><a href="../presenton/20-nextjs-architecture/">20</a></td>
+</tr>
+<tr>
+<td><code>servers/nextjs/types/llm_config.ts</code></td>
+<td>153</td>
+<td><code>LLMConfig</code> interface mirroring the config keys.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The UI enforces limits from <code>servers/nextjs/utils/presentationLimits.ts</code>, while FastAPI enforces <code>MAX_NUMBER_OF_SLIDES</code> and <code>MAX_OUTLINE_WORDS</code> from <code>servers/fastapi/constants/presentation.py</code>. <code>MAX_OUTLINE_WORDS</code> is read from the environment by FastAPI, so changing it without updating the frontend constant lets the UI accept or trim content differently from the server.</p>
+</div>
+<h2 id="step-18-electron">Step 18: Electron<a class="headerlink" href="#step-18-electron" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>electron/app/main.ts</code></td>
+<td>547</td>
+<td>Main process: sets <code>DISABLE_AUTH</code> and <code>PRESENTON_ELECTRON</code>, starts FastAPI and Next.js on free ports, initializes the desktop session, creates the window.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/preloads/index.ts</code></td>
+<td>14</td>
+<td>Exposes <code>window.env</code> and <code>window.electron.exportPresentation</code> and <code>readFile</code> via <code>contextBridge</code>.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/ipc/export_handlers.ts</code></td>
+<td>483</td>
+<td><code>export-presentation</code> IPC: runs the export runtime and saves the file.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/ipc/read_file.ts</code></td>
+<td>14</td>
+<td><code>read-file</code> IPC handler.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/servers.ts</code></td>
+<td>428</td>
+<td><code>startFastApiServer</code> and <code>startNextJsServer</code> child processes.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/constants.ts</code></td>
+<td>344</td>
+<td>App directories; <code>userConfig.json</code> lives in the user-data directory.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/desktop-auth.ts</code></td>
+<td>50</td>
+<td>Creates the desktop session cookie and token header.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/export-chromium.ts</code></td>
+<td>581</td>
+<td>Resolves, installs and repairs the Chromium used for export.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/user-config-env.ts</code></td>
+<td>45</td>
+<td>Seeds the desktop user config from env with Docker's normalization.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/user-config-store.ts</code></td>
+<td>233</td>
+<td>Electron copy of the locked <code>userConfig.json</code> store.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/update-checker.ts</code></td>
+<td>390</td>
+<td>Polls for new versions and injects an update banner.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/app/utils/imagemagick-runtime.ts</code></td>
+<td>208</td>
+<td>Resolves the bundled ImageMagick for document extraction.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+<tr>
+<td><code>electron/build.js</code></td>
+<td>1016</td>
+<td><code>electron-builder</code> configuration and platform signing logic.</td>
+<td><a href="../presenton/27-electron/">27</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-19-root-scripts-and-built-in-templates">Step 19: Root scripts and built-in templates<a class="headerlink" href="#step-19-root-scripts-and-built-in-templates" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>Responsibility</th>
+<th>Ch.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/sync-presentation-export.cjs</code></td>
+<td>411</td>
+<td>Installs the pinned <code>@presenton/export-core</code> release into <code>presentation-export/</code> (<code>--force</code>, <code>--check-only</code>).</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>scripts/run-presentation-export.mjs</code></td>
+<td>135</td>
+<td>Runner that calls <code>runTask</code> from <code>@presenton/export-core</code> with cookies, app-data and Chromium paths.</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>scripts/export-permissions.cjs</code></td>
+<td>66</td>
+<td>Gives exported files a group the web server can read (<code>www-data</code> or <code>nginx</code>).</td>
+<td><a href="../presenton/24-export-pipeline/">24</a></td>
+</tr>
+<tr>
+<td><code>scripts/sync-document-dependencies.cjs</code></td>
+<td>63</td>
+<td>Verifies or reinstalls LiteParse and sharp against the lockfile.</td>
+<td><a href="../presenton/11-document-ingestion/">11</a></td>
+</tr>
+<tr>
+<td><code>scripts/user-config-env.cjs</code></td>
+<td>246</td>
+<td>Env-to-<code>userConfig.json</code> key list and normalization shared by Docker and Electron.</td>
+<td><a href="../presenton/06-configuration-and-providers/">06</a></td>
+</tr>
+<tr>
+<td><code>scripts/convert-template.mjs</code></td>
+<td>364</td>
+<td>Repackages a template JSON into the built-in <code>template.json</code> format with static assets.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>scripts/convert-presentation-template.mjs</code></td>
+<td>357</td>
+<td>Converts a saved presentation JSON into a built-in template.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+<tr>
+<td><code>scripts/presenton-terminal-banner.mjs</code></td>
+<td>191</td>
+<td>Startup banner printed by the container.</td>
+<td><a href="../presenton/26-docker-and-deployment/">26</a></td>
+</tr>
+<tr>
+<td><code>templates/general/template.json</code></td>
+<td>17427</td>
+<td>Example built-in template: keys <code>id</code>, <code>name</code>, <code>description</code>, <code>thumbnail</code>, <code>merged_components</code> (15), <code>layouts</code> (12), <code>fonts</code>, <code>theme</code>. All 16 template folders share this shape plus a <code>static/</code> asset folder.</td>
+<td><a href="../presenton/16-template-v2-format/">16</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>templates/&lt;name&gt;/template.json</code> is not read at request time. <code>import_default_templates_on_startup</code> copies it into the <code>template_v2</code> table on every boot (<code>servers/fastapi/api/lifespan.py:64</code>). Editing a built-in template file requires a restart, and edits made to a default template through the API are blocked (<code>_require_private_template</code>) because the next boot would overwrite them.</p>
+</div>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Where every major responsibility lives: routers in <code>servers/fastapi/api</code>, persistence in <code>models/sql</code> and <code>services/database.py</code>, generation in <code>utils/llm_calls</code> and <code>templates/v2</code>, and UI in <code>servers/nextjs/app</code> and <code>components/slide-editor</code>.</li>
+<li>Which files are the largest and densest: <code>presentation.py</code> (3393 lines), <code>template.py</code> (2175), <code>services/chat/memory_layer.py</code> (4131), <code>templates/v2/certified_generation.py</code> (4633), <code>slide-editor/surface/nodes.tsx</code> (6548) and <code>lib/template-v2-json-to-html.ts</code> (4145).</li>
+<li>Which concerns are duplicated across FastAPI, Next.js and Electron and must change together.</li>
+<li>That built-in templates are imported from <code>templates/*/template.json</code> at startup, not served from disk.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Look up unfamiliar terms in the <a href="../appendix-glossary/">Glossary</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../appendix-endpoints/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Endpoint index">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Endpoint index
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

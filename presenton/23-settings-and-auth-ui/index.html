@@ -1,0 +1,3980 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/23-settings-and-auth-ui/">
+      
+      
+        <link rel="prev" href="../22-slide-editor/">
+      
+      
+        <link rel="next" href="../24-export-pipeline/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Settings, onboarding, auth UI - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#settings-onboarding-auth-ui" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Settings, onboarding, auth UI
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-where-configuration-lives-and-how-the-browser-reads-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Where configuration lives and how the browser reads it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Where configuration lives and how the browser reads it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-apiuser-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 /api/user-config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-apiruntime-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 /api/runtime-config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-redaction-for-non-admins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Redaction for non-admins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-libuser-config-storets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 lib/user-config-store.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-the-login-gate-and-logout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: The login gate and logout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-onboarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Onboarding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Onboarding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-when-it-shows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 When it shows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-saving" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Saving
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-finish-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Finish step
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-validation-and-normalization-shared-by-onboarding-and-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Validation and normalization, shared by onboarding and settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-the-settings-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: The settings page
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: The settings page">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-routing-by-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Routing by role
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Sections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-save" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Save
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-the-do-not-leave-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 The "do not leave" guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-text-provider-forms-and-the-endpoints-they-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Text provider forms and the endpoints they call
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: Text provider forms and the endpoints they call">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-textprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 TextProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-chatgpt-through-codex-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 ChatGPT through Codex OAuth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-presenton-cloud-device-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Presenton Cloud device flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-orphaned-provider-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Orphaned provider components
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-image-and-web-search-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Image and web search settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Image and web search settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-imageprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 ImageProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-websearchprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 WebSearchProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-telemetry-and-disable_anonymous_tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Telemetry and DISABLE_ANONYMOUS_TRACKING
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Telemetry and DISABLE_ANONYMOUS_TRACKING">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-the-status-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 The status route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-opting-out-from-the-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Opting out from the UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-what-goes-into-event-properties-utilsanalyticsts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 What goes into event properties: utils/analytics.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-the-admin-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: The admin panel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-the-community-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: The Community page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-where-configuration-lives-and-how-the-browser-reads-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Where configuration lives and how the browser reads it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Where configuration lives and how the browser reads it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-apiuser-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 /api/user-config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-apiruntime-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 /api/runtime-config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-redaction-for-non-admins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Redaction for non-admins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-libuser-config-storets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 lib/user-config-store.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-the-login-gate-and-logout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: The login gate and logout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-onboarding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Onboarding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Onboarding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-when-it-shows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 When it shows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-saving" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Saving
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-finish-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Finish step
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-validation-and-normalization-shared-by-onboarding-and-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Validation and normalization, shared by onboarding and settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-the-settings-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: The settings page
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: The settings page">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-routing-by-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Routing by role
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-sections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Sections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-save" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Save
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-the-do-not-leave-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 The "do not leave" guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-text-provider-forms-and-the-endpoints-they-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Text provider forms and the endpoints they call
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: Text provider forms and the endpoints they call">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-textprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 TextProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-chatgpt-through-codex-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 ChatGPT through Codex OAuth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-presenton-cloud-device-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Presenton Cloud device flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-orphaned-provider-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Orphaned provider components
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-image-and-web-search-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Image and web search settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Image and web search settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-imageprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 ImageProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-websearchprovider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 WebSearchProvider
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-telemetry-and-disable_anonymous_tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Telemetry and DISABLE_ANONYMOUS_TRACKING
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Telemetry and DISABLE_ANONYMOUS_TRACKING">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Initialization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-the-status-route" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 The status route
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-opting-out-from-the-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Opting out from the UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-what-goes-into-event-properties-utilsanalyticsts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 What goes into event properties: utils/analytics.ts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-the-admin-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: The admin panel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-the-community-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: The Community page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="settings-onboarding-auth-ui">Settings, onboarding, auth UI<a class="headerlink" href="#settings-onboarding-auth-ui" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/nextjs/components/Home.tsx</code>, <code>servers/nextjs/components/OnBoarding/PresentonMode.tsx</code>, <code>servers/nextjs/app/(presentation-generator)/(dashboard)/settings/SettingPage.tsx</code>, <code>servers/nextjs/app/(presentation-generator)/(dashboard)/settings/TextProvider.tsx</code>, <code>servers/nextjs/utils/storeHelpers.ts</code>, <code>servers/nextjs/app/api/user-config/route.ts</code>, <code>servers/nextjs/lib/runtime-provider-config.ts</code>, <code>servers/nextjs/lib/user-config-store.ts</code>, <code>servers/nextjs/app/(presentation-generator)/(dashboard)/admin/AdminPanel.tsx</code>, <code>servers/nextjs/utils/mixpanel.ts</code>  ·  <strong>Builds on:</strong> <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>  ·  <strong>Time:</strong> ~40 min</p>
+</div>
+<p>This chapter covers every screen that configures a Presenton instance: the login gate, the onboarding wizard, the admin settings page with its text, image and web search provider forms, the ChatGPT (Codex) and Presenton Cloud sign-in flows, the admin panel for users and API keys, the Community page, and anonymous telemetry. For each one you will see the request it sends, the validation it runs first, and how the saved configuration flows back into the browser, including how secrets are hidden from non-admin users.</p>
+<p>Paths are relative to <code>servers/nextjs/</code> unless they start with <code>servers/</code>. The server-side meaning of each configuration key (which provider class it selects, how it becomes environment variables) is in <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>; this chapter stays in the browser and the Next.js route handlers.</p>
+<h2 id="step-1-where-configuration-lives-and-how-the-browser-reads-it">Step 1: Where configuration lives and how the browser reads it<a class="headerlink" href="#step-1-where-configuration-lives-and-how-the-browser-reads-it" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    A["Admin browser"] --&gt;|"POST /api/user-config"| B["app/api/user-config/route.ts"]
+    B --&gt;|"PUT /api/v1/admin/provider-settings (cookie forwarded)"| C["FastAPI admin router"]
+    C --&gt; D["provider_settings table (row id 1)"]
+    C --&gt;|"_mirror_to_legacy_file"| E["USER_CONFIG_PATH JSON file"]
+    A --&gt;|"GET /api/user-config"| B
+    B --&gt;|"GET /api/v1/admin/provider-settings"| C
+    F["Regular user browser"] --&gt;|"GET /api/runtime-config or /api/user-config"| G["readRuntimeProviderConfig()"]
+    G --&gt;|"readUserConfigFile"| E
+    H["Any browser"] --&gt;|"GET /api/telemetry-status"| I["telemetry-status route"]
+    I --&gt; E</code></pre>
+<p>The source of truth is the FastAPI <code>provider_settings</code> table. <code>save_provider_settings()</code> merges the incoming keys into the stored ones (patch semantics), commits, and mirrors the result into the JSON file at <code>USER_CONFIG_PATH</code> (<code>servers/fastapi/services/provider_settings.py:137</code>). Several Next.js routes read that file directly, which is why both copies matter.</p>
+<h3 id="11-apiuser-config">1.1 <code>/api/user-config</code><a class="headerlink" href="#11-apiuser-config" title="Permanent link">&para;</a></h3>
+<p><code>app/api/user-config/route.ts</code> is the admin settings endpoint:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Caller role</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td>admin</td>
+<td>forwards to FastAPI <code>GET /api/v1/admin/provider-settings</code> with the caller's cookie and desktop token header; returns real secrets</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td>regular user</td>
+<td>returns <code>readRuntimeProviderConfig().config</code> (redacted, see 1.3)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td>anonymous</td>
+<td><code>401 {"detail": "Unauthorized"}</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td>admin only (<code>requireAdminApi</code>, else 401 or 403)</td>
+<td>requires <code>Content-Type: application/json</code> (else 415), a non-empty JSON object body (else 400), then forwards it as <code>PUT /api/v1/admin/provider-settings</code></td>
+</tr>
+</tbody>
+</table>
+<p>The role check calls FastAPI <code>GET /api/v1/auth/status</code> from the server with the incoming cookie (<code>lib/server-auth-role.ts:20</code>); any failure counts as unauthenticated.</p>
+<h3 id="12-apiruntime-config">1.2 <code>/api/runtime-config</code><a class="headerlink" href="#12-apiruntime-config" title="Permanent link">&para;</a></h3>
+<p><code>app/api/runtime-config/route.ts:7</code> returns <code>{configured, config}</code> for any authenticated user, from <code>readRuntimeProviderConfig()</code>. If reading fails it answers <code>200 {"configured": false, "config": {}}</code>. <code>ConfigurationInitializer</code> uses it for non-admins (see <a href="../21-user-journey/">User journey</a>).</p>
+<h3 id="13-redaction-for-non-admins">1.3 Redaction for non-admins<a class="headerlink" href="#13-redaction-for-non-admins" title="Permanent link">&para;</a></h3>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/lib/runtime-provider-config.ts (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">REDACTED_SECRET_PLACEHOLDER</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"__configured__"</span><span class="p">;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// Match credential fields, not every field containing the word "token".</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// Numeric settings such as LLM_MAX_OUTPUT_TOKENS must remain visible or the</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1">// client-side config validator will reject an otherwise valid shared config.</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kd">const</span><span class="w"> </span><span class="nx">SECRET_FIELD</span><span class="w"> </span><span class="o">=</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="sr">/(?:API_KEY|ACCESS_KEY_ID|SECRET_ACCESS_KEY|SESSION_TOKEN|ACCESS_TOKEN|REFRESH_TOKEN|PASSWORD)$/i</span><span class="p">;</span>
+</span></code></pre></div>
+<p><code>readRuntimeProviderConfig()</code> (<code>lib/runtime-provider-config.ts:23</code>) returns <code>{configured: false, config: {}}</code> when <code>USER_CONFIG_PATH</code> is unset; otherwise it reads the file, normalizes it, drops every key starting with <code>AUTH_</code>, and replaces each non-empty value whose key ends in one of those suffixes with <code>"__configured__"</code>. <code>configured</code> is computed from the full, unredacted config with <code>hasValidLLMConfig()</code>, so a regular user's browser can trust it without ever seeing a key. <code>tests/runtime-provider-config.test.mjs:49</code> verifies that <code>OPENROUTER_API_KEY</code> and <code>PEXELS_API_KEY</code> become <code>"__configured__"</code>, that <code>LLM_MAX_OUTPUT_TOKENS: 16384</code> survives, and that no <code>AUTH_</code> key, signing key or password hash appears in the JSON.</p>
+<p>The placeholder is recognized on the way back: <code>ImagesApi.searchStockImages()</code> only sends an <code>X-Provider-Api-Key</code> header when the key is non-empty and not <code>"__configured__"</code> (<code>app/(presentation-generator)/services/api/images.ts:120</code>), so the backend falls back to the stored key.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Redaction is suffix based. A new provider whose secret is called, for example, <code>FOO_TOKEN</code> or <code>BAR_SECRET</code> would not match and would be sent to every signed-in user. Name new secret fields with one of the listed suffixes, or extend <code>SECRET_FIELD</code> and its test.</p>
+</div>
+<h3 id="14-libuser-config-storets">1.4 <code>lib/user-config-store.ts</code><a class="headerlink" href="#14-libuser-config-storets" title="Permanent link">&para;</a></h3>
+<p>The Next.js side reads the JSON file with <code>readUserConfigFile()</code> (used by <code>readRuntimeProviderConfig()</code>, <code>/api/telemetry-status</code> and <code>/api/has-required-key</code>). The module also exports a locked writer, <code>updateUserConfigFile()</code>, but nothing in the Next.js source calls it in this snapshot; writes go through FastAPI's mirror instead. The mechanisms:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read</td>
+<td><code>readSnapshot()</code> (<code>lib/user-config-store.ts:78</code>) parses the primary file with <code>readJsonIfValid()</code> (<code>:60</code>); if it is missing, invalid, or not a JSON object, it falls back to <code>&lt;path&gt;.bak</code>, then <code>{}</code>; an empty file reads as <code>{}</code>. <code>readUserConfigFile()</code> takes no lock and returns <code>{}</code> on any error</td>
+</tr>
+<tr>
+<td>Lock (writer only)</td>
+<td><code>&lt;path&gt;.lock</code> created with <code>fs.openSync(path, "wx")</code>; wait up to <code>LOCK_TIMEOUT_MS = 5000</code>, polling every 50 ms; a lock older than <code>LOCK_STALE_MS = 30000</code> is deleted</td>
+</tr>
+<tr>
+<td>Write (writer only)</td>
+<td>copy the primary to <code>.bak</code> if it was valid, write a uniquely named <code>&lt;path&gt;.&lt;pid&gt;.&lt;time&gt;.&lt;random&gt;.tmp</code> file, <code>fsync</code>, <code>rename</code> over the primary; after the rename <code>.bak</code> is only created if it does not exist yet (<code>copyBackupIfPossible(path, false)</code>), so it keeps the previous good version</td>
+</tr>
+<tr>
+<td>Retries</td>
+<td><code>EPERM</code>, <code>EBUSY</code>, <code>EACCES</code> retried up to 6 times with 50 ms times attempt backoff, using a busy-wait <code>sleepSync</code></td>
+</tr>
+</tbody>
+</table>
+<p>The busy-wait is deliberate: the functions are synchronous so they can be used from route handlers without worker primitives. Reads only busy-wait during the short retry backoff (at most 50 + 100 + ... + 250 ms); the 5 s lock wait would block the Node event loop only if something called the writer under contention.</p>
+<h2 id="step-2-the-login-gate-and-logout">Step 2: The login gate and logout<a class="headerlink" href="#step-2-the-login-gate-and-logout" title="Permanent link">&para;</a></h2>
+<p>The login and first-admin setup form is <code>components/Auth/AuthGate.tsx</code>, walked through request by request in <a href="../21-user-journey/">User journey</a>. In short: <code>POST /api/v1/auth/setup</code> with <code>{username, password}</code> (username at least 3 characters, password at least 8 plus confirmation) when no admin exists, <code>POST /api/v1/auth/login</code> (password at least 6) otherwise, and a full reload of <code>/</code> on success.</p>
+<p><code>LogoutButton</code> (<code>components/Auth/LogoutButton.tsx:19</code>) sends <code>POST /api/v1/auth/logout</code> with <code>credentials: "include"</code>, records the outcome with <code>trackEventImmediately</code> (beacon transport), and always ends with <code>window.location.replace("/")</code>, even if the backend call failed. It appears in the admin Settings "Sign out" section and in the regular user's account page.</p>
+<p>The server-side guards used by pages, all in <code>utils/serverAuth.ts</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>Used by</th>
+<th>On failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getServerAuthStatus()</code></td>
+<td><code>/</code>, <code>/settings</code></td>
+<td>returns <code>available: false</code> or <code>authenticated: false</code></td>
+</tr>
+<tr>
+<td><code>requireAppSession()</code> (<code>utils/serverAuth.ts:94</code>)</td>
+<td><code>app/(presentation-generator)/layout.tsx</code> (every app page)</td>
+<td>redirect <code>/</code> (backend down or not configured), <code>/?reason=unauthorized</code> (signed out)</td>
+</tr>
+<tr>
+<td><code>requireAdminSession()</code> (<code>utils/serverAuth.ts:110</code>)</td>
+<td><code>/admin</code> page</td>
+<td>redirect <code>/?reason=unauthorized</code> or <code>/dashboard</code> for non-admins</td>
+</tr>
+</tbody>
+</table>
+<p>With <code>DISABLE_AUTH</code> truthy (Electron), all three short-circuit and report an <code>electron</code> admin. The cookie, sessions and roles are covered in <a href="../25-auth-and-multiuser/">Auth and multi-user</a>.</p>
+<h2 id="step-3-onboarding">Step 3: Onboarding<a class="headerlink" href="#step-3-onboarding" title="Permanent link">&para;</a></h2>
+<h3 id="31-when-it-shows">3.1 When it shows<a class="headerlink" href="#31-when-it-shows" title="Permanent link">&para;</a></h3>
+<p>Onboarding is the <code>Home</code> component rendered at <code>/</code> (<code>components/Home.tsx:11</code>). Only admins see it; a regular user is pushed to <code>/upload</code> (<code>Home.tsx:20</code>). And an admin only stays on <code>/</code> when the stored configuration is invalid, because <code>ConfigurationInitializer</code> redirects <code>/</code> to <code>/upload</code> as soon as <code>hasValidLLMConfig()</code> passes. So in practice onboarding is "the first admin login on a fresh instance", plus any later time the provider configuration becomes invalid (for example a Presenton Cloud disconnect clears <code>LLM</code>).</p>
+<h3 id="32-structure">3.2 Structure<a class="headerlink" href="#32-structure" title="Permanent link">&para;</a></h3>
+<p><code>Home</code> keeps two numbers: <code>step</code> (2 = provider wizard, 3 = finish) starting at 2, and <code>providerStep</code> (1 to 3) starting at 1. <code>OnBoardingHeader</code> (<code>components/OnBoarding/OnBoardingHeader.tsx:4</code>) shows four numbered dots, "Text Provider", "Image Provider", "Web Search", "Finish Setup"; clicking a dot only goes backwards. <code>OnBoardingSlidebar</code> is decoration (concentric circles hidden on the finish step).</p>
+<p><code>PresentonMode</code> (<code>components/OnBoarding/PresentonMode.tsx:58</code>) implements the three provider steps on a local copy of <code>userConfig.llm_config</code>:</p>
+<table>
+<thead>
+<tr>
+<th><code>providerStep</code></th>
+<th>Screen</th>
+<th>Continue validates with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Text provider, in three tabs: "chatgpt" (Codex), "local" (<code>ollama</code>, <code>lmstudio</code>), "other" (every remaining provider except <code>presenton</code>); plus the Presenton Cloud card</td>
+<td><code>getLLMConfigValidationError({...config, DISABLE_IMAGE_GENERATION: true, WEB_GROUNDING: false})</code>, and for Codex a live <code>GET /api/v1/ppt/codex/auth/status</code> that must say <code>authenticated</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Image provider, or "disable image generation"</td>
+<td><code>getLLMConfigValidationError({...config, WEB_GROUNDING: false})</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Web search: off, <code>auto</code> (model-native), <code>searxng</code>, <code>tavily</code>, <code>exa</code>, <code>brave</code></td>
+<td>full <code>getLLMConfigValidationError(config)</code>, then save</td>
+</tr>
+</tbody>
+</table>
+<p>Switching tabs pre-selects <code>codex</code>, <code>ollama</code> or the first "other" provider (<code>PresentonMode.tsx:292</code>). Picking <code>ollama</code> fills <code>OLLAMA_URL</code> with <code>getDefaultOllamaUrl()</code> if empty. The validation trick in steps 1 and 2 is worth noting: by forcing the later sections off, each step validates only what the user has seen so far.</p>
+<h3 id="33-saving">3.3 Saving<a class="headerlink" href="#33-saving" title="Permanent link">&para;</a></h3>
+<p>The final Continue runs <code>handleSaveConfig()</code> (<code>PresentonMode.tsx:720</code>). For Ollama it first checks that the chosen model is pulled at the given URL with <code>isOllamaModelAvailable()</code>, which calls <code>GET /api/v1/ppt/ollama/models/available?ollama_url=...</code>. Then <code>handleSaveLLMConfig(llmConfig)</code> (<code>utils/storeHelpers.ts:405</code>):</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/utils/storeHelpers.ts (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">handleSaveLLMConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">(</span><span class="nx">llmConfig</span><span class="o">:</span><span class="w"> </span><span class="kt">LLMConfig</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">normalizedConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">normalizeLLMConfig</span><span class="p">(</span><span class="nx">llmConfig</span><span class="p">);</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">validationError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">getLLMConfigValidationError</span><span class="p">(</span><span class="nx">normalizedConfig</span><span class="p">);</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">validationError</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="nx">validationError</span><span class="p">);</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">"/api/user-config"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"Content-Type"</span><span class="o">:</span><span class="w"> </span><span class="s2">"application/json"</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="kt">JSON.stringify</span><span class="p">(</span><span class="nx">normalizedConfig</span><span class="p">),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="p">});</span>
+</span></code></pre></div>
+<p>On success it dispatches <code>setLLMConfig(normalizedConfig)</code> so the rest of the app sees the new provider without a reload, and <code>PresentonMode</code> calls <code>setStep(3)</code>.</p>
+<p>Choosing Presenton Cloud is a shortcut: <code>handlePresentonContinue()</code> (<code>PresentonMode.tsx:890</code>) checks <code>GET /api/v1/auth/presenton/status</code> for <code>linked: true</code>, saves <code>{...config, LLM: "presenton"}</code> and goes straight to <code>/upload</code>, skipping the image and web search steps (Cloud provides both).</p>
+<h3 id="34-finish-step">3.4 Finish step<a class="headerlink" href="#34-finish-step" title="Permanent link">&para;</a></h3>
+<p><code>FinalStep</code> (<code>components/OnBoarding/FinalStep.tsx:30</code>) fires confetti, reads <code>GET /api/telemetry-status</code>, and shows a "share anonymous usage data" switch plus buttons to <code>/dashboard</code> and <code>/upload</code>. The switch uses the same code path as the Privacy settings page (Step 8).</p>
+<h2 id="step-4-validation-and-normalization-shared-by-onboarding-and-settings">Step 4: Validation and normalization, shared by onboarding and settings<a class="headerlink" href="#step-4-validation-and-normalization-shared-by-onboarding-and-settings" title="Permanent link">&para;</a></h2>
+<p><code>normalizeLLMConfig()</code> (<code>utils/storeHelpers.ts:28</code>) runs on every load and every save:</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IMAGE_PROVIDER === "dall-e-3"</code></td>
+<td>migrated to <code>gpt-image-2</code>; <code>GPT_IMAGE_2_QUALITY</code> defaults to <code>high</code> if the old <code>DALL_E_3_QUALITY</code> was <code>hd</code>, else <code>medium</code>; <code>DALL_E_3_QUALITY</code> deleted</td>
+</tr>
+<tr>
+<td><code>DISABLE_IMAGE_GENERATION</code>, <code>WEB_GROUNDING</code>, three <code>OPENROUTER_*</code> flags</td>
+<td>strings <code>1/true/yes/on</code> and <code>0/false/no/off</code> parsed to booleans</td>
+</tr>
+<tr>
+<td><code>LLM_MAX_OUTPUT_TOKENS</code></td>
+<td>numeric string parsed to an integer</td>
+</tr>
+<tr>
+<td><code>LLM_GENERATION_PROFILE</code></td>
+<td>cleared unless it is <code>model_max</code> with no manual token limit</td>
+</tr>
+<tr>
+<td><code>LLM_REASONING_BUDGET_TOKENS</code></td>
+<td>always set to <code>""</code> (no longer user-facing; empty removes it on the server)</td>
+</tr>
+<tr>
+<td><code>LLM_REASONING_EFFORT === "none"</code></td>
+<td>set to <code>""</code></td>
+</tr>
+<tr>
+<td><code>OPENROUTER_PROVIDER_ORDER</code> as a comma string</td>
+<td>split into an array</td>
+</tr>
+</tbody>
+</table>
+<p><code>getLLMConfigValidationError()</code> (<code>utils/storeHelpers.ts:100</code>) returns the first problem as a user-facing sentence, or <code>null</code>. Its rules per text provider:</p>
+<table>
+<thead>
+<tr>
+<th><code>LLM</code></th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>empty</td>
+<td>fails first with "Select a text provider."</td>
+</tr>
+<tr>
+<td><code>presenton</code></td>
+<td>nothing (returns immediately)</td>
+</tr>
+<tr>
+<td><code>openai</code>, <code>deepseek</code>, <code>google</code>, <code>openrouter</code>, <code>cerebras</code>, <code>fireworks</code>, <code>together</code>, <code>anthropic</code></td>
+<td><code>&lt;PROVIDER&gt;_API_KEY</code> and <code>&lt;PROVIDER&gt;_MODEL</code></td>
+</tr>
+<tr>
+<td><code>vertex</code></td>
+<td><code>VERTEX_MODEL</code>, and either <code>VERTEX_API_KEY</code> or <code>VERTEX_PROJECT</code>, but not an API key together with project or location</td>
+</tr>
+<tr>
+<td><code>azure</code></td>
+<td><code>AZURE_OPENAI_API_KEY</code>, <code>AZURE_OPENAI_ENDPOINT</code>, <code>AZURE_OPENAI_API_VERSION</code>, <code>AZURE_OPENAI_MODEL</code></td>
+</tr>
+<tr>
+<td><code>bedrock</code></td>
+<td><code>BEDROCK_MODEL</code>, and <code>BEDROCK_API_KEY</code> or both AWS access key id and secret</td>
+</tr>
+<tr>
+<td><code>ollama</code></td>
+<td><code>OLLAMA_URL</code> (trimmed) and <code>OLLAMA_MODEL</code></td>
+</tr>
+<tr>
+<td><code>custom</code></td>
+<td><code>CUSTOM_LLM_URL</code> and <code>CUSTOM_MODEL</code></td>
+</tr>
+<tr>
+<td><code>litellm</code></td>
+<td><code>LITELLM_BASE_URL</code> and <code>LITELLM_MODEL</code></td>
+</tr>
+<tr>
+<td><code>lmstudio</code></td>
+<td><code>LMSTUDIO_MODEL</code></td>
+</tr>
+<tr>
+<td><code>codex</code> or <code>chatgpt</code></td>
+<td><code>CODEX_MODEL</code>, and it must be in the supported Codex model list</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td>"Unsupported or unknown text provider."</td>
+</tr>
+</tbody>
+</table>
+<p>Before the per-provider check, <code>LLM_MAX_OUTPUT_TOKENS</code> (if set) must be a positive integer, and an image provider is required unless image generation is disabled. After it, image providers need their key or URL (<code>pexels</code> and <code>pixabay</code> their own keys, <code>gpt-image-2</code> and <code>gpt-image-1.5</code> <code>OPENAI_API_KEY</code>, <code>gemini_flash</code> and <code>nanobanana_pro</code> <code>GOOGLE_API_KEY</code>, <code>comfyui</code> <code>COMFYUI_URL</code>, <code>open_webui</code> <code>OPEN_WEBUI_IMAGE_URL</code>, <code>openai_compatible</code> base URL plus key plus model), and with <code>WEB_GROUNDING</code> on, a <code>WEB_SEARCH_PROVIDER</code> must be chosen and it needs <code>SEARXNG_BASE_URL</code>, <code>TAVILY_API_KEY</code>, <code>EXA_API_KEY</code> or <code>BRAVE_SEARCH_API_KEY</code> (<code>auto</code> needs nothing).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The image providers <code>gpt-image-*</code> and <code>gemini_flash</code> reuse the text provider's <code>OPENAI_API_KEY</code> and <code>GOOGLE_API_KEY</code>. An admin who uses Anthropic for text and GPT Image for pictures must still fill <code>OPENAI_API_KEY</code>, which the image settings form asks for. If you add a new image provider, add a <code>case</code> here, or saving fails with "Select a valid image provider."</p>
+</div>
+<h2 id="step-5-the-settings-page">Step 5: The settings page<a class="headerlink" href="#step-5-the-settings-page" title="Permanent link">&para;</a></h2>
+<h3 id="51-routing-by-role">5.1 Routing by role<a class="headerlink" href="#51-routing-by-role" title="Permanent link">&para;</a></h3>
+<p><code>/settings</code> (<code>app/(presentation-generator)/(dashboard)/settings/page.tsx:11</code>) is a Server Component:</p>
+<div class="language-tsx highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/(dashboard)/settings/page.tsx (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">getServerAuthStatus</span><span class="p">()</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">getSettingsView</span><span class="p">(</span><span class="nx">status</span><span class="p">.</span><span class="nx">role</span><span class="p">)</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'admin'</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="o">?</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">SettingPage</span><span class="w"> </span><span class="p">/&gt;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="p">&lt;</span><span class="nt">UserAccountSettings</span><span class="w"> </span><span class="na">username</span><span class="o">=</span><span class="p">{</span><span class="nx">status</span><span class="p">.</span><span class="nx">username</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="s1">'User'</span><span class="p">}</span><span class="w"> </span><span class="p">/&gt;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><code>getSettingsView()</code> (<code>utils/settingsAccess.ts:3</code>) is a one-liner: <code>admin</code> gets <code>"admin"</code>, everyone else (including <code>null</code>) gets <code>"account"</code>. <code>UserAccountSettings</code> shows only "Signed in as" and a Sign out button. <code>SettingPage</code> additionally pushes non-admins to <code>/dashboard</code> on the client (<code>SettingPage.tsx:257</code>).</p>
+<h3 id="52-sections">5.2 Sections<a class="headerlink" href="#52-sections" title="Permanent link">&para;</a></h3>
+<p><code>SettingSideBar</code> (<code>settings/SettingSideBar.tsx:7</code>) defines the sections:</p>
+<table>
+<thead>
+<tr>
+<th><code>SettingsSection</code></th>
+<th>Component</th>
+<th>Hidden when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text-provider</code></td>
+<td><code>TextProvider</code></td>
+<td>never</td>
+</tr>
+<tr>
+<td><code>image-provider</code></td>
+<td><code>ImageProvider</code></td>
+<td><code>LLM === "presenton"</code></td>
+</tr>
+<tr>
+<td><code>web-search-provider</code></td>
+<td><code>WebSearchProvider</code></td>
+<td><code>LLM === "presenton"</code></td>
+</tr>
+<tr>
+<td><code>privacy</code></td>
+<td><code>PrivacySettings</code> ("Usage Analytics")</td>
+<td>never</td>
+</tr>
+<tr>
+<td><code>admin</code></td>
+<td><code>AdminPanel embedded</code></td>
+<td>never</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>Sign out card with <code>LogoutButton</code></td>
+<td>never</td>
+</tr>
+</tbody>
+</table>
+<p>All three provider sections edit one local <code>llmConfig</code> state in <code>SettingPage</code> (initialized from Redux). A floating "Save Configuration" button is shown on every section except <code>session</code> and <code>admin</code>. The page header shows a summary such as <code>OpenAI (gpt-4.1) · GPT Image 1.5 · Web search disabled</code>.</p>
+<h3 id="53-save">5.3 Save<a class="headerlink" href="#53-save" title="Permanent link">&para;</a></h3>
+<p><code>handleSaveConfig()</code> (<code>SettingPage.tsx:167</code>) runs, in order:</p>
+<ol>
+<li>Codex selected: <code>GET /api/v1/ppt/codex/auth/status</code> must return <code>status: "authenticated"</code>, otherwise <code>requestChatGptReauth()</code> (Step 6.2).</li>
+<li>Presenton selected: <code>GET /api/v1/auth/presenton/status</code> must return <code>linked: true</code>.</li>
+<li><code>getLLMConfigValidationError()</code>; on error, a "Cannot save settings" toast, and, only when the admin is on the image tab and the OpenAI or DeepSeek model is empty, a jump back to the text tab.</li>
+<li>Stock image provider probe: <code>GET /api/v1/ppt/images/search?query=business&amp;limit=1&amp;provider=...&amp;strict_api_key=true</code>.</li>
+<li>Ollama model availability check.</li>
+<li><code>handleSaveLLMConfig()</code>, which posts to <code>/api/user-config</code> and updates Redux.</li>
+</ol>
+<h3 id="54-the-do-not-leave-guard">5.4 The "do not leave" guard<a class="headerlink" href="#54-the-do-not-leave-guard" title="Permanent link">&para;</a></h3>
+<p>While the selected text provider is incomplete (no <code>LLM</code>, or the provider's model field empty, or Ollama without URL), an effect (<code>SettingPage.tsx:335</code>) installs three traps: a <code>beforeunload</code> prompt, a <code>popstate</code> handler that pushes the settings URL back, and a capture-phase document <code>click</code> handler that inspects anchors with <code>providerSetupNavigationAction()</code> (<code>lib/provider-setup-navigation.ts:1</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Link</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>no <code>href</code>, or <code>#</code></td>
+<td><code>ignore</code></td>
+</tr>
+<tr>
+<td>a protocol other than <code>http:</code> or <code>https:</code>, or an unparsable URL</td>
+<td><code>block</code> (prevented silently)</td>
+</tr>
+<tr>
+<td><code>target="_blank"</code></td>
+<td><code>ignore</code> (documentation links still open)</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td><code>warn</code>: "Provider setup required" toast and navigation prevented</td>
+</tr>
+</tbody>
+</table>
+<p><code>tests/provider-setup-navigation.test.mjs</code> covers these cases.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>In <code>SettingPage</code> two <code>useEffect</code> hooks (<code>SettingPage.tsx:325</code> and <code>335</code>) are declared after the <code>if (!isAdmin) return null;</code> early return at line 263. React requires hooks to run in the same order on every render, so a render where <code>isAdmin</code> flips would change the hook count. It works today because the page only renders for admins, but if you reuse the component, move those effects above the early return.</p>
+</div>
+<h2 id="step-6-text-provider-forms-and-the-endpoints-they-call">Step 6: Text provider forms and the endpoints they call<a class="headerlink" href="#step-6-text-provider-forms-and-the-endpoints-they-call" title="Permanent link">&para;</a></h2>
+<h3 id="61-textprovider">6.1 <code>TextProvider</code><a class="headerlink" href="#61-textprovider" title="Permanent link">&para;</a></h3>
+<p><code>settings/TextProvider.tsx:60</code> is the live text provider form. It shows a provider picker over <code>LLM_PROVIDERS</code> (<code>utils/providerConstants.ts:182</code>: <code>presenton</code>, <code>codex</code>, <code>openai</code>, <code>deepseek</code>, <code>google</code>, <code>vertex</code>, <code>azure</code>, <code>bedrock</code>, <code>openrouter</code>, <code>cerebras</code>, <code>litellm</code>, <code>fireworks</code>, <code>together</code>, <code>lmstudio</code>, <code>anthropic</code>, <code>ollama</code>, <code>custom</code>) and then a provider-specific body:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Body</th>
+<th>Model list request</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>presenton</code></td>
+<td><code>OnboardingPresentonAccount</code> (6.3)</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>codex</code></td>
+<td><code>SettingCodex</code> (6.2)</td>
+<td>none; fixed list in <code>utils/codexModels.ts</code></td>
+</tr>
+<tr>
+<td><code>ollama</code></td>
+<td><code>OllamaConfig</code></td>
+<td><code>GET /api/v1/ppt/ollama/models/available?ollama_url=...</code>, <code>GET /api/v1/ppt/ollama/models/library</code>, pull with <code>POST /api/v1/ppt/ollama/models/pull?model_name=...&amp;ollama_url=...</code> (streamed progress)</td>
+</tr>
+<tr>
+<td><code>vertex</code>, <code>azure</code></td>
+<td><code>VertexAzureManualFields</code></td>
+<td>none (manual model entry)</td>
+</tr>
+<tr>
+<td><code>bedrock</code></td>
+<td><code>BedrockManualFields</code></td>
+<td>none (manual model entry)</td>
+</tr>
+<tr>
+<td><code>google</code></td>
+<td>API key plus <code>CreatableModelInput</code></td>
+<td><code>POST /api/v1/ppt/google/models/available</code> with <code>{"api_key": "..."}</code></td>
+</tr>
+<tr>
+<td><code>anthropic</code></td>
+<td>same</td>
+<td><code>POST /api/v1/ppt/anthropic/models/available</code> with <code>{"api_key": "..."}</code></td>
+</tr>
+<tr>
+<td>every other provider</td>
+<td>same</td>
+<td><code>POST /api/v1/ppt/openai/models/available</code> with <code>{"url": "&lt;base url&gt;", "api_key": "..."}</code></td>
+</tr>
+</tbody>
+</table>
+<p>The model fetch skips providers in <code>MANUAL_MODEL_PROVIDERS = {"vertex", "azure", "bedrock"}</code> and waits for an API key (or a URL for <code>custom</code> and <code>litellm</code>). For OpenAI-compatible providers the base URL comes from the provider's own field (<code>DEEPSEEK_BASE_URL</code>, <code>LMSTUDIO_BASE_URL</code> and so on) or the default URL in <code>LLM_PROVIDERS</code>. When the list loads and no model is set, a preferred default is chosen if present (otherwise the first model in the list): <code>gpt-4.1</code> (OpenAI and LiteLLM), <code>deepseek-chat</code>, <code>models/gemini-2.5-flash</code>, <code>claude-sonnet-4-20250514</code>, <code>openai/gpt-4o</code> (OpenRouter), <code>llama-3.3-70b</code> (Cerebras), and so on (<code>TextProvider.tsx:360</code>).</p>
+<p><code>AdvancedTextProviderSettings</code> (<code>components/AdvancedTextProviderSettings.tsx</code>) appears under the model field. It fetches token defaults with <code>POST /api/v1/ppt/generation/defaults</code> and body <code>{"provider": "&lt;LLM&gt;", "model": "&lt;model&gt;"}</code>, which returns <code>default_max_output_tokens</code> and <code>model_max_output_tokens</code>, and edits <code>LLM_MAX_OUTPUT_TOKENS</code>, <code>LLM_REASONING_MODE</code> and <code>LLM_REASONING_EFFORT</code>. For OpenRouter it can load upstream providers with <code>POST /api/v1/ppt/openrouter/providers/available</code> (<code>{"model", "api_key", "base_url"}</code>) to build <code>OPENROUTER_PROVIDER_ORDER</code>.</p>
+<h3 id="62-chatgpt-through-codex-oauth">6.2 ChatGPT through Codex OAuth<a class="headerlink" href="#62-chatgpt-through-codex-oauth" title="Permanent link">&para;</a></h3>
+<p><code>SettingCodex</code> (settings) and <code>components/CodexConfig.tsx</code> (onboarding) implement the same flow:</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant U as Admin
+    participant S as SettingCodex
+    participant F as FastAPI
+    participant O as OpenAI sign-in page
+    S-&gt;&gt;F: GET /api/v1/ppt/codex/auth/status
+    U-&gt;&gt;S: Sign in
+    S-&gt;&gt;F: POST /api/v1/ppt/codex/auth/initiate
+    F--&gt;&gt;S: session_id and url
+    S-&gt;&gt;O: window.open(url)
+    loop every 2 s
+        S-&gt;&gt;F: GET /api/v1/ppt/codex/auth/status/SESSION
+    end
+    F--&gt;&gt;S: status success with username, email, is_pro
+    alt callback cannot reach the server
+        U-&gt;&gt;S: paste code
+        S-&gt;&gt;F: POST /api/v1/ppt/codex/auth/exchange
+    end</code></pre>
+<p>On success the form sets <code>CODEX_MODEL</code> to <code>DEFAULT_CODEX_MODEL</code> if the current one is unsupported. Sign out is <code>POST /api/v1/ppt/codex/auth/logout</code>, which also clears the <code>CODEX_*</code> token fields locally and calls <code>syncStoreAfterCodexSignOut()</code> so Redux matches. "Refresh" is <code>POST /api/v1/ppt/codex/auth/refresh</code>.</p>
+<p>Re-authentication is event driven. Any stream or API response that indicates expired ChatGPT credentials (an <code>x-presenton-auth-action: codex-reauth</code> header, or a 401/403 whose message contains <code>CHATGPT_AUTH_REQUIRED:</code>, "chatgpt authentication", "chatgpt session" or "codex oauth"; <code>utils/chatgptAuth.ts:54</code>) calls <code>requestChatGptReauth()</code>, which dispatches <code>presenton:chatgpt-auth-required</code>. <code>ChatGptAuthRedirectHandler</code> (<code>app/ChatGptAuthRedirectHandler.tsx:12</code>), mounted once in <code>Providers</code>, shows a toast, calls <code>logoutChatGptAuth()</code>, and navigates to <code>/settings?chatgpt=reauth</code>; a 2 s latch prevents duplicate handling. <code>SettingPage</code> listens to the same event and switches to the text provider tab.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The Codex components report the model with the lowercase field name <code>"codex_model"</code>. <code>TextProvider</code> maps it to <code>CODEX_MODEL</code> before writing (<code>TextProvider.tsx:619</code>). If you embed <code>SettingCodex</code> or <code>CodexConfig</code> elsewhere without that mapping, you will save a lowercase <code>codex_model</code> key that the validator never reads.</p>
+</div>
+<h3 id="63-presenton-cloud-device-flow">6.3 Presenton Cloud device flow<a class="headerlink" href="#63-presenton-cloud-device-flow" title="Permanent link">&para;</a></h3>
+<p><code>OnboardingPresentonAccount</code> (<code>components/OnBoarding/OnboardingPresentonAccount.tsx</code>) is used by both onboarding and settings (<code>variant</code>). It implements an OAuth device flow:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Request</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Status</td>
+<td><code>GET /api/v1/auth/presenton/status</code></td>
+<td><code>{enabled, linked, email, canManage}</code>; the card is disabled unless <code>canManage</code></td>
+</tr>
+<tr>
+<td>Start</td>
+<td><code>POST /api/v1/auth/presenton/device/start</code> with <code>{"device_name": "Presenton settings"}</code> or <code>"Presenton onboarding"</code></td>
+<td>returns <code>device_code</code>, <code>user_code</code>, <code>verification_uri</code>, <code>interval</code> (default 5 s), <code>expires_in</code> (default 900 s)</td>
+</tr>
+<tr>
+<td>Approve</td>
+<td>browser opens <code>verification_uri</code></td>
+<td>a blank tab is opened synchronously before the request so popup blockers allow it; Electron opens the system browser instead</td>
+</tr>
+<tr>
+<td>Poll</td>
+<td><code>POST /api/v1/auth/presenton/device/poll</code> with <code>{"device_code": "..."}</code> every <code>interval</code> seconds</td>
+<td><code>202</code> means pending; <code>202</code> with <code>error: "slow_down"</code> adds 5 s to the interval; any other non-2xx ends the flow with "Presenton connection failed"</td>
+</tr>
+<tr>
+<td>Done</td>
+<td>non-202 success</td>
+<td>reloads status; in onboarding, continues automatically</td>
+</tr>
+<tr>
+<td>Disconnect</td>
+<td><code>POST /api/v1/auth/presenton/logout</code></td>
+<td>reloads status and calls the <code>onDisconnect</code> prop; in settings, <code>TextProvider</code> passes a callback that runs <code>syncStoreAfterPresentonDisconnect()</code>, which sets <code>LLM</code> to <code>""</code> in Redux (<code>TextProvider.tsx:593</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>The user code can be copied with <code>navigator.clipboard.writeText</code>. Expiry is checked on every poll tick. The server side of Presenton Cloud is outside this chapter's scope; see <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>.</p>
+<h3 id="64-orphaned-provider-components">6.4 Orphaned provider components<a class="headerlink" href="#64-orphaned-provider-components" title="Permanent link">&para;</a></h3>
+<p><code>components/LLMSelection.tsx</code> is a complete, older provider picker that wires <code>OpenAIConfig</code>, <code>GoogleConfig</code>, <code>AnthropicConfig</code>, <code>OllamaConfig</code>, <code>CustomConfig</code>, <code>CodexConfig</code> and <code>ImageSelectionConfig</code>. Nothing imports <code>LLMSelection</code> in this snapshot, so <code>OpenAIConfig</code>, <code>GoogleConfig</code>, <code>AnthropicConfig</code>, <code>CustomConfig</code> and <code>ImageSelectionConfig</code> are reachable only through it. They call the same model-list endpoints (<code>OpenAIConfig.tsx:60</code> posts <code>{url, api_key}</code> to <code>/api/v1/ppt/openai/models/available</code>, <code>GoogleConfig.tsx:54</code> and <code>AnthropicConfig.tsx:57</code> post <code>{api_key}</code> to their endpoints) but use lowercase field names such as <code>openai_api_key</code>. The live forms are <code>TextProvider</code> (settings) and <code>PresentonMode</code> (onboarding).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Similarly, <code>app/api/has-required-key/route.ts</code> (which reports whether <code>OPENAI_API_KEY</code> is set in the file or the environment) has no caller. Before deleting or changing any of these, search for imports, because some may be kept for the Electron build.</p>
+</div>
+<h2 id="step-7-image-and-web-search-settings">Step 7: Image and web search settings<a class="headerlink" href="#step-7-image-and-web-search-settings" title="Permanent link">&para;</a></h2>
+<h3 id="71-imageprovider">7.1 <code>ImageProvider</code><a class="headerlink" href="#71-imageprovider" title="Permanent link">&para;</a></h3>
+<p><code>settings/ImageProvider.tsx</code> toggles <code>DISABLE_IMAGE_GENERATION</code> and lists <code>IMAGE_PROVIDERS</code> (<code>utils/providerConstants.ts:91</code>): <code>pexels</code>, <code>pixabay</code>, <code>gpt-image-2</code>, <code>gpt-image-1.5</code>, <code>gemini_flash</code>, <code>nanobanana_pro</code>, <code>comfyui</code>, <code>open_webui</code>, <code>openai_compatible</code>. GPT Image providers get a quality select (<code>low</code>, <code>medium</code>, <code>high</code>; the form defaults display <code>medium</code> for GPT Image 2 and <code>low</code> for GPT Image 1.5). <code>openai_compatible</code> renders <code>OpenAICompatibleImageFields</code>, which can list models with <code>POST /api/v1/ppt/openai/models/available</code>.</p>
+<p><code>ImageProviderTest</code> (<code>components/ImageProviderTest.tsx:18</code>) adds a test button. It sends only the image-related fields (<code>IMAGE_TEST_FIELDS</code>: provider, the keys and URLs for each image provider, ComfyUI workflow, and both quality fields) to <code>POST /api/v1/ppt/images/test</code> and expects <code>{"image_url": "..."}</code>, which it displays. The request is aborted if the configuration changes while it is running. For stock providers the button reads "Test image search", otherwise "Test image generation". The test uses the unsaved form values, so admins can verify a key before saving.</p>
+<h3 id="72-websearchprovider">7.2 <code>WebSearchProvider</code><a class="headerlink" href="#72-websearchprovider" title="Permanent link">&para;</a></h3>
+<p><code>settings/WebSearchProvider.tsx</code> toggles <code>WEB_GROUNDING</code>; turning it on without a valid provider selects <code>auto</code> (<code>WebSearchProvider.tsx:59-73</code>). Each provider shows its URL or key field from <code>WEB_SEARCH_PROVIDERS</code>, plus <code>WEB_SEARCH_MAX_RESULTS</code> (default display <code>"5"</code>) for external providers. The upload page reads <code>WEB_GROUNDING</code> from Redux to preset its <code>webSearch</code> flag.</p>
+<h2 id="step-8-telemetry-and-disable_anonymous_tracking">Step 8: Telemetry and <code>DISABLE_ANONYMOUS_TRACKING</code><a class="headerlink" href="#step-8-telemetry-and-disable_anonymous_tracking" title="Permanent link">&para;</a></h2>
+<h3 id="81-initialization">8.1 Initialization<a class="headerlink" href="#81-initialization" title="Permanent link">&para;</a></h3>
+<p><code>MixpanelInitializer</code> (<code>app/MixpanelInitializer.tsx:7</code>) wraps the app in the root layout. On mount it calls <code>initMixpanel()</code>; on every pathname change it tracks <code>Page View</code> with <code>{url: pathname}</code>. <code>utils/mixpanel.ts</code> defines the token, the <code>MixpanelEvent</code> enum (168 event names) and the gate:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/utils/mixpanel.ts (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">    </span><span class="nx">trackingCheckPromise</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s1">'/api/telemetry-status'</span><span class="p">);</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">res</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`telemetry-status returned </span><span class="si">${</span><span class="nx">res</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Boolean</span><span class="p">(</span><span class="nx">data</span><span class="o">?</span><span class="p">.</span><span class="nx">telemetryEnabled</span><span class="p">);</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="nb">window</span><span class="p">.</span><span class="nx">__mixpanel_telemetry_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">enabled</span><span class="p">;</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">enabled</span><span class="p">;</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="c1">// If the API call fails, default to enabling tracking</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nb">window</span><span class="p">.</span><span class="nx">__mixpanel_telemetry_enabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="p">})();</span>
+</span></code></pre></div>
+<p><code>initMixpanel()</code> initializes the SDK only if the status call says enabled. The init options are <code>api_host: "https://api-eu.mixpanel.com"</code>, <code>track_pageview: false</code>, <code>autocapture: false</code>, <code>record_sessions_percent: 100</code>, <code>record_mask_text_selector: ""</code>, <code>record_block_selector: ""</code>, <code>record_collect_fonts: true</code> and <code>record_canvas: true</code>; the app version from <code>window.env.APP_VERSION</code> is registered as a super property. <code>track()</code> drops events when <code>window.__mixpanel_telemetry_enabled === false</code> and lazily initializes otherwise. <code>trackEventImmediately()</code> waits for the status and uses <code>transport: "sendBeacon"</code> so events survive a page unload (used for exports, sign-out and opt-out).</p>
+<h3 id="82-the-status-route">8.2 The status route<a class="headerlink" href="#82-the-status-route" title="Permanent link">&para;</a></h3>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/api/telemetry-status/route.ts (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">envDisabled</span><span class="w"> </span><span class="o">=</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">DISABLE_ANONYMOUS_TRACKING</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"true"</span><span class="w"> </span><span class="o">||</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">DISABLE_ANONYMOUS_TRACKING</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"True"</span><span class="p">;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">isDisabled</span><span class="w"> </span><span class="o">=</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nx">envDisabled</span><span class="w"> </span><span class="o">||</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nx">fileDisabled</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"true"</span><span class="w"> </span><span class="o">||</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nx">fileDisabled</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"True"</span><span class="p">;</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">telemetryEnabled</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="nx">isDisabled</span><span class="p">;</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">NextResponse</span><span class="p">.</span><span class="nx">json</span><span class="p">({</span><span class="w"> </span><span class="nx">telemetryEnabled</span><span class="w"> </span><span class="p">});</span>
+</span></code></pre></div>
+<p><code>fileDisabled</code> is <code>DISABLE_ANONYMOUS_TRACKING</code> read from the <code>USER_CONFIG_PATH</code> file. The route is exempt from the API auth gate in <code>proxy.ts</code> (<code>isApiAuthExempt</code>, alongside <code>/api/v1/auth/*</code>), so the login page can check it before anyone signs in. <code>docker-compose.yml</code> passes <code>DISABLE_ANONYMOUS_TRACKING</code> through to the container.</p>
+<h3 id="83-opting-out-from-the-ui">8.3 Opting out from the UI<a class="headerlink" href="#83-opting-out-from-the-ui" title="Permanent link">&para;</a></h3>
+<p><code>PrivacySettings</code> (<code>settings/PrivacySettings.tsx:29</code>) and <code>FinalStep</code> share the toggle logic: when disabling, first send <code>Usage Analytics Disabled</code> with <code>trackEventImmediately</code>; then <code>setTelemetryEnabled(enabled)</code> (sets the window flag and resets the cached status); then <code>POST /api/user-config</code> with:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"DISABLE_ANONYMOUS_TRACKING"</span><span class="p">:</span><span class="w"> </span><span class="s2">"true"</span><span class="w"> </span><span class="p">}</span>
+</span></code></pre></div>
+<p>Re-enabling sends the same body with <code>"false"</code> (<code>PrivacySettings.tsx:44-49</code>, <code>FinalStep.tsx:72-77</code>). This POST does not go through <code>handleSaveLLMConfig()</code>, so no provider validation runs.</p>
+<p>Because FastAPI merges provider settings, this partial body changes only that key, and the mirror to the JSON file makes <code>/api/telemetry-status</code> report the new value. If the POST fails, the toggle and the window flag are rolled back.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The environment check accepts only the exact strings <code>true</code> and <code>True</code>. <code>DISABLE_ANONYMOUS_TRACKING=1</code> or <code>TRUE</code> does not disable telemetry, unlike <code>DISABLE_AUTH</code>, which accepts <code>1</code>, <code>true</code>, <code>yes</code>, <code>on</code> in any case. Also, if <code>/api/telemetry-status</code> itself fails, the client defaults to enabled.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Opting out stops <code>track()</code> calls through the window flag, but the code never calls a Mixpanel opt-out or stop-recording API (a search for <code>opt_out</code> and <code>stop_session_recording</code> finds nothing). If the SDK was already initialized in the current page, whatever it does on its own, including the session recording configured above with an empty text-mask selector, is not explicitly stopped until the next full page load, when <code>initMixpanel()</code> sees the disabled status and skips initialization. This chapter did not verify the SDK's own default masking behavior; review it before relying on the "No personal information or presentation content is collected" wording shown in the Privacy section.</p>
+</div>
+<p>Regular users cannot change telemetry: <code>/api/user-config</code> <code>POST</code> requires admin, and the Privacy section exists only on the admin settings page.</p>
+<h3 id="84-what-goes-into-event-properties-utilsanalyticsts">8.4 What goes into event properties: <code>utils/analytics.ts</code><a class="headerlink" href="#84-what-goes-into-event-properties-utilsanalyticsts" title="Permanent link">&para;</a></h3>
+<p>Event properties are deliberately coarse. <code>utils/analytics.ts</code> holds three helpers that callers use instead of raw values:</p>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sanitizeAnalyticsError(error, fallback = "Unknown error")</code> (<code>utils/analytics.ts:1</code>)</td>
+<td>the error message (or the string, or the fallback) with whitespace collapsed to single spaces and cut to 240 characters</td>
+</tr>
+<tr>
+<td><code>bucketFileSize(bytes)</code> (<code>:14</code>)</td>
+<td><code>"unknown"</code>, <code>"0"</code>, <code>"&lt;100KB"</code>, <code>"100KB-1MB"</code>, <code>"1MB-5MB"</code>, <code>"5MB-20MB"</code>, <code>"20MB-100MB"</code> or <code>"100MB+"</code></td>
+</tr>
+<tr>
+<td><code>bucketMessageLength(length)</code> (<code>:27</code>)</td>
+<td><code>"0"</code>, <code>"&lt;50"</code>, <code>"50-199"</code>, <code>"200-499"</code>, <code>"500-999"</code>, <code>"1000-1999"</code> or <code>"2000+"</code></td>
+</tr>
+</tbody>
+</table>
+<p>For example, the AuthGate failure events send <code>sanitizeAnalyticsError(detail, ...)</code> and the image replace events send <code>file_size_bucket: bucketFileSize(file.size)</code>. Note that a sanitized error message is still the server's message text, and some events carry ids such as <code>presentation_id</code> and counts such as <code>username_length</code>; only the helpers above coarsen values.</p>
+<h2 id="step-9-the-admin-panel">Step 9: The admin panel<a class="headerlink" href="#step-9-the-admin-panel" title="Permanent link">&para;</a></h2>
+<p><code>AdminPanel</code> (<code>app/(presentation-generator)/(dashboard)/admin/AdminPanel.tsx:75</code>) is rendered both at <code>/admin</code> (guarded by <code>requireAdminSession()</code>) and embedded in Settings. It calls FastAPI through relative <code>/api/v1/admin/...</code> URLs, which <code>proxy.ts</code> rewrites to FastAPI after its session check, always with <code>credentials: "include"</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Request</th>
+<th>Body or notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>List users</td>
+<td><code>GET /api/v1/admin/users</code></td>
+<td><code>[{id, username, role, created_at}]</code></td>
+</tr>
+<tr>
+<td>Add user</td>
+<td><code>POST /api/v1/admin/users</code></td>
+<td><code>{"username": "...", "password": "..."}</code>; form <code>minLength</code> 3 and 8</td>
+</tr>
+<tr>
+<td>Reset password</td>
+<td><code>PUT /api/v1/admin/users/{id}/password</code></td>
+<td><code>{"password": "..."}</code>; existing sessions of that user are signed out</td>
+</tr>
+<tr>
+<td>Delete user</td>
+<td><code>DELETE /api/v1/admin/users/{id}</code></td>
+<td>confirmation dialog</td>
+</tr>
+<tr>
+<td>List API keys</td>
+<td><code>GET /api/v1/admin/api-keys</code></td>
+<td>revoked keys (<code>revoked_at</code> set) are filtered out client side</td>
+</tr>
+<tr>
+<td>Create API key</td>
+<td><code>POST /api/v1/admin/api-keys</code></td>
+<td><code>{"user_id": "...", "label": "...", "expiry_days": 90}</code>; choices 30, 90, 180, 365; the token is shown and copied with <code>copyTextToClipboard()</code></td>
+</tr>
+<tr>
+<td>Reveal or copy a key</td>
+<td><code>GET /api/v1/admin/api-keys/{id}/token</code></td>
+<td><code>{"token": "..."}</code>, cached in component state</td>
+</tr>
+<tr>
+<td>Revoke a key</td>
+<td><code>POST /api/v1/admin/api-keys/{id}/revoke</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The API key owner select defaults to the first admin user. Keys look like <code>sk-presenton-...</code>; <code>proxy.ts</code> forwards requests carrying <code>Authorization: Bearer sk-presenton-...</code> to FastAPI and refuses them on Next.js-only routes with <code>403 {"detail": "API keys are only accepted by the Presenton API"}</code>. How the keys are stored and validated is in <a href="../25-auth-and-multiuser/">Auth and multi-user</a> and their use in <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</p>
+<h2 id="step-10-the-community-page">Step 10: The Community page<a class="headerlink" href="#step-10-the-community-page" title="Permanent link">&para;</a></h2>
+<p><code>/community</code> (<code>app/(presentation-generator)/(dashboard)/community/page.tsx</code>) calls <code>notFound()</code> when <code>PRESENTON_COMMUNITY_ENABLED</code> is <code>0</code>, <code>false</code>, <code>no</code> or <code>off</code>. <code>CommunityPage</code> lists designs 20 per page (<code>PAGE_SIZE = 20</code>) with <code>GET /api/v1/ppt/community/presentations?page=N&amp;page_size=20&amp;order_by=...&amp;order=...</code> plus optional filters from <code>CommunityPresentationFilters</code> (<code>created_at_gt</code>, <code>created_at_lt</code>, <code>views</code>, <code>likes</code> with <code>_gt</code> and <code>_lt</code> variants). Opening a card fetches <code>GET /api/v1/ppt/community/presentations/{id}</code> and shows <code>CommunityDesignPreviewDialog</code>, which renders the HTML slides with <code>SmartHtmlSlide</code>.</p>
+<p>The two calls to action hand off to the upload page through the URL, which <a href="../21-user-journey/">User journey</a> explains:</p>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Navigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Use design</td>
+<td><code>/upload?mode=smart&amp;communityId=&lt;id&gt;</code></td>
+</tr>
+<tr>
+<td>Use prompt</td>
+<td><code>/upload?mode=smart&amp;prompt=&lt;shared prompt&gt;</code> (error toast if the design has no prompt)</td>
+</tr>
+</tbody>
+</table>
+<p>Network failures are mapped to a retryable <code>ApiResponseError</code> with the code <code>community_backend_unreachable</code> and the message "Could not reach the Presenton server while loading Community..." (<code>services/api/community.ts:86</code>).</p>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Provider settings live in FastAPI's <code>provider_settings</code> table and are mirrored to the <code>USER_CONFIG_PATH</code> file; admins read and write them through <code>/api/user-config</code>, regular users get a redacted copy where secrets read <code>"__configured__"</code>.</li>
+<li>Onboarding is the admin-only wizard at <code>/</code>, validating each of its three steps with the same <code>getLLMConfigValidationError()</code> that Settings uses, and saving with <code>handleSaveLLMConfig()</code>.</li>
+<li>Each text provider form maps to a specific model-list endpoint; Codex uses a polled OAuth flow with an event-driven re-auth path, and Presenton Cloud uses a device flow.</li>
+<li>The admin panel manages users and <code>sk-presenton-</code> API keys through <code>/api/v1/admin/*</code>, and the Community page feeds Smart-mode generation through upload URL parameters.</li>
+<li>Telemetry is gated by <code>/api/telemetry-status</code>, which honors <code>DISABLE_ANONYMOUS_TRACKING</code> (exactly <code>true</code> or <code>True</code>) from the environment or the config file, and the UI toggle writes that key through the admin config route.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>With the UI covered, the next chapter follows the Export button into the bundled exporter and explains how PPTX and PDF files are produced: <a href="../24-export-pipeline/">PPTX and PDF export</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../22-slide-editor/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Slide editor">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Slide editor
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../24-export-pipeline/" class="md-footer__link md-footer__link--next" aria-label="Next: PPTX and PDF export">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                PPTX and PDF export
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

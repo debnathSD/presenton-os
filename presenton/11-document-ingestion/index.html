@@ -1,0 +1,4485 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/11-document-ingestion/">
+      
+      
+        <link rel="prev" href="../10-streaming/">
+      
+      
+        <link rel="next" href="../12-images-icons-search/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Document ingestion - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#document-ingestion" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Document ingestion
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-big-picture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The big picture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-upload-the-raw-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Upload the raw files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Upload the raw files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-the-router-and-its-three-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 The router and its three endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-what-the-browser-sends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 What the browser sends
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-what-the-server-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 What the server does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-accepted-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Accepted types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-the-mcp-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 The MCP variant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-where-files-live-tempfileservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Where files live (TempFileService)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Where files live (TempFileService)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-the-base-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 The base directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-per-owner-subdirectories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Per-owner subdirectories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-path-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Path checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-lifetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Lifetime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-filesupdate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 /files/update
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-decompose-the-uploads-into-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Decompose the uploads into text
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Decompose the uploads into text">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-the-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 The request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-the-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 The handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-from-decompose-to-create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 From decompose to create
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-the-documentsloader-dispatcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: The DocumentsLoader dispatcher
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: The DocumentsLoader dispatcher">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-extension-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Extension routing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-text-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Text files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-pdfs-images-and-liteparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: PDFs, images and LiteParse
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: PDFs, images and LiteParse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-scanned-pdf-detection-pdfplumber" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Scanned PDF detection (pdfplumber)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-images-pillow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Images (Pillow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-office-documents-no-external-converter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Office documents: no external converter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-liteparse-runner-and-ocr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The LiteParse runner and OCR
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: The LiteParse runner and OCR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-language-to-tesseract-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Language to Tesseract code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-liteparseservice-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 LiteParseService configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-readiness-check-on-every-parse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Readiness check on every parse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 The command line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-inside-liteparse_runnermjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Inside liteparse_runner.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-running-the-process-and-reading-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Running the process and reading output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#67-failure-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.7 Failure mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-cleaning-the-extracted-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Cleaning the extracted text
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-from-documents-to-additional_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: From documents to additional_context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: From documents to additional_context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-standard-outline-stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Standard outline stream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-other-callers-of-documentsloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Other callers of DocumentsLoader
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-the-documents-preview-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: The documents-preview page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-the-score-based-chunker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: The score-based chunker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: The score-based chunker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-the-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 The algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Worked example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-supply-chain-and-security-checks-for-the-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Supply-chain and security checks for the parser
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 11: Supply-chain and security checks for the parser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-pinned-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Pinned dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-scriptssync-document-dependenciescjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 scripts/sync-document-dependencies.cjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-scriptsdocument-parser-securitytestmjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 scripts/document-parser-security.test.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-server-side-safety-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Server-side safety summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-big-picture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The big picture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-upload-the-raw-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Upload the raw files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Upload the raw files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-the-router-and-its-three-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 The router and its three endpoints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-what-the-browser-sends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 What the browser sends
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-what-the-server-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 What the server does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-accepted-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 Accepted types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-the-mcp-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 The MCP variant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-where-files-live-tempfileservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Where files live (TempFileService)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Where files live (TempFileService)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-the-base-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 The base directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-per-owner-subdirectories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Per-owner subdirectories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-path-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Path checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-lifetime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Lifetime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-filesupdate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 /files/update
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-decompose-the-uploads-into-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Decompose the uploads into text
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Decompose the uploads into text">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-the-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 The request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-the-handler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 The handler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-from-decompose-to-create" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 From decompose to create
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-the-documentsloader-dispatcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: The DocumentsLoader dispatcher
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: The DocumentsLoader dispatcher">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-extension-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Extension routing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-text-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Text files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-pdfs-images-and-liteparse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: PDFs, images and LiteParse
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: PDFs, images and LiteParse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-scanned-pdf-detection-pdfplumber" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Scanned PDF detection (pdfplumber)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-images-pillow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Images (Pillow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-office-documents-no-external-converter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Office documents: no external converter
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-liteparse-runner-and-ocr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The LiteParse runner and OCR
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: The LiteParse runner and OCR">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-language-to-tesseract-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Language to Tesseract code
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-liteparseservice-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 LiteParseService configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-readiness-check-on-every-parse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Readiness check on every parse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-the-command-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 The command line
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-inside-liteparse_runnermjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Inside liteparse_runner.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-running-the-process-and-reading-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Running the process and reading output
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#67-failure-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.7 Failure mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-cleaning-the-extracted-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Cleaning the extracted text
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-from-documents-to-additional_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: From documents to additional_context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: From documents to additional_context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-standard-outline-stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Standard outline stream
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-other-callers-of-documentsloader" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Other callers of DocumentsLoader
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-the-documents-preview-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: The documents-preview page
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-the-score-based-chunker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: The score-based chunker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: The score-based chunker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-the-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 The algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-worked-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Worked example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-supply-chain-and-security-checks-for-the-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Supply-chain and security checks for the parser
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 11: Supply-chain and security checks for the parser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-pinned-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Pinned dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-scriptssync-document-dependenciescjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 scripts/sync-document-dependencies.cjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-scriptsdocument-parser-securitytestmjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 scripts/document-parser-security.test.mjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-server-side-safety-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Server-side safety summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="document-ingestion">Document ingestion<a class="headerlink" href="#document-ingestion" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/api/v1/ppt/endpoints/files.py</code>, <code>servers/fastapi/services/temp_file_service.py</code>, <code>servers/fastapi/services/documents_loader.py</code>, <code>servers/fastapi/services/liteparse_service.py</code>, <code>electron/resources/document-extraction/liteparse_runner.mjs</code>, <code>servers/fastapi/services/office_document_service.py</code>, <code>servers/fastapi/services/document_conversion_service.py</code>, <code>servers/fastapi/utils/ocr_language.py</code>, <code>servers/fastapi/services/score_based_chunker.py</code>, <code>scripts/sync-document-dependencies.cjs</code>  ·  <strong>Builds on:</strong> <a href="../10-streaming/">Streaming (SSE)</a>  ·  <strong>Time:</strong> ~40 min</p>
+</div>
+<p>This chapter follows an uploaded file from the browser's <code>FormData</code> to the <code>Context:</code> line of the outline prompt. You will see the three file endpoints and their limits, the per-owner temp directory that holds every upload, how <code>DocumentsLoader</code> dispatches each extension to a backend (pure-Python OOXML/ODF readers, Pillow image normalization, and the Node-based LiteParse runner with Tesseract OCR), how the extracted text is cleaned, and how it is concatenated into <code>additional_context</code>. It closes with the score-based chunker (and the fact that nothing calls it), and the supply-chain checks that pin the parser's Node dependencies.</p>
+<h2 id="the-big-picture">The big picture<a class="headerlink" href="#the-big-picture" title="Permanent link">&para;</a></h2>
+<p>Document ingestion in the web UI is a two-request dance that happens before the presentation row even exists. The upload page first sends the raw files, then asks the server to "decompose" them into plain <code>.txt</code> files, and only then calls <code>/presentation/create</code> with the paths of those <code>.txt</code> files. When the outline stream later runs, it reads the <code>.txt</code> files back and pastes their content into the prompt.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant UI as UploadPage.tsx
+    participant API as FastAPI /api/v1/ppt
+    participant TFS as TempFileService
+    participant DL as DocumentsLoader
+    participant LP as liteparse_runner.mjs
+    UI-&gt;&gt;API: POST /files/upload (multipart files)
+    API-&gt;&gt;TFS: create_temp_dir(uuid4)
+    API-&gt;&gt;TFS: create_temp_file_path(name, dir) per file
+    API--&gt;&gt;UI: ["/tmp/presenton/.../report.pdf", ...]
+    UI-&gt;&gt;API: POST /files/decompose {file_paths, language}
+    API-&gt;&gt;DL: DocumentsLoader(other_files, language).load_documents(temp_dir)
+    DL-&gt;&gt;LP: node runner --file ... --ocr-language ... (PDF, images)
+    LP--&gt;&gt;DL: plain text on stdout
+    DL--&gt;&gt;API: documents (list of str)
+    API-&gt;&gt;TFS: write &lt;uuid&gt;.txt per document
+    API--&gt;&gt;UI: [{name, file_path}, ...]
+    UI-&gt;&gt;API: POST /presentation/create {file_paths: txt paths, ...}
+    UI-&gt;&gt;API: GET /outlines/stream/{id}
+    API-&gt;&gt;DL: DocumentsLoader(txt paths).load_documents(temp_dir)
+    DL--&gt;&gt;API: text of each .txt
+    API-&gt;&gt;API: additional_context = "\n\n".join(documents)</code></pre>
+<p>The browser side lives in <code>servers/nextjs/app/(presentation-generator)/upload/components/UploadPage.tsx:444-530</code> (<code>handleDocumentProcessing</code>) and the two API helpers <code>uploadDoc</code> and <code>decomposeDocuments</code> in <code>servers/nextjs/app/(presentation-generator)/services/api/presentation-generation.ts:32-80</code>.</p>
+<h2 id="step-1-upload-the-raw-files">Step 1: Upload the raw files<a class="headerlink" href="#step-1-upload-the-raw-files" title="Permanent link">&para;</a></h2>
+<h3 id="11-the-router-and-its-three-endpoints">1.1 The router and its three endpoints<a class="headerlink" href="#11-the-router-and-its-three-endpoints" title="Permanent link">&para;</a></h3>
+<p><code>FILES_ROUTER = APIRouter(prefix="/files", tags=["Files"])</code> (<code>servers/fastapi/api/v1/ppt/endpoints/files.py:16</code>) is mounted under <code>API_V1_PPT_ROUTER = APIRouter(prefix="/api/v1/ppt")</code> (<code>servers/fastapi/api/v1/ppt/router.py:22-24</code>). The full set of file routes is:</p>
+<table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Handler</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /api/v1/ppt/files/upload</code></td>
+<td><code>upload_files</code> (<code>files.py:79-100</code>)</td>
+<td>multipart, field <code>files</code> (repeatable)</td>
+<td><code>List[str]</code> of absolute temp paths</td>
+</tr>
+<tr>
+<td><code>POST /api/v1/ppt/files/mcp-upload</code></td>
+<td><code>upload_files_for_mcp</code> (<code>files.py:103-130</code>)</td>
+<td>JSON <code>{"files": [{"filename", "content_base64"}]}</code></td>
+<td><code>{"file_paths": [...]}</code></td>
+</tr>
+<tr>
+<td><code>POST /api/v1/ppt/files/decompose</code></td>
+<td><code>decompose_files</code> (<code>files.py:133-173</code>)</td>
+<td>JSON <code>{"file_paths": [...], "language": "..."}</code></td>
+<td><code>List[DecomposedFileInfo]</code></td>
+</tr>
+<tr>
+<td><code>POST /api/v1/ppt/files/update</code></td>
+<td><code>update_files</code> (<code>files.py:176-184</code>)</td>
+<td>multipart <code>file_path</code> + <code>file</code></td>
+<td><code>{"message": "File updated successfully"}</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-what-the-browser-sends">1.2 What the browser sends<a class="headerlink" href="#12-what-the-browser-sends" title="Permanent link">&para;</a></h3>
+<p><code>uploadDoc</code> appends every <code>File</code> object under the same key <code>files</code> and posts it with <code>getHeaderForFormData()</code> (<code>presentation-generation.ts:32-55</code>):</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/services/api/presentation-generation.ts (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="nx">uploadDoc</span><span class="p">(</span><span class="nx">documents</span><span class="o">:</span><span class="w"> </span><span class="kt">File</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">formData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">FormData</span><span class="p">();</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nx">documents</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nb">document</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nx">formData</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"files"</span><span class="p">,</span><span class="w"> </span><span class="nb">document</span><span class="p">);</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="p">});</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="nx">getApiUrl</span><span class="p">(</span><span class="sb">`/api/v1/ppt/files/upload`</span><span class="p">),</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">          </span><span class="nx">method</span><span class="o">:</span><span class="w"> </span><span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">          </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="kt">getHeaderForFormData</span><span class="p">(),</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">          </span><span class="nx">body</span><span class="o">:</span><span class="w"> </span><span class="kt">formData</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">          </span><span class="nx">cache</span><span class="o">:</span><span class="w"> </span><span class="s2">"no-cache"</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">      </span><span class="p">);</span>
+</span></code></pre></div>
+<h3 id="13-what-the-server-does">1.3 What the server does<a class="headerlink" href="#13-what-the-server-does" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/files.py (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@FILES_ROUTER</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/upload"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_files</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">UploadFile</span><span class="p">]]):</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="s2">"Documents are required"</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">TEMP_FILE_SERVICE</span><span class="o">.</span><span class="n">create_temp_dir</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()))</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">validate_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">UPLOAD_ACCEPTED_FILE_TYPES</span><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">temp_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="k">for</span> <span class="n">each_file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="n">temp_path</span> <span class="o">=</span> <span class="n">TEMP_FILE_SERVICE</span><span class="o">.</span><span class="n">create_temp_file_path</span><span class="p">(</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>                <span class="n">each_file</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">temp_dir</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>            <span class="p">)</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_path</span><span class="p">,</span> <span class="s2">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>                <span class="n">content</span> <span class="o">=</span> <span class="k">await</span> <span class="n">each_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>            <span class="n">temp_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_path</span><span class="p">)</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="k">return</span> <span class="n">temp_files</span>
+</span></code></pre></div>
+<p>In order:</p>
+<ol>
+<li>An empty list is rejected with <code>400 "Documents are required"</code> (<code>files.py:81-82</code>).</li>
+<li>A fresh directory named by a UUID4 is created inside the owner's temp root (<code>files.py:84</code>, Step 2 explains the root).</li>
+<li><code>validate_files(files, nullable=True, multiple=True, max_size=100, accepted_types=UPLOAD_ACCEPTED_FILE_TYPES)</code> (<code>files.py:86</code>) checks every file (<code>servers/fastapi/utils/validators.py:23-48</code>): if <code>max_size * 1024 * 1024 &lt; file.size</code> it raises <code>400 "File '&lt;name&gt;' exceeded max upload size of 100 MB"</code>, otherwise if the type is not accepted it raises <code>400 "File '&lt;name&gt;' not accepted. Accepted types: [...]"</code>.</li>
+<li>Each file is written whole (<code>await each_file.read()</code>) to <code>create_temp_file_path(each_file.filename, temp_dir)</code> and the absolute path is appended to the response.</li>
+</ol>
+<p>A typical response:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">[</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="s2">"/tmp/presenton/3f0c9a3e-5f3c-4c1b-9c9a-6f1f2a0b7d11/quarterly-report.pdf"</span><span class="p">,</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="s2">"/tmp/presenton/3f0c9a3e-5f3c-4c1b-9c9a-6f1f2a0b7d11/notes.txt"</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">]</span>
+</span></code></pre></div>
+<p>When authentication is enabled and an owner is bound to the request, an extra <code>&lt;owner_id&gt;/</code> segment appears after the base directory (Step 2).</p>
+<h3 id="14-accepted-types">1.4 Accepted types<a class="headerlink" href="#14-accepted-types" title="Permanent link">&para;</a></h3>
+<p><code>UPLOAD_ACCEPTED_FILE_TYPES</code> is the union of MIME types and extensions (<code>servers/fastapi/constants/documents.py:65-80</code>). The comment at <code>documents.py:78-79</code> explains why both are kept: "some clients upload legacy office files with generic content-type values". <code>_is_accepted_file_type</code> (<code>validators.py:8-20</code>) accepts a file if its lower-cased <code>content_type</code> is in the MIME set, or else if its lower-cased suffix is in the extension set.</p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Extensions (<code>constants/documents.py</code>)</th>
+<th>MIME types</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF</td>
+<td><code>.pdf</code> (line 1)</td>
+<td><code>application/pdf</code></td>
+</tr>
+<tr>
+<td>Text</td>
+<td><code>.txt</code> (line 2)</td>
+<td><code>text/plain</code>, <code>text/markdown</code></td>
+</tr>
+<tr>
+<td>Word</td>
+<td><code>.doc .docx .docm .odt .rtf</code> (line 4)</td>
+<td><code>application/msword</code>, OOXML wordprocessing, macro-enabled, ODF text, <code>application/rtf</code>, <code>text/rtf</code></td>
+</tr>
+<tr>
+<td>PowerPoint</td>
+<td><code>.ppt .pptx .pptm .odp</code> (line 5)</td>
+<td><code>application/vnd.ms-powerpoint</code>, OOXML presentation, macro-enabled, ODF presentation</td>
+</tr>
+<tr>
+<td>Spreadsheet</td>
+<td><code>.xls .xlsx .xlsm .ods .csv .tsv</code> (line 6)</td>
+<td>Excel, OOXML sheet, macro-enabled, ODF sheet, <code>text/csv</code>, <code>application/csv</code>, <code>text/tab-separated-values</code>, <code>text/tsv</code></td>
+</tr>
+<tr>
+<td>Image</td>
+<td><code>.jpg .jpeg .png .gif .bmp .tiff .tif .webp</code> (lines 8-22)</td>
+<td><code>image/jpeg png gif bmp tiff webp</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>SVG_EXTENSIONS = [".svg"]</code> is defined (<code>documents.py:14</code>) but is not part of <code>IMAGE_EXTENSIONS</code> nor of the accepted list, so SVG uploads are rejected.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The size limit is per file, not per request: <code>validate_files</code> loops over files and compares each <code>file.size</code> against 100 MB. There is no cap on the number of files in the multipart route. In front of FastAPI, the bundled nginx sets <code>client_max_body_size 110M</code> for <code>location /api/v1/</code> (<code>nginx.conf:45-46</code>), so in the Docker image the whole multipart body is effectively capped at 110 MB.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>create_temp_dir</code> runs before <code>validate_files</code> (<code>files.py:84-86</code>). A rejected upload therefore leaves an empty UUID directory behind. It is harmless, but it means the temp root accumulates directories until the next restart (Step 2.4).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>All files from one request share one directory and keep their sanitized basenames. Two files with the same name in one request (for example <code>slides.pdf</code> from two folders) map to the same path, the second overwrites the first, and the response lists the same path twice.</p>
+</div>
+<h3 id="15-the-mcp-variant">1.5 The MCP variant<a class="headerlink" href="#15-the-mcp-variant" title="Permanent link">&para;</a></h3>
+<p>MCP clients cannot send multipart bodies, so <code>/files/mcp-upload</code> accepts base64 (<code>files.py:24-60</code>). Limits are explicit:</p>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Combined decoded size</td>
+<td><code>MCP_FILES_UPLOAD_MAX_TOTAL_BYTES = 100 * 1024 * 1024</code></td>
+<td><code>files.py:18</code></td>
+</tr>
+<tr>
+<td>Combined base64 characters</td>
+<td><code>4 * ((100 MiB + 2) // 3) + 4 * 32</code></td>
+<td><code>files.py:19-21</code></td>
+</tr>
+<tr>
+<td>Files per request</td>
+<td>1 to 32</td>
+<td><code>files.py:37-43</code></td>
+</tr>
+<tr>
+<td>Filename length</td>
+<td>1 to 255</td>
+<td><code>files.py:25</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>_decode_mcp_file</code> uses <code>base64.b64decode(..., validate=True)</code> and returns <code>400 "Invalid base64 content for '&lt;name&gt;'"</code> on bad input, or <code>413</code> if one file alone exceeds 100 MiB (<code>files.py:63-76</code>). The handler accumulates a running total and raises <code>413 "Combined file upload exceeds 100 MiB"</code> (<code>files.py:111-120</code>), then wraps each payload in a Starlette <code>UploadFile(file=BytesIO(content), filename=..., size=len(content))</code> and calls the same <code>upload_files</code> function (<code>files.py:122-130</code>). That reuse means MCP uploads get the same validation and storage, with one difference: the <code>UploadFile</code> is built without headers, so its <code>content_type</code> is <code>None</code> and <code>_is_accepted_file_type</code> can only accept the file by its extension. A file named without a recognized suffix is rejected even if its bytes are a valid PDF. The MCP tool contract built around this endpoint is covered in <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</p>
+<h2 id="step-2-where-files-live-tempfileservice">Step 2: Where files live (TempFileService)<a class="headerlink" href="#step-2-where-files-live-tempfileservice" title="Permanent link">&para;</a></h2>
+<p>Every path that ingestion touches goes through the singleton <code>TEMP_FILE_SERVICE = TempFileService()</code> (<code>servers/fastapi/services/temp_file_service.py:191</code>).</p>
+<h3 id="21-the-base-directory">2.1 The base directory<a class="headerlink" href="#21-the-base-directory" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/services/temp_file_service.py (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">TempFileService</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">get_temp_directory_env</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"/tmp/presenton"</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cleanup_base_dir</span><span class="p">()</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>get_temp_directory_env()</code> returns <code>os.getenv("TEMP_DIRECTORY")</code> (<code>servers/fastapi/utils/get_env.py:59-60</code>). The Docker images set <code>TEMP_DIRECTORY=/tmp/presenton</code> (<code>Dockerfile:83</code>, <code>Dockerfile.dev:11</code>); Electron passes its own <code>tempDir</code> (<code>electron/app/main.ts:372</code>).</p>
+<h3 id="22-per-owner-subdirectories">2.2 Per-owner subdirectories<a class="headerlink" href="#22-per-owner-subdirectories" title="Permanent link">&para;</a></h3>
+<p><code>_owner_base_dir_realpath()</code> (<code>temp_file_service.py:21-33</code>) reads <code>get_current_owner_id()</code> from a context variable (<code>servers/fastapi/api/v1/auth/context.py:13-14</code>). With no owner (auth disabled, or an internal call) the root is the base dir; otherwise it is <code>&lt;base&gt;/&lt;owner_id&gt;</code>, created on demand. Every other method resolves against that owner root, so one user cannot read or reference another user's uploads by path. How the owner gets bound to the request is in <a href="../25-auth-and-multiuser/">Auth and multi-user</a>.</p>
+<h3 id="23-path-checks">2.3 Path checks<a class="headerlink" href="#23-path-checks" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it guarantees</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sanitize_upload_filename(name)</code></td>
+<td>Converts <code>\</code> to <code>/</code>, keeps only <code>os.path.basename</code>, strips, rejects empty, <code>.</code> and <code>..</code> with <code>400 "Invalid filename"</code></td>
+<td><code>temp_file_service.py:43-48</code></td>
+</tr>
+<tr>
+<td><code>resolve_temp_path(path, must_exist)</code></td>
+<td><code>realpath(abspath(path))</code> must equal the owner root or start with <code>root + os.sep</code>; otherwise <code>400 "File path must stay within the temp directory"</code>; <code>404 "File not found"</code> if <code>must_exist</code> and missing</td>
+<td><code>temp_file_service.py:50-72</code></td>
+</tr>
+<tr>
+<td><code>resolve_existing_temp_paths(paths)</code></td>
+<td>Applies <code>resolve_temp_path(..., must_exist=True)</code> to each path; empty input returns <code>[]</code></td>
+<td><code>temp_file_service.py:74-79</code></td>
+</tr>
+<tr>
+<td><code>create_dir_in_dir</code> / <code>create_temp_dir</code></td>
+<td>Directory name is sanitized (or a UUID4), realpath must stay inside the root</td>
+<td><code>temp_file_service.py:81-94</code></td>
+</tr>
+<tr>
+<td><code>create_temp_file_path(name, dir)</code></td>
+<td>Sanitizes the name, checks both the directory and the final realpath</td>
+<td><code>temp_file_service.py:96-115</code></td>
+</tr>
+</tbody>
+</table>
+<p>Because <code>realpath</code> resolves symlinks before the prefix check, a symlink inside the temp dir that points outside it is rejected. <code>servers/fastapi/tests/unit/test_temp_file_service_security.py</code> covers the safe basename (line 17), paths outside the root (line 30), symlink escape (line 43), a symlinked parent of the managed dir (line 60), and the must-exist rule (line 80).</p>
+<h3 id="24-lifetime">2.4 Lifetime<a class="headerlink" href="#24-lifetime" title="Permanent link">&para;</a></h3>
+<p><code>cleanup_base_dir()</code> runs in the constructor (<code>temp_file_service.py:15</code>, <code>187-188</code>), and the constructor runs when the module is first imported. Nothing else in the API calls <code>cleanup_temp_dir</code> (a repository-wide search finds only the definitions in <code>temp_file_service.py:160-188</code>). Uploaded files, decomposed <code>.txt</code> files and converted PNGs therefore stay on disk until the FastAPI process restarts, and are all deleted at that moment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>presentation.file_paths</code> stores absolute temp paths in the database (<code>servers/fastapi/models/sql/presentation.py:50</code>). If FastAPI restarts between <code>/presentation/create</code> and <code>/outlines/stream/{id}</code>, the startup cleanup deletes those files and the stream's <code>DocumentsLoader</code> constructor raises <code>HTTPException(404, "File not found")</code> from <code>resolve_existing_temp_paths</code>. Because the loader is built inside the stream generator (<code>outlines.py:121-126</code>), the browser does not get an HTTP 404: <code>safe_sse_stream</code> turns it into an SSE <code>error</code> frame with <code>detail</code> "File not found" (<a href="../10-streaming/">Streaming (SSE)</a>). Uploads are not durable inputs; they are a short-lived working set.</p>
+</div>
+<h3 id="25-filesupdate">2.5 <code>/files/update</code><a class="headerlink" href="#25-filesupdate" title="Permanent link">&para;</a></h3>
+<p><code>update_files</code> (<code>files.py:176-184</code>) validates one file with <code>validate_files(file, False, False, 100, ...)</code> and calls <code>update_temp_file_from_upload(file_path, file)</code> (<code>temp_file_service.py:142-158</code>), which overwrites an existing path inside the owner root. No component in <code>servers/nextjs</code> calls <code>/files/update</code> in this snapshot (a search for <code>files/update</code> under <code>servers/nextjs</code> returns nothing).</p>
+<h2 id="step-3-decompose-the-uploads-into-text">Step 3: Decompose the uploads into text<a class="headerlink" href="#step-3-decompose-the-uploads-into-text" title="Permanent link">&para;</a></h2>
+<h3 id="31-the-request">3.1 The request<a class="headerlink" href="#31-the-request" title="Permanent link">&para;</a></h3>
+<p>After the upload returns, <code>handleDocumentProcessing</code> immediately posts the paths plus the language selected in the UI (<code>UploadPage.tsx:460-472</code>, <code>presentation-generation.ts:57-80</code>):</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"file_paths"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="s2">"/tmp/presenton/3f0c9a3e-.../quarterly-report.pdf"</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="s2">"/tmp/presenton/3f0c9a3e-.../notes.txt"</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">"language"</span><span class="p">:</span><span class="w"> </span><span class="s2">"German (Deutsch)"</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The upload page refuses to process documents while the language is <code>Auto</code> (<code>UploadPage.tsx:384-388</code>): "Please choose a language before processing uploaded documents." That is because the language drives the OCR model (Step 6).</p>
+<h3 id="32-the-handler">3.2 The handler<a class="headerlink" href="#32-the-handler" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/files.py (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>    <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">TEMP_FILE_SERVICE</span><span class="o">.</span><span class="n">create_temp_dir</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()))</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">resolved_file_paths</span> <span class="o">=</span> <span class="n">TEMP_FILE_SERVICE</span><span class="o">.</span><span class="n">resolve_existing_temp_paths</span><span class="p">(</span><span class="n">file_paths</span><span class="p">)</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">txt_files</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">other_files</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">resolved_file_paths</span><span class="p">:</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="k">if</span> <span class="n">file_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".txt"</span><span class="p">):</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="n">txt_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>            <span class="n">other_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">documents_loader</span> <span class="o">=</span> <span class="n">DocumentsLoader</span><span class="p">(</span><span class="n">file_paths</span><span class="o">=</span><span class="n">other_files</span><span class="p">,</span> <span class="n">presentation_language</span><span class="o">=</span><span class="n">language</span><span class="p">)</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="k">await</span> <span class="n">documents_loader</span><span class="o">.</span><span class="n">load_documents</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">parsed_documents</span> <span class="o">=</span> <span class="n">documents_loader</span><span class="o">.</span><span class="n">documents</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="n">response</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">parsed_doc</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parsed_documents</span><span class="p">):</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>        <span class="n">file_path</span> <span class="o">=</span> <span class="n">TEMP_FILE_SERVICE</span><span class="o">.</span><span class="n">create_temp_file_path</span><span class="p">(</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">.txt"</span><span class="p">,</span> <span class="n">temp_dir</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="p">)</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>        <span class="n">parsed_doc</span> <span class="o">=</span> <span class="n">parsed_doc</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"&lt;br&gt;"</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">text_file</span><span class="p">:</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>            <span class="n">text_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">parsed_doc</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Step by step (<code>files.py:133-173</code>):</p>
+<ol>
+<li>A new UUID temp directory is created for the outputs (<code>files.py:138</code>).</li>
+<li>Every input path is resolved and must exist inside the owner root (<code>files.py:139</code>).</li>
+<li>Paths ending in lowercase <code>.txt</code> are passed through untouched; everything else goes to <code>DocumentsLoader</code> (<code>files.py:141-151</code>).</li>
+<li>Each extracted document has <code>&lt;br&gt;</code> replaced with newlines and is written as UTF-8 to <code>&lt;temp_dir&gt;/&lt;uuid4&gt;.txt</code> (<code>files.py:153-160</code>).</li>
+<li>The response pairs the original basename with the new <code>.txt</code> path, using <code>models/decomposed_file_info.py:4-6</code> (<code>name: str</code>, <code>file_path: str</code>). Pass-through <code>.txt</code> files are appended at the end with their original path (<code>files.py:167-171</code>).</li>
+</ol>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">[</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"quarterly-report.pdf"</span><span class="p">,</span><span class="w"> </span><span class="nt">"file_path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/tmp/presenton/9b1e.../5d2c7f0e-....txt"</span><span class="p">},</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="p">{</span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"notes.txt"</span><span class="p">,</span><span class="w"> </span><span class="nt">"file_path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/tmp/presenton/3f0c9a3e-.../notes.txt"</span><span class="p">}</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">]</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The response is not in upload order: parsed documents come first, <code>.txt</code> files last. Code that zips the response with the original upload list by index will mismatch names. Use the <code>name</code> field.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The <code>.txt</code> split uses a case-sensitive <code>endswith(".txt")</code>. <code>NOTES.TXT</code> goes through <code>DocumentsLoader</code>, where the suffix is lower-cased and it is read as text anyway, then rewritten to a new UUID file. The result is the same text, just copied.</p>
+</div>
+<h3 id="33-from-decompose-to-create">3.3 From decompose to create<a class="headerlink" href="#33-from-decompose-to-create" title="Permanent link">&para;</a></h3>
+<p><code>getDocumentPaths</code> (<code>UploadPage.tsx:131-144</code>) flattens the responses and keeps every <code>file_path</code> string. Those <code>.txt</code> paths, not the original uploads, become <code>file_paths</code> in <code>POST /presentation/create</code> (<code>UploadPage.tsx:486-503</code>). <code>create_presentation</code> runs them through <code>resolve_existing_temp_paths</code> again and stores them on the row (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1737-1751</code>). The rest of create is covered in <a href="../08-standard-pipeline/">Standard generation pipeline</a>.</p>
+<h2 id="step-4-the-documentsloader-dispatcher">Step 4: The DocumentsLoader dispatcher<a class="headerlink" href="#step-4-the-documentsloader-dispatcher" title="Permanent link">&para;</a></h2>
+<p><code>DocumentsLoader</code> (<code>servers/fastapi/services/documents_loader.py:163-357</code>) is the single entry point for text extraction. Its constructor does four things (<code>documents_loader.py:166-182</code>):</p>
+<ul>
+<li>re-validates every path with <code>TEMP_FILE_SERVICE.resolve_existing_temp_paths</code> (so a caller can never smuggle in a path outside the owner root);</li>
+<li>maps the presentation language to an OCR code with <code>presentation_language_to_ocr_code</code> (Step 6);</li>
+<li>builds a <code>LiteParseService(timeout_seconds=DECOMPOSE_TIMEOUT_SECONDS)</code> with <code>DECOMPOSE_TIMEOUT_SECONDS = 600</code> (<code>documents_loader.py:164</code>);</li>
+<li>builds a <code>DocumentConversionService</code> and an optional fallback <code>DocumentServiceCls</code>.</li>
+</ul>
+<p>The fallback is imported in a <code>try</code> block from <code>services.lightweight_document_service</code> (<code>documents_loader.py:31-35</code>). That module does not exist in this snapshot, so <code>DocumentServiceCls</code> is <code>None</code> and the fallback branch in <code>_parse_with_liteparse</code> never runs.</p>
+<h3 id="41-extension-routing">4.1 Extension routing<a class="headerlink" href="#41-extension-routing" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/services/documents_loader.py (excerpt)</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>            <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">PDF_EXTENSIONS</span><span class="p">:</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>                <span class="n">document</span><span class="p">,</span> <span class="n">imgs</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_pdf</span><span class="p">(</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>                    <span class="n">file_path</span><span class="p">,</span> <span class="n">load_text</span><span class="p">,</span> <span class="n">load_images</span><span class="p">,</span> <span class="n">temp_dir</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>                <span class="p">)</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>            <span class="k">elif</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">TEXT_EXTENSIONS</span><span class="p">:</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>                <span class="n">document</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_text</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>            <span class="k">elif</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">OFFICE_EXTENSIONS</span><span class="p">:</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>                <span class="n">document</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">load_office_document</span><span class="p">,</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>                    <span class="n">file_path</span><span class="p">,</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>                <span class="p">)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>            <span class="k">elif</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">IMAGE_EXTENSIONS</span><span class="p">:</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>                <span class="n">document</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">load_image</span><span class="p">,</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>                    <span class="n">file_path</span><span class="p">,</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>                    <span class="n">temp_dir</span><span class="p">,</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>                <span class="p">)</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>            <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>                <span class="n">document</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_with_liteparse</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>            <span class="n">document</span> <span class="o">=</span> <span class="n">clean_extracted_document_text</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>            <span class="n">documents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">document</span><span class="p">)</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>            <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
+</span></code></pre></div>
+<pre class="mermaid"><code>flowchart TD
+    A["load_documents(temp_dir)"] --&gt; B{"suffix.lower()"}
+    B --&gt;|".pdf"| C["load_pdf"]
+    C --&gt; C1["_is_scanned_pdf via pdfplumber"]
+    C1 --&gt;|"under 50 chars in first 5 pages"| C2["LiteParse dpi=300"]
+    C1 --&gt;|"has text"| C3["LiteParse dpi=LITEPARSE_DPI (120)"]
+    B --&gt;|".txt"| D["load_text: read UTF-8"]
+    B --&gt;|"Word, PowerPoint, Spreadsheet"| E["extract_office_document_text (zipfile + XML)"]
+    E --&gt;|".doc .ppt .xls .rtf"| E1["OfficeDocumentError then HTTP 400"]
+    B --&gt;|"jpg png gif bmp tiff webp"| F["convert_image_to_png (Pillow)"]
+    F --&gt; F1["LiteParse dpi=300"]
+    B --&gt;|"anything else"| G["LiteParse default dpi"]
+    C2 --&gt; H["clean_extracted_document_text"]
+    C3 --&gt; H
+    D --&gt; H
+    E --&gt; H
+    F1 --&gt; H
+    G --&gt; H
+    H --&gt; I["append to documents, then self._documents = documents"]</code></pre>
+<p>Files are processed sequentially in a <code>for</code> loop (<code>documents_loader.py:203-241</code>); blocking work is pushed to threads with <code>asyncio.to_thread</code>, so the event loop stays responsive but there is no parallelism across files. A missing file raises <code>404 "File &lt;path&gt; not found"</code> (<code>documents_loader.py:204-207</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>text/markdown</code> is an accepted MIME type, but <code>.md</code> is not in any extension list. A Markdown upload therefore passes validation (by MIME) and lands in the <code>else</code> branch, which sends it to LiteParse. Whether LiteParse handles <code>.md</code> is not verified here; if it does not, the user sees a 500. Rename to <code>.txt</code> to get the direct UTF-8 path.</p>
+</div>
+<h3 id="42-text-files">4.2 Text files<a class="headerlink" href="#42-text-files" title="Permanent link">&para;</a></h3>
+<p><code>load_text</code> opens the file with <code>encoding="utf-8"</code> and reads it in a thread (<code>documents_loader.py:284-286</code>). There is no <code>errors=</code> argument, so a <code>.txt</code> that is not valid UTF-8 (for example Latin-1 with accented characters) raises <code>UnicodeDecodeError</code>. Where that surfaces depends on the path. In the web UI flow, <code>/files/decompose</code> passes uploaded <code>.txt</code> files through without reading them, so the error appears later, inside the outline stream, as an SSE <code>error</code> frame with the generic "Failed to generate presentation outlines. Please try again." (<a href="../10-streaming/">Streaming (SSE)</a>). In the one-shot API, which parses <code>request.files</code> inside the request, it is a plain 500. Note the asymmetry with <code>.csv</code> and <code>.tsv</code>, which the office reader opens with <code>errors="replace"</code>.</p>
+<h2 id="step-5-pdfs-images-and-liteparse">Step 5: PDFs, images and LiteParse<a class="headerlink" href="#step-5-pdfs-images-and-liteparse" title="Permanent link">&para;</a></h2>
+<h3 id="51-scanned-pdf-detection-pdfplumber">5.1 Scanned PDF detection (pdfplumber)<a class="headerlink" href="#51-scanned-pdf-detection-pdfplumber" title="Permanent link">&para;</a></h3>
+<p>pdfplumber is used for two things only: detecting scanned PDFs and rendering page images. <code>_is_scanned_pdf</code> (<code>documents_loader.py:271-282</code>) opens the PDF, sums <code>len(page.extract_text().strip())</code> over the first <code>sample_pages=5</code> pages, and returns <code>True</code> when the total is below <code>threshold=50</code>. Any exception returns <code>False</code> (treat as a normal PDF). <code>load_pdf</code> (<code>documents_loader.py:246-269</code>) then calls LiteParse with <code>dpi=300</code> for scanned files and <code>dpi=None</code> (meaning "use the service default") otherwise.</p>
+<p><code>get_page_images_from_pdf</code> renders every page at <code>resolution=150</code> to <code>page_&lt;n&gt;.png</code> (<code>documents_loader.py:342-351</code>), but only when <code>load_images=True</code>, and no production caller passes that flag. Tests in <code>servers/fastapi/tests/unit/test_documents_loader.py:129-165</code> pin the scanned-detection behavior, including the threshold edge case and the "corrupt PDF is not scanned" rule.</p>
+<h3 id="52-images-pillow">5.2 Images (Pillow)<a class="headerlink" href="#52-images-pillow" title="Permanent link">&para;</a></h3>
+<p><code>load_image</code> (<code>documents_loader.py:295-310</code>) first normalizes the image with <code>DocumentConversionService.convert_image_to_png</code> and then OCRs the PNG with LiteParse at <code>dpi=300</code>. If a <code>temp_dir</code> was given, the PNG goes there; otherwise into a <code>tempfile.TemporaryDirectory(prefix="image-convert-")</code> that is deleted afterwards.</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/services/document_conversion_service.py (excerpt)</span><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>            <span class="k">with</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">image</span><span class="p">:</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>                <span class="n">image</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>                <span class="n">converted</span> <span class="o">=</span> <span class="n">ImageOps</span><span class="o">.</span><span class="n">exif_transpose</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>                <span class="k">if</span> <span class="n">converted</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"RGBA"</span><span class="p">,</span> <span class="s2">"LA"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>                    <span class="n">converted</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"P"</span> <span class="ow">and</span> <span class="s2">"transparency"</span> <span class="ow">in</span> <span class="n">converted</span><span class="o">.</span><span class="n">info</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>                <span class="p">):</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>                    <span class="n">rgba</span> <span class="o">=</span> <span class="n">converted</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">"RGBA"</span><span class="p">)</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>                    <span class="n">background</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"RGB"</span><span class="p">,</span> <span class="n">rgba</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>                    <span class="n">background</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">rgba</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">rgba</span><span class="o">.</span><span class="n">getchannel</span><span class="p">(</span><span class="s2">"A"</span><span class="p">))</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>                    <span class="n">converted</span> <span class="o">=</span> <span class="n">background</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>                <span class="k">elif</span> <span class="n">converted</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"RGB"</span><span class="p">:</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>                    <span class="n">converted</span> <span class="o">=</span> <span class="n">converted</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">"RGB"</span><span class="p">)</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>                <span class="n">converted</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">"PNG"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The conversion takes the first frame (<code>seek(0)</code>, so only the first frame of a GIF or multi-page TIFF), applies EXIF orientation, flattens transparency onto white, and forces RGB (<code>servers/fastapi/services/document_conversion_service.py:39-89</code>). Output names avoid collisions: <code>&lt;stem&gt;.png</code>, or <code>&lt;stem&gt;-converted.png</code> if that would overwrite the input, or <code>&lt;stem&gt;-1.png</code>, <code>&lt;stem&gt;-2.png</code> and so on (<code>document_conversion_service.py:18-37</code>). Pillow <code>OSError</code> and <code>UnidentifiedImageError</code> become <code>DocumentConversionError</code>. The <code>timeout_seconds</code> argument is accepted and immediately discarded (<code>del timeout_seconds</code>, line 45).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>load_image</code> calls <code>convert_image_to_png</code> directly, outside <code>_parse_with_liteparse</code> (<code>documents_loader.py:295-310</code>). So although <code>_parse_with_liteparse</code> lists <code>DocumentConversionError</code> among the exceptions it maps to a friendly <code>HTTPException(500, "Failed to parse document ...")</code>, a corrupt or unreadable image never reaches that handler: the <code>DocumentConversionError</code> escapes <code>load_documents</code> and <code>/files/decompose</code> answers with FastAPI's generic 500 "Internal Server Error".</p>
+</div>
+<h3 id="53-office-documents-no-external-converter">5.3 Office documents: no external converter<a class="headerlink" href="#53-office-documents-no-external-converter" title="Permanent link">&para;</a></h3>
+<p>The scope question "which external tools convert office files?" has a short answer in this snapshot: none. <code>extract_office_document_text</code> (<code>servers/fastapi/services/office_document_service.py:144-171</code>) is pure Python on top of <code>zipfile</code> and <code>xml.etree.ElementTree</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>Reader</th>
+<th>What it extracts</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.csv .tsv</code></td>
+<td><code>open(..., errors="replace")</code></td>
+<td>The raw file</td>
+<td><code>office_document_service.py:146-148</code></td>
+</tr>
+<tr>
+<td><code>.docx .docm</code></td>
+<td><code>_extract_docx</code></td>
+<td><code>word/document.xml</code>, every <code>&lt;w:p&gt;</code>, its <code>&lt;w:t&gt;</code> nodes joined by spaces, paragraphs joined by <code>\n</code></td>
+<td><code>47-56</code></td>
+</tr>
+<tr>
+<td><code>.pptx .pptm</code></td>
+<td><code>_extract_pptx</code></td>
+<td><code>ppt/slides/slideN.xml</code> in natural numeric order, all <code>&lt;a:t&gt;</code> text per slide, slides joined by blank lines</td>
+<td><code>59-69</code></td>
+</tr>
+<tr>
+<td><code>.xlsx .xlsm</code></td>
+<td><code>_extract_xlsx</code></td>
+<td><code>xl/worksheets/sheetN.xml</code> rows as tab-separated values, resolving shared strings and inline strings</td>
+<td><code>83-131</code></td>
+</tr>
+<tr>
+<td><code>.odt .odp .ods</code></td>
+<td><code>_extract_odf</code></td>
+<td><code>content.xml</code>, every <code>p</code> and <code>h</code> element's text</td>
+<td><code>134-141</code></td>
+</tr>
+<tr>
+<td><code>.doc .ppt .xls .rtf</code></td>
+<td>none</td>
+<td>Raises <code>OfficeDocumentError</code></td>
+<td><code>150-154</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>_natural_key</code> (<code>office_document_service.py:20-24</code>) splits names on digit runs so <code>slide10.xml</code> sorts after <code>slide9.xml</code>; <code>servers/fastapi/tests/unit/test_office_document_service.py:17</code> tests exactly that. Tag matching uses <code>_local_name</code> (strip the <code>{namespace}</code> prefix, line 27-28), so any element whose local name is <code>t</code> counts as text regardless of namespace.</p>
+<p><code>DocumentsLoader.load_office_document</code> turns <code>OfficeDocumentError</code> into <code>HTTPException(400, detail=str(exc))</code> (<code>documents_loader.py:288-293</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Legacy binary formats (<code>.doc</code>, <code>.ppt</code>, <code>.xls</code>) and <code>.rtf</code> pass the upload validation (<code>constants/documents.py:4-6</code>) and then fail at decompose with <code>400</code> and the message ".doc files require an external office conversion engine; save the document in a modern OOXML or OpenDocument format first" (<code>office_document_service.py:150-154</code>). The upload succeeds, only the second request fails. <code>test_rejects_legacy_binary_office_formats</code> (<code>servers/fastapi/tests/unit/test_office_document_service.py:48</code>) asserts this.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Office extraction is text-only. Speaker notes (<code>ppt/notesSlides/</code>), charts, embedded images, headers and footers are not read, and spreadsheet formulas yield their cached <code>&lt;v&gt;</code> value, not the formula. Numbers are kept as raw strings, so dates in XLSX appear as serial numbers. Empty cells are skipped rather than emitted as empty fields (<code>office_document_service.py:125-128</code>), so columns shift left in sparse rows. In <code>.docx</code>, each <code>&lt;w:t&gt;</code> run is stripped and runs are joined with spaces (<code>office_document_service.py:38-56</code>), so a word that Word split across two formatting runs comes out with a space inside it.</p>
+</div>
+<h2 id="step-6-the-liteparse-runner-and-ocr">Step 6: The LiteParse runner and OCR<a class="headerlink" href="#step-6-the-liteparse-runner-and-ocr" title="Permanent link">&para;</a></h2>
+<h3 id="61-language-to-tesseract-code">6.1 Language to Tesseract code<a class="headerlink" href="#61-language-to-tesseract-code" title="Permanent link">&para;</a></h3>
+<p><code>presentation_language_to_ocr_code</code> (<code>servers/fastapi/utils/ocr_language.py:113-126</code>) maps the exact UI label (for example <code>"German (Deutsch)"</code>) to an ISO 639-3 Tesseract code (<code>"deu"</code>) using an 89-entry table (<code>ocr_language.py:15-106</code>) whose keys must match the <code>LanguageType</code> values in the upload UI (comment at <code>ocr_language.py:5-7</code>). Lookup order: <code>None</code> or blank returns <code>"eng"</code>; exact key; case-insensitive key; unknown returns <code>"eng"</code>. A final regex guard <code>^[a-zA-Z0-9_,+]+$</code> (<code>ocr_language.py:110</code>) ensures that nothing odd reaches the command line. Two notable entries: Chinese maps to <code>chi_sim</code> / <code>chi_tra</code>, and Tahitian deliberately maps to <code>eng</code> because there is "No dedicated Tahitian traineddata in default Tesseract bundles" (<code>ocr_language.py:103-104</code>). <code>servers/fastapi/tests/unit/test_small_surfaces_coverage.py:405-425</code> covers resolution and the bad-language fallback.</p>
+<h3 id="62-liteparseservice-configuration">6.2 LiteParseService configuration<a class="headerlink" href="#62-liteparseservice-configuration" title="Permanent link">&para;</a></h3>
+<p><code>LiteParseService.__init__</code> (<code>servers/fastapi/services/liteparse_service.py:67-80</code>) reads its configuration from the environment:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Clamp / meaning</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LITEPARSE_NODE_BINARY</code></td>
+<td><code>node</code></td>
+<td>Node executable; Electron sets it to its own <code>process.execPath</code> with <code>ELECTRON_RUN_AS_NODE=1</code> (<code>electron/app/main.ts:378-382</code>)</td>
+<td><code>liteparse_service.py:70</code></td>
+</tr>
+<tr>
+<td><code>LITEPARSE_DPI</code></td>
+<td><code>120</code> (<code>_DEFAULT_DPI</code>)</td>
+<td>int clamped to 72..600</td>
+<td><code>liteparse_service.py:21</code>, <code>71</code></td>
+</tr>
+<tr>
+<td><code>LITEPARSE_NUM_WORKERS</code></td>
+<td><code>max(os.cpu_count() - 2, 1)</code></td>
+<td>int clamped to 1..64; docker-compose sets <code>${LITEPARSE_NUM_WORKERS:-1}</code> (<code>docker-compose.yml:119</code>)</td>
+<td><code>liteparse_service.py:22</code>, <code>72-77</code></td>
+</tr>
+<tr>
+<td><code>LITEPARSE_RUNNER_PATH</code></td>
+<td>first existing candidate from <code>_resolve_runner_path</code></td>
+<td>path to <code>liteparse_runner.mjs</code></td>
+<td><code>liteparse_service.py:78</code>, <code>144-195</code></td>
+</tr>
+<tr>
+<td><code>LITEPARSE_RUNNER_OUTPUT</code></td>
+<td>empty (plain)</td>
+<td><code>json</code> selects the legacy one-JSON-line bridge</td>
+<td><code>liteparse_service.py:244-247</code></td>
+</tr>
+<tr>
+<td><code>LITEPARSE_OCR_SERVER_URL</code></td>
+<td>unset</td>
+<td>passed as <code>--ocr-server-url</code> (HTTP OCR instead of local Tesseract)</td>
+<td><code>liteparse_service.py:291-293</code></td>
+</tr>
+<tr>
+<td><code>LITEPARSE_TESSDATA_PATH</code></td>
+<td>unset</td>
+<td>passed as <code>--tessdata-path</code></td>
+<td><code>liteparse_service.py:294-296</code></td>
+</tr>
+<tr>
+<td><code>IMAGEMAGICK_BINARY</code>, <code>MAGICK_HOME</code></td>
+<td>unset</td>
+<td>their directories are prepended to the child <code>PATH</code></td>
+<td><code>liteparse_service.py:82-120</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>_env_int</code> (<code>liteparse_service.py:48-64</code>) logs a warning and falls back to the default for non-integers, and clamps out-of-range values; <code>servers/fastapi/tests/test_liteparse_service.py:17-117</code> checks the defaults (<code>--dpi 120</code>, <code>--python-bridge plain</code>), env overrides, clamping, and the JSON bridge switch.</p>
+<p>The runner is searched in this order (<code>liteparse_service.py:148-191</code>): <code>/app/document-extraction-liteparse/liteparse_runner.mjs</code> (the Docker runtime copy), <code>&lt;cwd&gt;/../../resources/document-extraction/</code>, a path relative to the service file, a PyInstaller layout <code>&lt;cwd&gt;/../../app/resources/...</code>, and finally <code>&lt;cwd&gt;/../../electron/resources/document-extraction/</code>. The npm project root, the directory whose <code>node_modules/@llamaindex/liteparse</code> exists, is found the same way (<code>liteparse_service.py:122-142</code>).</p>
+<h3 id="63-readiness-check-on-every-parse">6.3 Readiness check on every parse<a class="headerlink" href="#63-readiness-check-on-every-parse" title="Permanent link">&para;</a></h3>
+<p><code>parse()</code> begins with <code>check_runtime_ready()</code> (<code>liteparse_service.py:197-242</code>, <code>271-273</code>), which:</p>
+<ol>
+<li>checks the runner file exists;</li>
+<li>runs <code>node --version</code> (10 s timeout);</li>
+<li>checks <code>node_modules/@llamaindex/liteparse</code> exists under the project root;</li>
+<li>runs <code>node --input-type=module -e "import '@llamaindex/liteparse'"</code> (20 s timeout), because the package "is ESM-only; require.resolve() fails" (comment at line 223).</li>
+</ol>
+<p>Any failure raises <code>LiteParseError(reason)</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The readiness check is not cached: every PDF or image spawns two extra Node processes before the real parse. On a slow disk or under Electron, that is noticeable per file. If you profile ingestion, this is the first easy win.</p>
+</div>
+<h3 id="64-the-command-line">6.4 The command line<a class="headerlink" href="#64-the-command-line" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/services/liteparse_service.py (excerpt)</span><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>        <span class="n">command</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">node_binary</span><span class="p">,</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">runner_path</span><span class="p">,</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>            <span class="s2">"--file"</span><span class="p">,</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>            <span class="n">file_path</span><span class="p">,</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>            <span class="s2">"--ocr-enabled"</span><span class="p">,</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>            <span class="s2">"true"</span> <span class="k">if</span> <span class="n">ocr_enabled</span> <span class="k">else</span> <span class="s2">"false"</span><span class="p">,</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>            <span class="s2">"--ocr-language"</span><span class="p">,</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>            <span class="n">ocr_language</span><span class="p">,</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>            <span class="s2">"--dpi"</span><span class="p">,</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>            <span class="nb">str</span><span class="p">(</span><span class="n">effective_dpi</span><span class="p">),</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>            <span class="s2">"--num-workers"</span><span class="p">,</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_workers</span><span class="p">),</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="p">]</span>
+</span></code></pre></div>
+<p><code>DocumentsLoader._parse_with_liteparse</code> always passes <code>ocr_enabled=True</code> and the mapped language (<code>documents_loader.py:312-320</code>). The command is a list (no shell), so file names with spaces or quotes are safe. Then <code>--ocr-server-url</code>, <code>--tessdata-path</code> and <code>--python-bridge plain|json</code> are appended (<code>liteparse_service.py:291-299</code>).</p>
+<h3 id="65-inside-liteparse_runnermjs">6.5 Inside <code>liteparse_runner.mjs</code><a class="headerlink" href="#65-inside-liteparse_runnermjs" title="Permanent link">&para;</a></h3>
+<p>The runner (<code>electron/resources/document-extraction/liteparse_runner.mjs</code>) is a small CLI around <code>new LiteParse(config).parse(resolvedPath, true)</code> from <code>@llamaindex/liteparse</code> (line 13, 125-126):</p>
+<ul>
+<li><code>--file</code> is required and must exist, otherwise exit code 2 (<code>liteparse_runner.mjs:68-76</code>).</li>
+<li><code>--ocr-enabled</code> accepts <code>1/true/yes/on</code> and <code>0/false/no/off</code>, default true (lines 21-27, 78).</li>
+<li><code>--dpi</code> defaults to 150 inside the runner and is clamped 72..600; <code>--num-workers</code> defaults to <code>cpus - 2</code> clamped 1..64 (lines 79-85). Python always passes both, so the runner defaults only apply to manual runs.</li>
+<li>The OCR language is <code>LITEPARSE_OCR_LANGUAGE</code> env first, then <code>--ocr-language</code>, then <code>eng</code>; commas become <code>+</code> (so <code>deu,eng</code> becomes <code>deu+eng</code>) (lines 36-45, 87-92).</li>
+<li><code>--ocr-server-url</code> falls back to <code>LITEPARSE_OCR_SERVER_URL</code>; <code>--tessdata-path</code> falls back to <code>LITEPARSE_TESSDATA_PATH</code> then <code>TESSDATA_PREFIX</code> (lines 97-108).</li>
+<li>Plain bridge: writes the raw <code>result.text</code> to stdout and exits 0; on error writes the stack and message to stderr and exits 1 (lines 129-132, 150-156).</li>
+<li>JSON bridge: one line <code>{"ok": true, "filePath", "text", "pageCount", "ocr": {"engine": "tesseract" | "http", ...}}</code>, or <code>{"ok": false, "filePath", "error"}</code> with exit 1 (lines 134-146, 160-167).</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>LITEPARSE_OCR_LANGUAGE</code> in the environment overrides the language that Python computed from the UI (<code>liteparse_runner.mjs:88-91</code>). If you set it globally (for example to <code>eng</code>), choosing German in the UI has no OCR effect.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The production Dockerfile installs only <code>tesseract-ocr tesseract-ocr-eng</code>, and only when <code>INSTALL_TESSERACT=true</code> (the default, <code>Dockerfile:77</code>, <code>105</code>). The language mapping can ask for <code>deu</code>, <code>jpn</code> and so on, but whether that traineddata is available depends on how LiteParse resolves Tesseract data (local data, <code>LITEPARSE_TESSDATA_PATH</code>, or an OCR server). That resolution happens inside <code>@llamaindex/liteparse</code> and is not verified in this chapter.</p>
+</div>
+<h3 id="66-running-the-process-and-reading-output">6.6 Running the process and reading output<a class="headerlink" href="#66-running-the-process-and-reading-output" title="Permanent link">&para;</a></h3>
+<p>In the default plain mode, <code>_run_plain_bridge_to_text</code> (<code>liteparse_service.py:413-463</code>) streams stdout into a <code>NamedTemporaryFile(prefix="liteparse-stdout-")</code> instead of a pipe, so large PDFs do not have to fit in a pipe buffer, and drains stderr in a daemon thread into a <code>BoundedTextBuffer</code> that keeps only the last 8192 characters (<code>servers/fastapi/utils/runtime_limits.py:39-60</code>). It waits up to <code>timeout_seconds</code> (600 from <code>DocumentsLoader</code>); on timeout it kills the child and raises <code>LiteParseError("LiteParse timed out after 600 seconds")</code>. The stdout file is read back with <code>errors="replace"</code> and always unlinked. A non-zero exit becomes <code>LiteParseError</code> carrying the return code and 600-character snippets of stderr and stdout (<code>liteparse_service.py:345-351</code>). Success returns <code>{"ok": True, "text": stdout.lstrip("\ufeff"), "filePath": ..., "pageCount": 0}</code>.</p>
+<p>In JSON mode, <code>subprocess.run(..., capture_output=True, timeout=...)</code> is used and <code>_decode_runner_output</code> takes the last stdout line that parses as a JSON object, tolerating stray log lines (<code>liteparse_service.py:387-411</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>In JSON mode the timeout surfaces as <code>subprocess.TimeoutExpired</code>, which is not one of the exceptions <code>_parse_with_liteparse</code> catches (<code>LiteParseError</code>, <code>DocumentConversionError</code>, <code>OfficeDocumentError</code>, <code>documents_loader.py:321</code>). It escapes as an unhandled 500 rather than the friendly "Failed to parse document" message. The default plain mode converts timeouts into <code>LiteParseError</code> and does not have this problem.</p>
+</div>
+<h3 id="67-failure-mapping">6.7 Failure mapping<a class="headerlink" href="#67-failure-mapping" title="Permanent link">&para;</a></h3>
+<p><code>_parse_with_liteparse</code> logs the failure, tries the (absent) fallback parser, and raises <code>HTTPException(500, "Failed to parse document &lt;basename&gt;: &lt;error&gt;")</code> (<code>documents_loader.py:321-340</code>). Because files are processed in one loop, one bad file fails the whole decompose request; there is no partial result.</p>
+<h2 id="step-7-cleaning-the-extracted-text">Step 7: Cleaning the extracted text<a class="headerlink" href="#step-7-cleaning-the-extracted-text" title="Permanent link">&para;</a></h2>
+<p>Every document, whatever its backend, goes through <code>clean_extracted_document_text</code> (<code>documents_loader.py:146-160</code>, called at line 239). It exists because older runner versions, or the JSON bridge, could leave the whole JSON line in the stored text. The function runs up to 4 passes of <code>_clean_extracted_one_pass</code>, which:</p>
+<ol>
+<li>Up to 3 times, calls <code>_unwrap_liteparse_json_line_if_stored</code> (<code>documents_loader.py:40-59</code>): if the text (left-stripped) parses as a JSON object with <code>ok is True</code>, a <code>filePath</code> key and a string <code>text</code>, return just <code>text</code>.</li>
+<li>If the text still starts with <code>{</code>, calls <code>_try_extract_liteparse_text_value_from_malformed_json</code> (<code>documents_loader.py:116-129</code>): it only proceeds if the first 10,000 characters contain both <code>ok</code> and <code>filePath</code>, finds the first <code>"text": "</code> with the regex <code>"text"\s*:\s*"</code> and decodes the JSON string by hand with <code>_json_unescape_quoted_value</code> (<code>documents_loader.py:65-113</code>), which handles <code>\" \\ \/ \b \f \n \r \t \uXXXX</code> and returns what it has if the closing quote is missing (truncated output).</li>
+</ol>
+<p>The passes stop as soon as a pass changes nothing. Ordinary document text that does not start with <code>{</code> is returned unchanged. Tests: <code>servers/fastapi/tests/test_documents_loader_unwrap.py:9-50</code> and <code>servers/fastapi/tests/unit/test_documents_loader.py:18-40</code>, including nested payloads and truncated JSON.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>A real document whose text starts with a JSON object containing <code>"ok": true</code>, <code>"filePath"</code> and <code>"text"</code> would be unwrapped too. This is unlikely, but if you ingest JSON exports of LiteParse results, expect them to be reduced to their <code>text</code> field.</p>
+</div>
+<h2 id="step-8-from-documents-to-additional_context">Step 8: From documents to <code>additional_context</code><a class="headerlink" href="#step-8-from-documents-to-additional_context" title="Permanent link">&para;</a></h2>
+<h3 id="81-standard-outline-stream">8.1 Standard outline stream<a class="headerlink" href="#81-standard-outline-stream" title="Permanent link">&para;</a></h3>
+<p>When the outline stream starts (<code>GET /api/v1/ppt/outlines/stream/{id}</code>, <code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:84</code>), it creates a temp dir (line 110) and, if the row has <code>file_paths</code>, loads them again:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/outlines.py (excerpt)</span><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>        <span class="n">additional_context</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>        <span class="k">if</span> <span class="n">presentation</span><span class="o">.</span><span class="n">file_paths</span><span class="p">:</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>            <span class="n">documents_loader</span> <span class="o">=</span> <span class="n">DocumentsLoader</span><span class="p">(</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>                <span class="n">file_paths</span><span class="o">=</span><span class="n">presentation</span><span class="o">.</span><span class="n">file_paths</span><span class="p">,</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>                <span class="n">presentation_language</span><span class="o">=</span><span class="n">presentation</span><span class="o">.</span><span class="n">language</span><span class="p">,</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>            <span class="p">)</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>            <span class="k">await</span> <span class="n">documents_loader</span><span class="o">.</span><span class="n">load_documents</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>            <span class="n">documents</span> <span class="o">=</span> <span class="n">documents_loader</span><span class="o">.</span><span class="n">documents</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>            <span class="k">if</span> <span class="n">documents</span><span class="p">:</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>                <span class="n">additional_context</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">documents</span><span class="p">)</span>
+</span></code></pre></div>
+<p>In the web UI flow these paths are the decomposed <code>.txt</code> files, so this second load is just <code>load_text</code> per file: the expensive parsing happened once, in decompose. The concatenation is a plain <code>"\n\n".join(...)</code> with no headers and no file names, so the LLM sees one undifferentiated block (<code>outlines.py:120-129</code>).</p>
+<p><code>additional_context</code> is then passed to <code>get_outline_messages</code> (for memory capture, <code>outlines.py:142-168</code>, stored as <code>extracted_document_text</code>) and to <code>generate_ppt_outline</code> (<code>outlines.py:170-183</code>). Inside, if external web search is active, search results are appended to the same string with another <code>"\n\n"</code> (<code>servers/fastapi/utils/llm_calls/generate_presentation_outlines.py:350-353</code>). The final user prompt ends with:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/llm_calls/generate_presentation_outlines.py (excerpt)</span><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>        <span class="sa">f</span><span class="s2">"Today's Date: </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">'%Y-%m-</span><span class="si">%d</span><span class="s1">'</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>        <span class="sa">f</span><span class="s2">"Content: </span><span class="si">{</span><span class="n">content</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        <span class="s2">"Instructions (apply as constraints; never quote as slide content): "</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">instructions</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        <span class="sa">f</span><span class="s2">"Context: </span><span class="si">{</span><span class="n">additional_context</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'None'</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+</span></code></pre></div>
+<p>(<code>generate_presentation_outlines.py:210-214</code>). The system prompt tells the model to "Generate flow based on user <strong>content</strong> and use <strong>context</strong> just for reference" (<code>generate_presentation_outlines.py:129</code>), and the user prompt says conflicting language or slide-count requests inside Context are ignored (line 209). These rules are discussed in <a href="../09-prompts-and-schemas/">Prompts and schemas</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The Standard path never truncates <code>additional_context</code>. A 300-page PDF becomes one enormous <code>Context:</code> line, and the request can exceed the model's context window, failing at the provider. Smart mode, by contrast, caps its source context at 90,000 characters (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2023-2025</code>). If you add a limit to Standard mode, do it in <code>outlines.py</code> right after the join so both memory capture and generation see the same text.</p>
+</div>
+<h3 id="82-other-callers-of-documentsloader">8.2 Other callers of DocumentsLoader<a class="headerlink" href="#82-other-callers-of-documentsloader" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Caller</th>
+<th>How it loads</th>
+<th>Lines</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-shot <code>POST /presentation/generate</code> (sync and async)</td>
+<td><code>DocumentsLoader(file_paths=request.files, presentation_language=request.language).load_documents()</code> with no temp dir, skipped entirely when <code>slides_markdown</code> is given</td>
+<td><code>presentation.py:2732-2740</code></td>
+</tr>
+<tr>
+<td>Smart mode stream</td>
+<td>Emits status "Reading source documents", joins non-empty documents with web search context, truncates to 90,000 chars</td>
+<td><code>presentation.py:2000-2025</code></td>
+</tr>
+<tr>
+<td>v2 Smart API</td>
+<td>Passes <code>request.files</code> to <code>create_presentation</code> as <code>file_paths</code></td>
+<td><code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:66-80</code></td>
+</tr>
+<tr>
+<td>Chat attachments</td>
+<td>Loads attachments into a fresh temp dir for the chat context</td>
+<td><code>servers/fastapi/services/chat/service.py:599-604</code></td>
+</tr>
+<tr>
+<td>Chat memory layer</td>
+<td>Loads presentation files one at a time</td>
+<td><code>servers/fastapi/services/chat/memory_layer.py:576-599</code></td>
+</tr>
+</tbody>
+</table>
+<p>For API callers, the files in <code>request.files</code> are usually the raw uploads (from <code>/files/upload</code> or <code>/files/mcp-upload</code>), not decomposed <code>.txt</code> files, so the full parse happens inside the generation request. See <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>, <a href="../13-smart-mode/">Smart mode</a> and <a href="../14-editing-and-chat/">Editing and chat assistant</a>.</p>
+<p>When Presenton Cloud proxying is active, <code>/api/v1/ppt/files/upload</code> and <code>/api/v1/ppt/files/decompose</code> are part of <code>CLOUD_GENERATION_PATHS</code> (<code>servers/fastapi/services/presenton_cloud_proxy.py:42-49</code>) and are forwarded rather than handled locally; that mechanism is out of scope here.</p>
+<h2 id="step-9-the-documents-preview-page">Step 9: The documents-preview page<a class="headerlink" href="#step-9-the-documents-preview-page" title="Permanent link">&para;</a></h2>
+<p>The App Router still contains a <code>/documents-preview</code> route (<code>servers/nextjs/app/(presentation-generator)/documents-preview/page.tsx</code>, component <code>documents-preview/components/DocumentPreviewPage.tsx</code>). It reads <code>config</code> and <code>files</code> (the decompose responses) from Redux, fetches each <code>.txt</code> through <code>window.electron.readFile</code> in Electron or <code>POST /api/read-file</code> in the browser (<code>DocumentPreviewPage.tsx:95-105</code>), renders the selected document, and offers a create button that calls <code>createPresentation</code> with the <code>.txt</code> paths and navigates to <code>/outline</code> (<code>DocumentPreviewPage.tsx:141-191</code>). <code>/api/read-file</code> requires an authenticated session and uses <code>readReadableLocalFile</code> with the user's id and admin flag (<code>servers/nextjs/app/api/read-file/route.ts:8-33</code>).</p>
+<p>In this snapshot the upload page does not navigate there: <code>handleDocumentProcessing</code> calls create directly and pushes <code>/outline?id=...</code> (or the Smart presentation URL) (<code>UploadPage.tsx:309-316</code>, <code>527-529</code>). The only other reference is the header's path list (<code>servers/nextjs/app/(presentation-generator)/(dashboard)/dashboard/components/Header.tsx:13</code>, <code>26</code>). The full journey through the UI is in <a href="../21-user-journey/">User journey</a>.</p>
+<h2 id="step-10-the-score-based-chunker">Step 10: The score-based chunker<a class="headerlink" href="#step-10-the-score-based-chunker" title="Permanent link">&para;</a></h2>
+<p><code>servers/fastapi/services/score_based_chunker.py</code> implements a heading-based splitter that returns <code>DocumentChunk</code> objects (<code>servers/fastapi/models/document_chunk.py:6-13</code>: <code>heading</code>, <code>content</code>, <code>heading_index</code>, <code>score</code>, plus <code>to_slide_outline()</code> which builds a <code>SlideOutlineModel</code> with <code>content=f"{heading}\n{content}"</code>). Its intended use is clearly "one chunk per slide outline". In this snapshot, however, no module outside the file imports <code>ScoreBasedChunker</code>; a search for it across <code>servers/fastapi</code> matches only its own file. It is dormant code, documented here because the scope asks for it and because it is the obvious hook if you want per-slide grounding.</p>
+<h3 id="101-the-algorithm">10.1 The algorithm<a class="headerlink" href="#101-the-algorithm" title="Permanent link">&para;</a></h3>
+<ol>
+<li><code>extract_headings(text)</code> (<code>score_based_chunker.py:9-18</code>): every line that, after <code>strip()</code>, starts with <code>#</code> is a heading. That includes <code>#hashtag</code> lines and lines like <code>#1 priority</code>.</li>
+<li><code>score_headings(headings)</code> (<code>score_based_chunker.py:20-47</code>), with <code>level = number of leading #</code>:<ul>
+<li>levels 1 to 3: <code>10 - (level - 1) * 2</code>, so 10, 8, 6;</li>
+<li>level 4 and deeper: <code>4 - (level - 4) * 0.5</code>, so 4, 3.5, 3, and so on;</li>
+<li>the first heading gets <code>+5</code>;</li>
+<li>every later heading gets a "distance bonus" <code>min(5.0, (i - last_heading_index) * 0.5)</code>. Since <code>last_heading_index</code> is updated on every iteration, the distance is always 1, so the bonus is always exactly <code>0.5</code>.</li>
+</ul>
+</li>
+<li><code>get_chunks_from_headings(text, headings, scores, top_k)</code> (<code>score_based_chunker.py:49-153</code>):<ul>
+<li>keep headings with <code>score &gt; 0</code> (only absurdly deep runs of <code>#</code> reach a score of 0 or less, for example a non-first heading with 13 or more <code>#</code>, and are dropped);</li>
+<li>if at most <code>top_k</code> remain, select all of them in document order;</li>
+<li>otherwise group indices by <code>round(score)</code> and walk groups from the highest score down. A group that fits is taken whole. If it does not fit and 1 slot remains, take the middle index; if 2 remain, take the first and last; otherwise take <code>remaining</code> evenly spaced indices with <code>step = (len - 1) / (remaining - 1)</code>. Selected indices are sorted back into document order;</li>
+<li>map each heading to the first line number where the stripped line equals it (duplicate headings map to successive occurrences);</li>
+<li>each chunk's content runs from the line after its heading to the line of the next selected heading (or the end of the text), stripped.</li>
+</ul>
+</li>
+<li><code>get_n_chunks(text, n)</code> (<code>score_based_chunker.py:155-163</code>) runs the three steps in threads and raises <code>ValueError("Only X chunks found, requested n")</code> if fewer than <code>n</code> chunks result.</li>
+</ol>
+<h3 id="102-worked-example">10.2 Worked example<a class="headerlink" href="#102-worked-example" title="Permanent link">&para;</a></h3>
+<p>Input headings, in order: <code># Intro</code>, <code>## Background</code>, <code>## Method</code>, <code>### Details</code>, <code>#### Note</code>, with <code>top_k = 3</code>.</p>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>Heading</th>
+<th>Base</th>
+<th>First</th>
+<th>Distance</th>
+<th>Score</th>
+<th><code>round(score)</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code># Intro</code></td>
+<td>10</td>
+<td>+5</td>
+<td>0</td>
+<td>15.0</td>
+<td>15</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>## Background</code></td>
+<td>8</td>
+<td>0</td>
+<td>+0.5</td>
+<td>8.5</td>
+<td>8</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>## Method</code></td>
+<td>8</td>
+<td>0</td>
+<td>+0.5</td>
+<td>8.5</td>
+<td>8</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>### Details</code></td>
+<td>6</td>
+<td>0</td>
+<td>+0.5</td>
+<td>6.5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>#### Note</code></td>
+<td>4</td>
+<td>0</td>
+<td>+0.5</td>
+<td>4.5</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<p>Five candidates exceed <code>top_k</code>, so grouping kicks in: group 15 gives <code>[0]</code> (2 slots left), group 8 gives <code>[1, 2]</code>, which fits exactly. Selected: <code>[0, 1, 2]</code>. The third chunk, <code>## Method</code>, runs to the end of the text and therefore swallows <code>### Details</code> and <code>#### Note</code> as content.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Python's <code>round()</code> uses banker's rounding: <code>round(8.5) == 8</code> and <code>round(6.5) == 6</code>, but <code>round(7.5) == 8</code>. Grouping is therefore not "nearest integer, halves up". Combined with the constant 0.5 distance bonus, every non-first heading at levels 1 to 3, and at even levels from 4 on (4.5, 3.5, ...), lands on a <code>.5</code> score, while odd levels from 5 on land on whole numbers (level 5 scores 4.0, the same group as level 4's 4.5). This rounding rule therefore decides which levels share a group. Keep that in mind before wiring the chunker into production.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The chunker only understands Markdown headings. Text from <code>office_document_service.py</code> and from the LiteParse plain bridge usually contains no <code>#</code> lines at all, in which case <code>get_n_chunks</code> raises <code>ValueError</code> for any <code>n &gt; 0</code>.</p>
+</div>
+<h2 id="step-11-supply-chain-and-security-checks-for-the-parser">Step 11: Supply-chain and security checks for the parser<a class="headerlink" href="#step-11-supply-chain-and-security-checks-for-the-parser" title="Permanent link">&para;</a></h2>
+<p>The parser runs untrusted files through a Node dependency tree, so the repository pins and tests it.</p>
+<h3 id="111-pinned-dependencies">11.1 Pinned dependencies<a class="headerlink" href="#111-pinned-dependencies" title="Permanent link">&para;</a></h3>
+<p>The root <code>package.json</code> depends on <code>@llamaindex/liteparse ^1.5.2</code> and <code>sharp ^0.35.5</code>, with overrides forcing LiteParse's own <code>sharp</code> and <code>zod ^4.6.6</code> (<code>package.json:16-25</code>).</p>
+<h3 id="112-scriptssync-document-dependenciescjs">11.2 <code>scripts/sync-document-dependencies.cjs</code><a class="headerlink" href="#112-scriptssync-document-dependenciescjs" title="Permanent link">&para;</a></h3>
+<p><code>syncDocumentDependencies()</code> (<code>scripts/sync-document-dependencies.cjs:24-57</code>) guarantees that the installed parser matches the reviewed lockfile:</p>
+<ol>
+<li>Compute a SHA-256 fingerprint over <code>package-lock.json</code> bytes, the manifest's <code>dependencies</code> and <code>overrides</code>, and <code>platform:arch:node ABI</code> (lines 35-37).</li>
+<li>Mirror <code>package.json</code>, <code>package-lock.json</code> and <code>liteparse_runner.mjs</code> into <code>&lt;root&gt;/document-extraction-liteparse</code> (lines 38-42), the same directory the Docker image uses at <code>/app/document-extraction-liteparse</code>.</li>
+<li>For the root and the runtime directory, skip work only if the marker <code>node_modules/.presenton-document-lock.sha256</code> equals the fingerprint, the critical packages (<code>@llamaindex/liteparse</code>, <code>sharp</code>, <code>zod</code>, <code>axios</code>, <code>form-data</code>, <code>follow-redirects</code>, line 6) have exactly the lockfile versions, and <code>await import('@llamaindex/liteparse'); await import('sharp');</code> succeeds (lines 9-22, 44-48).</li>
+<li>Otherwise delete the marker, run <code>npm ci --include=optional --omit=dev --prefer-offline --no-fund --no-audit</code>, re-verify, and throw "Document dependencies do not match the reviewed lockfile" if verification still fails; only then write the marker (lines 49-54).</li>
+</ol>
+<p><code>start.js</code> runs it at container start only in development mode: <code>ensurePresentationExportNodeDependencies</code> (<code>start.js:225-227</code>) is called inside <code>if (isDev)</code> in <code>main</code> (<code>start.js:723-726</code>). <code>Dockerfile.dev:53-55</code> also runs it at build. The production <code>Dockerfile</code> installs the runtime directly with <code>npm --prefix /app/document-extraction-liteparse ci --omit=dev</code> (<code>Dockerfile:61-65</code>). Tests in <code>scripts/sync-document-dependencies.test.mjs</code> cover replacing an old volume and reusing the locked result (line 29), repairing a downgraded package even with a current marker (line 44), and making sure a failed install cannot leave a trusted marker (line 54).</p>
+<h3 id="113-scriptsdocument-parser-securitytestmjs">11.3 <code>scripts/document-parser-security.test.mjs</code><a class="headerlink" href="#113-scriptsdocument-parser-securitytestmjs" title="Permanent link">&para;</a></h3>
+<p>This test resolves <code>follow-redirects</code> exactly as LiteParse would reach it (LiteParse, then its <code>axios</code>, then <code>follow-redirects</code>, lines 7-10), which is the HTTP stack used for an OCR server. It starts a source server on <code>127.0.0.1</code> that answers <code>302</code> to a destination on <code>localhost</code> (a different origin), sends a request with array-form headers containing <code>Authorization: Bearer test-canary</code> and <code>Cookie: canary=test</code>, and asserts that the source saw both headers and the destination saw neither (lines 12-53). In other words, a malicious or misconfigured OCR server cannot redirect Presenton into leaking credentials to another host. Both scripts run in the root <code>npm test</code> (<code>package.json:8</code>). CI wiring is covered in <a href="../28-ci-tests-security/">CI, tests, security</a>.</p>
+<h3 id="114-server-side-safety-summary">11.4 Server-side safety summary<a class="headerlink" href="#114-server-side-safety-summary" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Path traversal in filenames</td>
+<td>basename-only sanitization, <code>.</code>/<code>..</code> rejected</td>
+<td><code>temp_file_service.py:43-48</code></td>
+</tr>
+<tr>
+<td>Reading other users' files by path</td>
+<td>per-owner root plus realpath prefix check on every path, re-checked in <code>DocumentsLoader</code></td>
+<td><code>temp_file_service.py:21-79</code>, <code>documents_loader.py:171</code></td>
+</tr>
+<tr>
+<td>Symlink escape</td>
+<td><code>os.path.realpath</code> before the prefix check</td>
+<td><code>temp_file_service.py:55-67</code></td>
+</tr>
+<tr>
+<td>Shell injection via file names</td>
+<td>subprocess argument lists, no shell</td>
+<td><code>liteparse_service.py:277-299</code></td>
+</tr>
+<tr>
+<td>OCR language injection</td>
+<td>regex guard on the OCR code</td>
+<td><code>ocr_language.py:110</code>, <code>124-125</code></td>
+</tr>
+<tr>
+<td>Runaway parser</td>
+<td>600 s timeout and kill, bounded stderr buffer</td>
+<td><code>liteparse_service.py:438-446</code>, <code>runtime_limits.py:39-60</code></td>
+</tr>
+<tr>
+<td>Malformed XML in office files</td>
+<td>parse errors become <code>OfficeDocumentError</code> (400); no hardening beyond the standard-library <code>ElementTree</code> parser (<code>defusedxml</code> is not used)</td>
+<td><code>office_document_service.py:31-35</code></td>
+</tr>
+<tr>
+<td>Credential leak via OCR redirects</td>
+<td><code>follow-redirects</code> version pinned and tested</td>
+<td><code>scripts/document-parser-security.test.mjs</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>There is no per-request limit on decompressed size or page count. A small zip-bomb style <code>.docx</code>, or a PDF with thousands of pages, is bounded only by the 600-second timeout (for LiteParse) or by memory (for the pure-Python office readers, which call <code>archive.read(member)</code> into memory). If you expose Presenton publicly, put limits in front of <code>/files/decompose</code>.</p>
+</div>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The web UI uploads raw files to <code>/files/upload</code>, decomposes them into UTF-8 <code>.txt</code> files with <code>/files/decompose</code>, and stores only the <code>.txt</code> paths on the presentation row; the outline stream rereads them.</li>
+<li>Every path lives under <code>TEMP_DIRECTORY</code> (default <code>/tmp/presenton</code>), optionally under a per-owner subdirectory, is validated with realpath prefix checks, and is wiped when FastAPI restarts.</li>
+<li><code>DocumentsLoader</code> routes by extension: UTF-8 read for <code>.txt</code>, pure-Python zip/XML readers for modern office formats (legacy <code>.doc/.ppt/.xls/.rtf</code> are rejected), Pillow normalization plus LiteParse OCR at 300 dpi for images, and LiteParse for PDFs with a pdfplumber scanned-PDF check that raises the DPI from 120 to 300.</li>
+<li>LiteParse is a Node subprocess (<code>liteparse_runner.mjs</code>) configured by <code>LITEPARSE_*</code> variables, with a 600-second timeout, the OCR language mapped from the UI label, and a cleaning pass that strips leftover JSON wrappers.</li>
+<li>The extracted texts are joined with blank lines into <code>additional_context</code>, untruncated in Standard mode (90,000 characters in Smart mode), and appear as the <code>Context:</code> line of the outline prompt.</li>
+<li><code>ScoreBasedChunker</code> exists but is not wired in; the parser's Node dependencies are pinned by a fingerprinted sync script and a redirect-credential test.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../12-images-icons-search/">Images, icons, web search</a> to see how the generated slides get their pictures, icons and web research context.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../10-streaming/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Streaming (SSE)">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Streaming (SSE)
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../12-images-icons-search/" class="md-footer__link md-footer__link--next" aria-label="Next: Images, icons, web search">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Images, icons, web search
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

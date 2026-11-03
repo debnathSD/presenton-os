@@ -1,0 +1,4240 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/05-fastapi-startup/">
+      
+      
+        <link rel="prev" href="../04-running-locally/">
+      
+      
+        <link rel="next" href="../06-configuration-and-providers/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>FastAPI app and startup - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fastapi-app-and-startup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FastAPI app and startup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-process-entry-point-serverpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The process entry point (server.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-import-time-work-in-apimainpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Import-time work in api/main.py
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Import-time work in api/main.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-a-sandbox-safe-mime-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 A sandbox-safe MIME table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-optional-sentry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Optional Sentry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-creating-the-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Creating the application
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-registering-routers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Registering routers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-mounting-app_data-and-static" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Mounting /app_data and /static
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Mounting /app_data and /static">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-per-root-app_data-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Per-root app_data mounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-the-static-mount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 The /static mount
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-cors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: CORS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-middleware-stack-and-its-real-execution-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The middleware stack and its real execution order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-the-static-icon-404-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: The static icon 404 fallback
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-the-lifespan-step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: The lifespan, step by step
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: The lifespan, step by step">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-the-app-data-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 The app data directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-migrations-migrate_database_on_startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Migrations: migrate_database_on_startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-create_db_and_tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 create_db_and_tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-bootstrap_database_admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 bootstrap_database_admin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-fail_interrupted_async_tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 fail_interrupted_async_tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#87-migrate_provider_settings_from_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.7 migrate_provider_settings_from_file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#88-import_default_templates_on_startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.8 import_default_templates_on_startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#89-update_env_with_user_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.9 update_env_with_user_config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#810-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.10 Shutdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-sessionauthmiddleware-as-a-decision-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: SessionAuthMiddleware as a decision tree
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: SessionAuthMiddleware as a decision tree">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-desktop-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Desktop guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-auth-disabled-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Auth-disabled path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-which-paths-need-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Which paths need authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-first-run-setup-http-428" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 First-run setup: HTTP 428
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-principal-resolution-and-401" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Principal resolution and 401
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-admin-only-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Admin-only paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#97-request-state-and-the-internal-session-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.7 Request state and the internal session token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#98-owner-contextvars-cloud-proxy-and-asset-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.8 Owner contextvars, cloud proxy and asset check
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-request-scoped-owner-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Request-scoped owner context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: Request-scoped owner context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-two-contextvars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Two contextvars
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-what-reads-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 What reads them
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-why-the-models-default-owner_id-from-the-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Why the models default owner_id from the context
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-worked-example-adding-a-router-and-endpoint-the-presenton-way" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Worked example: adding a router and endpoint the Presenton way
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-process-entry-point-serverpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The process entry point (server.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-import-time-work-in-apimainpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Import-time work in api/main.py
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Import-time work in api/main.py">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-a-sandbox-safe-mime-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 A sandbox-safe MIME table
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-optional-sentry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Optional Sentry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-creating-the-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Creating the application
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-registering-routers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Registering routers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-mounting-app_data-and-static" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Mounting /app_data and /static
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Mounting /app_data and /static">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-per-root-app_data-mounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Per-root app_data mounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-the-static-mount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 The /static mount
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-cors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: CORS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-middleware-stack-and-its-real-execution-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The middleware stack and its real execution order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-the-static-icon-404-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: The static icon 404 fallback
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-the-lifespan-step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: The lifespan, step by step
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: The lifespan, step by step">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-the-app-data-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 The app data directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-migrations-migrate_database_on_startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Migrations: migrate_database_on_startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-create_db_and_tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 create_db_and_tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-bootstrap_database_admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 bootstrap_database_admin
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#86-fail_interrupted_async_tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.6 fail_interrupted_async_tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#87-migrate_provider_settings_from_file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.7 migrate_provider_settings_from_file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#88-import_default_templates_on_startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.8 import_default_templates_on_startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#89-update_env_with_user_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.9 update_env_with_user_config
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#810-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.10 Shutdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-sessionauthmiddleware-as-a-decision-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: SessionAuthMiddleware as a decision tree
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: SessionAuthMiddleware as a decision tree">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-desktop-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Desktop guard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-auth-disabled-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Auth-disabled path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-which-paths-need-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Which paths need authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-first-run-setup-http-428" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 First-run setup: HTTP 428
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-principal-resolution-and-401" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Principal resolution and 401
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-admin-only-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Admin-only paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#97-request-state-and-the-internal-session-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.7 Request state and the internal session token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#98-owner-contextvars-cloud-proxy-and-asset-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.8 Owner contextvars, cloud proxy and asset check
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-request-scoped-owner-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Request-scoped owner context
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: Request-scoped owner context">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-two-contextvars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Two contextvars
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-what-reads-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 What reads them
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-why-the-models-default-owner_id-from-the-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Why the models default owner_id from the context
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-worked-example-adding-a-router-and-endpoint-the-presenton-way" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Worked example: adding a router and endpoint the Presenton way
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="fastapi-app-and-startup">FastAPI app and startup<a class="headerlink" href="#fastapi-app-and-startup" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/server.py</code>, <code>servers/fastapi/api/main.py</code>, <code>servers/fastapi/api/lifespan.py</code>, <code>servers/fastapi/api/middlewares.py</code>, <code>servers/fastapi/api/v1/auth/context.py</code>, <code>servers/fastapi/api/v1/auth/assets.py</code>, <code>servers/fastapi/services/database.py</code>  ·  <strong>Builds on:</strong> <a href="../04-running-locally/">Running it locally</a>  ·  <strong>Time:</strong> ~35 min</p>
+</div>
+<p>This chapter follows the FastAPI process from <code>python server.py</code> to the first request it serves. You will see every router and its full URL prefix, the <code>/app_data</code> and <code>/static</code> mounts, the CORS rule, the middleware stack in the order it really executes, each lifespan step, and the <code>SessionAuthMiddleware</code> decision tree. It ends with the request-scoped owner context that makes multi-user isolation automatic, and a worked example of adding an endpoint the way the codebase expects.</p>
+<p>All paths below are relative to the repository root. Unless stated otherwise, <code>servers/fastapi/</code> is the Python package root and the working directory of the process.</p>
+<h2 id="step-1-the-process-entry-point-serverpy">Step 1: The process entry point (<code>server.py</code>)<a class="headerlink" href="#step-1-the-process-entry-point-serverpy" title="Permanent link">&para;</a></h2>
+<p>The whole backend is started by a 29-line script, <code>servers/fastapi/server.py</code>. It parses three flags and hands a module path string to Uvicorn.</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--port</code></td>
+<td><code>int</code></td>
+<td>required</td>
+<td>TCP port (<code>server.py:7</code>)</td>
+</tr>
+<tr>
+<td><code>--reload</code></td>
+<td><code>str</code></td>
+<td><code>"false"</code></td>
+<td>Only the exact string <code>"true"</code> enables Uvicorn auto-reload (<code>server.py:11</code>, <code>server.py:20</code>)</td>
+</tr>
+<tr>
+<td><code>--log-level</code></td>
+<td><code>str</code></td>
+<td><code>"info"</code></td>
+<td>Passed to <code>uvicorn.run(log_level=...)</code> (<code>server.py:13</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>The bind host is hard-coded:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/server.py (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">reload</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">reload</span> <span class="o">==</span> <span class="s2">"true"</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">host</span> <span class="o">=</span> <span class="s2">"127.0.0.1"</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">uvicorn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="s2">"api.main:app"</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">port</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">log_level</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">log_level</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        <span class="n">reload</span><span class="o">=</span><span class="n">reload</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<p>FastAPI therefore only listens on loopback. In Docker, nginx is the public face and proxies <code>/api/v1/</code>, <code>/api/v2/</code>, <code>/docs</code> and <code>/openapi.json</code> to <code>localhost:8000</code> (<code>nginx.conf:45</code>, <code>nginx.conf:59</code>, <code>nginx.conf:110</code>). Two launchers call this script:</p>
+<ul>
+<li><code>start.js</code> spawns <code>python server.py --port 8000 --reload &lt;isDev&gt;</code> with <code>cwd</code> set to <code>servers/fastapi</code> (<code>start.js:521</code>, <code>start.js:532</code>, with <code>fastapiDir</code> defined at <code>start.js:33</code>).</li>
+<li>Electron runs either <code>uv run python server.py --port &lt;port&gt; --reload true</code> in development or a PyInstaller binary with <code>--port &lt;port&gt;</code> (<code>electron/app/utils/servers.ts:139</code>, <code>electron/app/utils/servers.ts:143</code>). See <a href="../27-electron/">Electron desktop app</a>.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>server.py</code> imports <code>from api.main import app</code> at line 3, before <code>uvicorn.run</code> receives the string <code>"api.main:app"</code>. With <code>--reload true</code>, the Uvicorn supervisor process has therefore already executed all of <code>api/main.py</code> (Sentry init, directory creation, mounts) even though only the reloaded child serves requests. The lifespan (Step 8) runs only in the serving process.</p>
+</div>
+<p>The working directory matters. <code>utils/path_helpers.py:15</code> resolves bundled read-only assets with <code>os.path.join(os.getcwd(), relative_path)</code>, so <code>static/</code> and <code>assets/</code> are found only when the process starts inside <code>servers/fastapi</code>.</p>
+<h2 id="step-2-import-time-work-in-apimainpy">Step 2: Import-time work in <code>api/main.py</code><a class="headerlink" href="#step-2-import-time-work-in-apimainpy" title="Permanent link">&para;</a></h2>
+<p>Everything in <code>api/main.py</code> runs when the module is imported, before any request and before the lifespan.</p>
+<h3 id="21-a-sandbox-safe-mime-table">2.1 A sandbox-safe MIME table<a class="headerlink" href="#21-a-sandbox-safe-mime-table" title="Permanent link">&para;</a></h3>
+<p><code>init_sandbox_safe_mimetypes()</code> is the first statement (<code>api/main.py:29</code>). It re-initializes the stdlib <code>mimetypes</code> table with <code>files=[]</code>, so Python never reads OS databases such as <code>/etc/apache2/mime.types</code>, then registers 15 explicit types (<code>utils/mime_types.py:4</code>). The docstring explains why: macOS App Store sandboxed builds can be denied access to those files, and Starlette's <code>FileResponse</code> calls <code>mimetypes.guess_type</code> lazily (<code>utils/mime_types.py:23</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>Media type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.avif</code>, <code>.gif</code>, <code>.jpeg</code>/<code>.jpg</code>, <code>.png</code>, <code>.svg</code>, <code>.webp</code></td>
+<td>image types (<code>.svg</code> is <code>image/svg+xml</code>)</td>
+</tr>
+<tr>
+<td><code>.otf</code>, <code>.ttf</code>, <code>.woff</code>, <code>.woff2</code></td>
+<td><code>font/otf</code>, <code>font/ttf</code>, <code>font/woff</code>, <code>font/woff2</code></td>
+</tr>
+<tr>
+<td><code>.pdf</code>, <code>.docx</code>, <code>.pptx</code>, <code>.xlsx</code></td>
+<td><code>application/pdf</code> and the three OOXML types</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-optional-sentry">2.2 Optional Sentry<a class="headerlink" href="#22-optional-sentry" title="Permanent link">&para;</a></h3>
+<p><code>_maybe_init_sentry()</code> runs at <code>api/main.py:63</code>, still at import time.</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>    <span class="n">traces_sample_rate</span> <span class="o">=</span> <span class="n">get_sentry_traces_sample_rate_env</span><span class="p">()</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">send_default_pii</span> <span class="o">=</span> <span class="n">get_sentry_send_default_pii_env</span><span class="p">()</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>        <span class="n">parsed_sample_rate</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>            <span class="nb">float</span><span class="p">(</span><span class="n">traces_sample_rate</span><span class="p">)</span> <span class="k">if</span> <span class="n">traces_sample_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="p">)</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">parsed_sample_rate</span> <span class="o">=</span> <span class="mf">1.0</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">parsed_send_default_pii</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">send_default_pii</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"true"</span> <span class="k">if</span> <span class="n">send_default_pii</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">True</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="p">)</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="n">dsn</span><span class="o">=</span><span class="n">sentry_dsn</span><span class="p">,</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>        <span class="n">send_default_pii</span><span class="o">=</span><span class="n">parsed_send_default_pii</span><span class="p">,</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>        <span class="n">traces_sample_rate</span><span class="o">=</span><span class="n">parsed_sample_rate</span><span class="p">,</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="p">)</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Env var</th>
+<th>Getter</th>
+<th>Default when unset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SENTRY_DSN</code></td>
+<td><code>get_sentry_dsn_env</code> (<code>utils/get_env.py:457</code>)</td>
+<td>No Sentry at all</td>
+</tr>
+<tr>
+<td><code>SENTRY_TRACES_SAMPLE_RATE</code></td>
+<td><code>get_sentry_traces_sample_rate_env</code> (<code>utils/get_env.py:461</code>)</td>
+<td><code>1.0</code>; also <code>1.0</code> if not parseable as float</td>
+</tr>
+<tr>
+<td><code>SENTRY_SEND_DEFAULT_PII</code></td>
+<td><code>get_sentry_send_default_pii_env</code> (<code>utils/get_env.py:465</code>)</td>
+<td><code>True</code>; any value other than <code>true</code> (case-insensitive) means <code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p>If <code>sentry_sdk</code> cannot be imported, the function returns silently (<code>api/main.py:37</code>), because the SDK is optional in some build targets.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Setting only <code>SENTRY_DSN</code> gives you 100 percent trace sampling and <code>send_default_pii=True</code>. Set both companion variables explicitly in any deployment that handles real user data.</p>
+</div>
+<h3 id="23-creating-the-application">2.3 Creating the application<a class="headerlink" href="#23-creating-the-application" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">lifespan</span><span class="o">=</span><span class="n">app_lifespan</span><span class="p">)</span>
+</span></code></pre></div>
+<p>There are no global exception handlers, no custom OpenAPI configuration and no root path. The only startup hook is the <code>app_lifespan</code> async context manager covered in Step 8.</p>
+<h2 id="step-3-registering-routers">Step 3: Registering routers<a class="headerlink" href="#step-3-registering-routers" title="Permanent link">&para;</a></h2>
+<p>Seven top-level routers are included in this order (<code>api/main.py:68</code> to <code>api/main.py:74</code>):</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_PPT_ROUTER</span><span class="p">)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_WEBHOOK_ROUTER</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_MOCK_ROUTER</span><span class="p">)</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_AUTH_ROUTER</span><span class="p">)</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_ADMIN_ROUTER</span><span class="p">)</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_ASYNC_TASKS_ROUTER</span><span class="p">)</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V2_ROUTER</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Two of them are aggregators: <code>API_V1_PPT_ROUTER = APIRouter(prefix="/api/v1/ppt")</code> includes 17 feature routers (<code>api/v1/ppt/router.py:22</code> to <code>api/v1/ppt/router.py:40</code>), and <code>API_V2_ROUTER = APIRouter(prefix="/api/v2")</code> nests <code>/ppt</code> and then <code>/presentation</code> (<code>api/v2/router.py:6</code>, <code>api/v2/ppt/router.py:6</code>, <code>api/v2/ppt/endpoints/presentation.py:35</code>). <code>API_V1_AUTH_ROUTER</code> nests the Presenton Cloud device-login router under <code>/presenton</code> (<code>api/v1/auth/router.py:28</code>). The backend declares 101 route decorators in total.</p>
+<table>
+<thead>
+<tr>
+<th>Full prefix</th>
+<th>Router constant and definition</th>
+<th>Endpoints (method and path suffix)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/ppt/files</code></td>
+<td><code>FILES_ROUTER</code> <code>api/v1/ppt/endpoints/files.py:16</code></td>
+<td>POST <code>/upload</code>, POST <code>/mcp-upload</code>, POST <code>/decompose</code>, POST <code>/update</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/fonts</code></td>
+<td><code>FONTS_ROUTER</code> <code>api/v1/ppt/endpoints/fonts.py:18</code></td>
+<td>POST <code>/upload</code>, GET <code>/list</code>, GET <code>/uploaded</code>, DELETE <code>/delete/{filename}</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/outlines</code></td>
+<td><code>OUTLINES_ROUTER</code> <code>api/v1/ppt/endpoints/outlines.py:40</code></td>
+<td>GET <code>/{id}</code>, PUT <code>/{id}</code>, GET <code>/stream/{id}</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/slide</code></td>
+<td><code>SLIDE_ROUTER</code> <code>api/v1/ppt/endpoints/slide.py:30</code></td>
+<td>POST <code>/edit</code>, POST <code>/edit-html</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/images</code></td>
+<td><code>IMAGES_ROUTER</code> <code>api/v1/ppt/endpoints/images.py:31</code></td>
+<td>POST <code>/test</code>, GET <code>/search</code>, GET <code>/generate</code>, GET <code>/generated</code>, POST <code>/upload</code>, GET <code>/uploaded</code>, DELETE <code>/{id}</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/icons</code></td>
+<td><code>ICONS_ROUTER</code> <code>api/v1/ppt/endpoints/icons.py:7</code></td>
+<td>GET <code>/search</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/ollama</code></td>
+<td><code>OLLAMA_ROUTER</code> <code>api/v1/ppt/endpoints/ollama.py:13</code></td>
+<td>GET <code>/models/supported</code>, GET <code>/models/available</code>, GET <code>/models/library</code>, POST <code>/models/pull</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/openai</code></td>
+<td><code>OPENAI_ROUTER</code> <code>api/v1/ppt/endpoints/openai.py:9</code></td>
+<td>POST <code>/models/available</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/openrouter</code></td>
+<td><code>OPENROUTER_ROUTER</code> <code>api/v1/ppt/endpoints/openrouter.py:11</code></td>
+<td>POST <code>/providers/available</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/anthropic</code></td>
+<td><code>ANTHROPIC_ROUTER</code> <code>api/v1/ppt/endpoints/anthropic.py:9</code></td>
+<td>POST <code>/models/available</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/google</code></td>
+<td><code>GOOGLE_ROUTER</code> <code>api/v1/ppt/endpoints/google.py:6</code></td>
+<td>POST <code>/models/available</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/generation</code></td>
+<td><code>GENERATION_ROUTER</code> <code>api/v1/ppt/endpoints/generation.py:7</code></td>
+<td>POST <code>/defaults</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/codex/auth</code></td>
+<td><code>CODEX_AUTH_ROUTER</code> <code>api/v1/ppt/endpoints/codex_auth.py:48</code></td>
+<td>POST <code>/initiate</code>, GET <code>/status/{session_id}</code>, POST <code>/exchange</code>, POST <code>/refresh</code>, GET <code>/status</code>, POST <code>/logout</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/presentation</code></td>
+<td><code>PRESENTATION_ROUTER</code> <code>api/v1/ppt/endpoints/presentation.py:136</code></td>
+<td>GET <code>/all</code>, GET <code>/{id}</code>, DELETE <code>/{id}</code>, POST <code>/{id}/duplicate</code>, POST <code>/{id}/regenerate</code>, POST <code>/{id}/export</code>, POST <code>/create</code>, POST <code>/create/blank</code>, POST <code>/prepare</code>, GET <code>/stream/{id}</code>, PATCH <code>/update</code>, PATCH <code>/slide_update</code>, POST <code>/generate</code>, POST <code>/generate/async</code>, GET <code>/status/{id}</code>, POST <code>/edit</code>, POST <code>/derive</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/chat</code></td>
+<td><code>CHAT_ROUTER</code> <code>api/v1/ppt/endpoints/chat.py:28</code></td>
+<td>GET <code>/conversations</code>, GET <code>/history</code>, DELETE <code>/conversation</code>, POST <code>/message</code>, POST <code>/message/stream</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/template</code></td>
+<td><code>TEMPLATE_ROUTER</code> <code>api/v1/ppt/endpoints/template.py:96</code></td>
+<td>GET <code>/all</code>, POST <code>/fonts-upload-and-slides-preview</code>, POST <code>/mcp-upload</code>, POST <code>/init</code>, POST <code>/async</code>, POST <code>/async/{task_id}/retry</code>, POST <code>/layouts/generate</code>, POST <code>/layouts/create</code>, POST <code>/generate-blocks</code>, PATCH <code>/{template_id}/layouts</code>, PATCH <code>/{template_id}</code>, GET <code>/{template_id}/theme</code>, GET <code>/{template_id}</code>, DELETE <code>/{template_id}</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/ppt/community/presentations</code></td>
+<td><code>COMMUNITY_ROUTER</code> <code>api/v1/ppt/endpoints/community.py:11</code></td>
+<td>GET <code>` (empty suffix), GET</code>/{community_id}`</td>
+</tr>
+<tr>
+<td><code>/api/v1/webhook</code></td>
+<td><code>API_V1_WEBHOOK_ROUTER</code> <code>api/v1/webhook/router.py:10</code></td>
+<td>POST <code>/subscribe</code> (201), DELETE <code>/unsubscribe</code> (204)</td>
+</tr>
+<tr>
+<td><code>/api/v1/mock</code></td>
+<td><code>API_V1_MOCK_ROUTER</code> <code>api/v1/mock/router.py:9</code></td>
+<td>GET <code>/presentation-generation-completed</code>, GET <code>/presentation-generation-failed</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/auth</code></td>
+<td><code>API_V1_AUTH_ROUTER</code> <code>api/v1/auth/router.py:27</code></td>
+<td>GET <code>/status</code>, GET <code>/verify</code>, POST <code>/setup</code>, POST <code>/login</code>, POST <code>/logout</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/auth/presenton</code></td>
+<td><code>PRESENTON_OAUTH_ROUTER</code> <code>api/v1/auth/presenton_oauth.py:29</code></td>
+<td>GET <code>/status</code>, POST <code>/logout</code>, POST <code>/device/start</code>, POST <code>/device/poll</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/admin</code></td>
+<td><code>API_V1_ADMIN_ROUTER</code> <code>api/v1/admin/router.py:41</code></td>
+<td>GET/POST <code>/api-keys</code>, GET <code>/api-keys/{api_key_id}/token</code>, POST <code>/api-keys/{api_key_id}/revoke</code>, GET/PUT <code>/provider-settings</code>, GET/POST <code>/users</code>, PUT <code>/users/{user_id}/password</code>, DELETE <code>/users/{user_id}</code></td>
+</tr>
+<tr>
+<td><code>/api/v1/async-tasks</code></td>
+<td><code>API_V1_ASYNC_TASKS_ROUTER</code> <code>api/v1/async_tasks/router.py:14</code></td>
+<td>GET <code>` (list), GET</code>/status/{id}`</td>
+</tr>
+<tr>
+<td><code>/api/v2/ppt/presentation</code></td>
+<td><code>PRESENTATION_V2_ROUTER</code> <code>api/v2/ppt/endpoints/presentation.py:35</code></td>
+<td>POST <code>/generate/smart</code>, POST <code>/generate/smart/async</code></td>
+</tr>
+</tbody>
+</table>
+<p>Request and response shapes for each endpoint live in the feature chapters and in the <a href="../../appendix-endpoints/">Endpoint index</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Declaration order inside a router is part of the routing logic. <code>GET /presentation/all</code> is declared at <code>presentation.py:1499</code>, before <code>GET /presentation/{id}</code> at <code>presentation.py:1551</code>; <code>GET /template/all</code> (<code>template.py:1113</code>) precedes <code>GET /template/{template_id}</code> (<code>template.py:2122</code>). Starlette matches routes in order, so a new literal path such as <code>/presentation/recent</code> must be declared above the <code>/{id}</code> route or it will be captured by it (and, because <code>id</code> is typed <code>uuid.UUID</code>, rejected with 422).</p>
+</div>
+<h2 id="step-4-mounting-app_data-and-static">Step 4: Mounting <code>/app_data</code> and <code>/static</code><a class="headerlink" href="#step-4-mounting-app_data-and-static" title="Permanent link">&para;</a></h2>
+<h3 id="41-per-root-app_data-mounts">4.1 Per-root <code>app_data</code> mounts<a class="headerlink" href="#41-per-root-app_data-mounts" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">app_data_dir</span> <span class="o">=</span> <span class="n">get_app_data_directory_env</span><span class="p">()</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">if</span> <span class="n">app_data_dir</span><span class="p">:</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">app_data_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="c1"># Configuration, databases, logs and Chromium state are private even when</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="c1"># account login is disabled. Only browser assets have HTTP mounts.</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">mount_app_data_assets</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">app_data_dir</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>APP_DATA_DIRECTORY</code> holds <code>userConfig.json</code>, the SQLite database <code>fastapi.db</code>, logs and browser state. The directory itself is never mounted. Instead <code>mount_app_data_assets</code> (<code>api/v1/auth/assets.py:39</code>) mounts seven subdirectories, each with its own <code>StaticFiles</code> instance, in sorted order:</p>
+<table>
+<thead>
+<tr>
+<th>Mount path</th>
+<th>Root class</th>
+<th>Visibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/app_data/exports</code></td>
+<td>private (<code>PRIVATE_APP_DATA_ROOTS</code>, <code>assets.py:10</code>)</td>
+<td>owner, or legacy files for admin</td>
+</tr>
+<tr>
+<td><code>/app_data/fonts</code></td>
+<td>shared (<code>SHARED_APP_DATA_ROOTS</code>, <code>assets.py:17</code>)</td>
+<td>anyone (no login needed)</td>
+</tr>
+<tr>
+<td><code>/app_data/images</code></td>
+<td>private</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>/app_data/pptx-to-html</code></td>
+<td>private</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>/app_data/pptx-to-json</code></td>
+<td>private</td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>/app_data/templates</code></td>
+<td>shared</td>
+<td>anyone (no login needed)</td>
+</tr>
+<tr>
+<td><code>/app_data/uploads</code></td>
+<td>private</td>
+<td>owner</td>
+</tr>
+</tbody>
+</table>
+<p>Each mount is an <code>_OwnerScopedStaticFiles</code> (<code>assets.py:20</code>). Its <code>lookup_path</code> override authorizes the exact file <code>StaticFiles</code> resolved, after symlinks, against the current owner:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/auth/assets.py (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">lookup_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>        <span class="n">full_path</span><span class="p">,</span> <span class="n">file_stat</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">lookup_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="n">owner_id</span> <span class="o">=</span> <span class="n">get_current_owner_id</span><span class="p">()</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="k">if</span> <span class="n">full_path</span> <span class="ow">and</span> <span class="n">owner_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>            <span class="c1"># Authorize the exact file StaticFiles will serve. Repeated URL</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>            <span class="c1"># decoding at a proxy must not select a different filesystem alias.</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>            <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directory</span><span class="p">)</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="n">relative</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            <span class="n">parts</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">asset_root</span><span class="p">,</span> <span class="o">*</span><span class="n">relative</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">))</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">_namespace_authorized</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">owner_id</span><span class="p">,</span> <span class="n">is_admin</span><span class="o">=</span><span class="n">get_current_owner_is_admin</span><span class="p">()):</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>                <span class="k">return</span> <span class="s2">""</span><span class="p">,</span> <span class="kc">None</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="k">return</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">file_stat</span>
+</span></code></pre></div>
+<p>The namespace rule in <code>_namespace_authorized</code> (<code>assets.py:106</code>) is: shared roots always pass; under a private root, a path of the form <code>&lt;root&gt;/users/&lt;uuid&gt;/&lt;file&gt;</code> passes only when <code>&lt;uuid&gt;</code> equals the caller's user id; any other path under a private root is a pre-multi-user "legacy" file and passes only for an admin. Files are written to these per-user folders by <code>_owned_directory</code> (<code>utils/asset_directory_utils.py:23</code>), which appends <code>users/&lt;owner_id&gt;</code> whenever an owner is in context.</p>
+<p>In Docker, nginx serves the same directories itself and protects the private ones with <code>auth_request /_auth_check</code>, which calls <code>/api/v1/auth/verify</code> with an <code>X-Original-URI</code> header (<code>nginx.conf:133</code>, <code>nginx.conf:159</code>, <code>api/v1/auth/router.py:96</code>). The FastAPI mounts are what Electron and bare development use.</p>
+<h3 id="42-the-static-mount">4.2 The <code>/static</code> mount<a class="headerlink" href="#42-the-static-mount" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">static_dir</span> <span class="o">=</span> <span class="n">get_resource_path</span><span class="p">(</span><span class="s2">"static"</span><span class="p">)</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">static_dir</span><span class="p">):</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">"/static"</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="n">static_dir</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">"static"</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>servers/fastapi/static/</code> contains <code>icons/</code> (one folder per Phosphor weight: <code>bold</code>, <code>duotone</code>, <code>fill</code>, <code>light</code>, <code>regular</code>, <code>thin</code>, plus <code>placeholder.svg</code>), <code>images/</code> and <code>vendor/</code>. This mount is plain <code>StaticFiles</code>, has no owner check, and <code>/static/</code> is not an auth-protected path (Step 9).</p>
+<h2 id="step-5-cors">Step 5: CORS<a class="headerlink" href="#step-5-cors" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">next_public_origin</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"NEXT_PUBLIC_URL"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">origins</span> <span class="o">=</span> <span class="p">[</span><span class="n">next_public_origin</span><span class="p">]</span> <span class="k">if</span> <span class="n">next_public_origin</span> <span class="k">else</span> <span class="p">[</span><span class="s2">"*"</span><span class="p">]</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">CORSMiddleware</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">allow_origins</span><span class="o">=</span><span class="n">origins</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">allow_credentials</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">allow_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">allow_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>The comment above it (<code>api/main.py:88</code>) gives the three cases:</p>
+<table>
+<thead>
+<tr>
+<th>Deployment</th>
+<th><code>NEXT_PUBLIC_URL</code></th>
+<th>Effective <code>allow_origins</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Electron (Next.js and FastAPI on separate loopback ports)</td>
+<td>the Next.js origin, for example <code>http://127.0.0.1:40001</code></td>
+<td>that exact origin, so credentialed requests are standards-compliant</td>
+</tr>
+<tr>
+<td>Docker (single origin behind nginx)</td>
+<td>usually unset</td>
+<td><code>["*"]</code>, which does not matter because the browser never makes cross-origin calls</td>
+</tr>
+<tr>
+<td>Standalone FastAPI development</td>
+<td>unset</td>
+<td><code>["*"]</code></td>
+</tr>
+</tbody>
+</table>
+<p>A trailing slash is stripped, so <code>http://localhost:3000/</code> and <code>http://localhost:3000</code> behave the same.</p>
+<h2 id="step-6-the-middleware-stack-and-its-real-execution-order">Step 6: The middleware stack and its real execution order<a class="headerlink" href="#step-6-the-middleware-stack-and-its-real-execution-order" title="Permanent link">&para;</a></h2>
+<p>Four middlewares are registered, in this source order:</p>
+<ol>
+<li><code>CORSMiddleware</code> (<code>api/main.py:94</code>)</li>
+<li><code>UserConfigEnvUpdateMiddleware</code> (<code>api/main.py:102</code>)</li>
+<li><code>SessionAuthMiddleware</code> (<code>api/main.py:103</code>)</li>
+<li><code>static_icon_fallback_middleware</code>, registered with the <code>@app.middleware("http")</code> decorator (<code>api/main.py:106</code>), which internally calls <code>add_middleware</code> with a <code>BaseHTTPMiddleware</code></li>
+</ol>
+<p>Starlette's <code>add_middleware</code> inserts each new middleware at the front of <code>app.user_middleware</code>, and the stack is built so that the first list entry is the outermost wrapper. The last registered middleware therefore sees the request first. The unit tests build their apps in the same relative order (<code>tests/unit/test_desktop_security.py:69</code>). The Starlette source is not vendored in this repository, so this ordering rule was not re-read against the locked <code>starlette</code> 1.6.0 (<code>servers/fastapi/uv.lock:2842</code>); it is the documented Starlette behavior.</p>
+<pre class="mermaid"><code>flowchart TD
+    A["Uvicorn receives HTTP request"] --&gt; B["ServerErrorMiddleware (Starlette built-in)"]
+    B --&gt; C["static_icon_fallback_middleware (registered last, outermost user middleware)"]
+    C --&gt; D["SessionAuthMiddleware"]
+    D --&gt; E["UserConfigEnvUpdateMiddleware"]
+    E --&gt; F["CORSMiddleware (registered first, innermost user middleware)"]
+    F --&gt; G["ExceptionMiddleware (Starlette built-in)"]
+    G --&gt; H["Router: APIRoute or Mount"]</code></pre>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Request phase</th>
+<th>Response phase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>static_icon_fallback_middleware</code></td>
+<td>passes through</td>
+<td>swaps a 404 on <code>/static/icons/...</code> for <code>placeholder.svg</code></td>
+</tr>
+<tr>
+<td><code>SessionAuthMiddleware</code></td>
+<td>desktop guard, authentication, authorization, owner context, cloud proxy, <code>/app_data</code> check</td>
+<td>resets the owner contextvars in <code>finally</code></td>
+</tr>
+<tr>
+<td><code>UserConfigEnvUpdateMiddleware</code></td>
+<td>calls <code>update_env_with_user_config()</code> (<code>api/middlewares.py:23</code>)</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td><code>CORSMiddleware</code></td>
+<td>answers preflight <code>OPTIONS</code></td>
+<td>adds CORS headers</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>CORSMiddleware</code> is the innermost user middleware. Any response that <code>SessionAuthMiddleware</code> produces itself (the 401, 403, 404, 428 and 503 JSON bodies below) never passes through it and carries no <code>Access-Control-Allow-Origin</code> header. In a cross-origin setup such as Electron, a browser reports such a rejection as a CORS failure rather than exposing the status code to JavaScript. Successful responses from routes do pass through CORS.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>UserConfigEnvUpdateMiddleware</code> sits inside the auth layer, so it runs only for requests that the auth layer lets through. It re-reads <code>userConfig.json</code> from disk on every such request. That is how a settings change made by one worker becomes visible to the next request without a restart; the precedence rules are in <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>.</p>
+</div>
+<h2 id="step-7-the-static-icon-404-fallback">Step 7: The static icon 404 fallback<a class="headerlink" href="#step-7-the-static-icon-404-fallback" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span><span class="p">(</span><span class="s2">"http"</span><span class="p">)</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">static_icon_fallback_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">call_next</span><span class="p">):</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="sd">"""Serve placeholder when icon paths are missing (e.g. renamed Phosphor icons)."""</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">404</span><span class="p">:</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>        <span class="k">return</span> <span class="n">response</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">path</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/static/icons/"</span><span class="p">):</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>        <span class="k">return</span> <span class="n">response</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="n">placeholder</span> <span class="o">=</span> <span class="n">get_resource_path</span><span class="p">(</span><span class="s2">"static/icons/placeholder.svg"</span><span class="p">)</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">placeholder</span><span class="p">):</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>        <span class="k">return</span> <span class="n">response</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>    <span class="k">return</span> <span class="n">FileResponse</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">media_type</span><span class="o">=</span><span class="s2">"image/svg+xml"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Saved slides reference icons by URL (for example <code>/static/icons/bold/acorn-bold.svg</code>). When an icon set upgrade renames a file, old decks would otherwise render broken images. The fallback keeps the status at 200 and returns the placeholder SVG. It only touches 404s under <code>/static/icons/</code>; every other 404 is returned unchanged. Icon selection itself is covered in <a href="../12-images-icons-search/">Images, icons, web search</a>.</p>
+<h2 id="step-8-the-lifespan-step-by-step">Step 8: The lifespan, step by step<a class="headerlink" href="#step-8-the-lifespan-step-by-step" title="Permanent link">&para;</a></h2>
+<p><code>app_lifespan</code> (<code>api/lifespan.py:44</code>) runs once in the serving process before the first request is accepted, and once on shutdown.</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/lifespan.py (excerpt)</span><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>    <span class="n">_configure_application_logging</span><span class="p">()</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">get_app_data_directory_env</span><span class="p">(),</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="k">await</span> <span class="n">migrate_database_on_startup</span><span class="p">()</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="k">await</span> <span class="n">create_db_and_tables</span><span class="p">()</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="k">await</span> <span class="n">bootstrap_database_admin</span><span class="p">()</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">async_session_maker</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="c1"># BackgroundTasks are process-local and cannot resume after a restart.</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="c1"># Resolve their persisted rows before accepting polling requests.</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="k">await</span> <span class="n">fail_interrupted_async_tasks</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="k">await</span> <span class="n">migrate_provider_settings_from_file</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="k">await</span> <span class="n">import_default_templates_on_startup</span><span class="p">()</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    <span class="n">update_env_with_user_config</span><span class="p">()</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="k">yield</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>    <span class="c1"># Shutdown: release all database connections to prevent stale/leaked pools.</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="k">await</span> <span class="n">dispose_engines</span><span class="p">()</span>
+</span></code></pre></div>
+<pre class="mermaid"><code>flowchart TD
+    S["Uvicorn starts lifespan"] --&gt; L1["_configure_application_logging: LOG_LEVEL, default INFO"]
+    L1 --&gt; L2["os.makedirs(APP_DATA_DIRECTORY)"]
+    L2 --&gt; L3{"MIGRATE_DATABASE_ON_STARTUP is true or True?"}
+    L3 --&gt;|"yes (default)"| L4["Alembic upgrade head in a worker thread"]
+    L3 --&gt;|"no"| L5["SQLModel.metadata.create_all for 15 tables"]
+    L4 --&gt; L6["bootstrap_database_admin"]
+    L5 --&gt; L6
+    L6 --&gt; L7["fail_interrupted_async_tasks: pending to error"]
+    L7 --&gt; L8["migrate_provider_settings_from_file: file to DB once, then DB to file"]
+    L8 --&gt; L9["import_default_templates_on_startup: upsert bundled templates"]
+    L9 --&gt; L10["update_env_with_user_config: copy settings into os.environ"]
+    L10 --&gt; R["yield: serve requests"]
+    R --&gt; X["dispose_engines on shutdown"]</code></pre>
+<h3 id="81-logging">8.1 Logging<a class="headerlink" href="#81-logging" title="Permanent link">&para;</a></h3>
+<p><code>_configure_application_logging</code> (<code>api/lifespan.py:19</code>) reads <code>LOG_LEVEL</code> (default <code>INFO</code>; unknown names fall back to <code>INFO</code>) and sets the root logger level. If the root logger has no handlers, it walks from the <code>uvicorn.error</code> logger up its propagation chain and attaches the handlers it finds to the root logger, so application <code>logging</code> calls appear in the same stream as Uvicorn's. Only if none are found does it call <code>logging.basicConfig</code>.</p>
+<h3 id="82-the-app-data-directory">8.2 The app data directory<a class="headerlink" href="#82-the-app-data-directory" title="Permanent link">&para;</a></h3>
+<p><code>os.makedirs(get_app_data_directory_env(), exist_ok=True)</code> (<code>api/lifespan.py:55</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>api/main.py</code> guards its mounts with <code>if app_data_dir:</code>, but the lifespan does not. If <code>APP_DATA_DIRECTORY</code> is unset, <code>os.makedirs(None)</code> raises <code>TypeError</code> and the server never starts. <code>start.js</code> refuses to start without it as well (<code>start.js:50</code>), and the default template import in 8.8 raises <code>RuntimeError</code> without it (<code>templates/default_templates.py:299</code>). Treat it as required.</p>
+</div>
+<h3 id="83-migrations-migrate_database_on_startup">8.3 Migrations: <code>migrate_database_on_startup</code><a class="headerlink" href="#83-migrations-migrate_database_on_startup" title="Permanent link">&para;</a></h3>
+<p>When <code>MIGRATE_DATABASE_ON_STARTUP</code> is <code>"true"</code> or <code>"True"</code> (the default is <code>"true"</code>, <code>utils/get_env.py:453</code>), <code>migrations.py:40</code> runs Alembic <code>upgrade head</code> in a thread via <code>asyncio.to_thread</code>, after repairing unknown revisions and stamping unversioned legacy databases. The full algorithm and the revision list are in <a href="../07-data-model/">Data model</a>.</p>
+<h3 id="84-create_db_and_tables">8.4 <code>create_db_and_tables</code><a class="headerlink" href="#84-create_db_and_tables" title="Permanent link">&para;</a></h3>
+<p>The inverse switch: only when migrations are disabled does <code>services/database.py:117</code> call <code>SQLModel.metadata.create_all</code> for an explicit list of 15 tables. With migrations on (the default) this function does nothing.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Both checks compare against the literal strings <code>"true"</code> and <code>"True"</code>. <code>MIGRATE_DATABASE_ON_STARTUP=1</code> or <code>yes</code> disables migrations and switches to <code>create_all</code>, which never alters existing tables. An upgraded deployment then runs new code against an old schema.</p>
+</div>
+<h3 id="85-bootstrap_database_admin">8.5 <code>bootstrap_database_admin</code><a class="headerlink" href="#85-bootstrap_database_admin" title="Permanent link">&para;</a></h3>
+<p><code>api/v1/auth/bootstrap.py:43</code> guarantees one primary administrator. It looks for any user with <code>is_superuser = True</code>. If one exists, it sets <code>admin_slot = "primary"</code> and, when <code>RESET_AUTH</code> or <code>AUTH_OVERRIDE_FROM_ENV</code> is truthy (startup aborts with <code>RuntimeError</code> if either is set without <code>AUTH_PASSWORD</code>), replaces the username and password from <code>AUTH_USERNAME</code>/<code>AUTH_PASSWORD</code>, bumps <code>auth_version</code> (invalidating every JWT) and deletes all API keys. If users exist but none is a superuser, startup fails with <code>RuntimeError("User accounts exist but no bootstrap administrator is configured")</code>. If no user exists, it migrates the legacy single-user credentials from <code>userConfig.json</code> or creates the admin from <code>AUTH_USERNAME</code>/<code>AUTH_PASSWORD</code>; with neither, it leaves the database empty so the first request gets HTTP 428 (Step 9). Finally <code>_backfill_legacy_ownership</code> (<code>bootstrap.py:128</code>) assigns every row with <code>owner_id IS NULL</code> in seven owned tables to that admin, plus custom (<code>is_default = False</code>) templates. The full account model is in <a href="../25-auth-and-multiuser/">Auth and multi-user</a>.</p>
+<h3 id="86-fail_interrupted_async_tasks">8.6 <code>fail_interrupted_async_tasks</code><a class="headerlink" href="#86-fail_interrupted_async_tasks" title="Permanent link">&para;</a></h3>
+<p>Background jobs run as FastAPI <code>BackgroundTasks</code> inside the process, so they cannot survive a restart. <code>services/async_tasks.py:22</code> selects every <code>async_tasks</code> row whose status is <code>pending</code> and rewrites it:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"error"</span><span class="p">,</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Background task interrupted by server restart"</span><span class="p">,</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="nt">"status_code"</span><span class="p">:</span><span class="w"> </span><span class="mi">503</span><span class="p">,</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The server restarted before this background task completed. Please start a new job."</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The error body is the constant <code>INTERRUPTED_TASK_ERROR</code> (<code>services/async_tasks.py:13</code>). Because no owner is in context at startup, the owner filter of Step 10 does not apply and every user's tasks are covered. Polling clients therefore get a terminal state instead of waiting forever (<a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>).</p>
+<h3 id="87-migrate_provider_settings_from_file">8.7 <code>migrate_provider_settings_from_file</code><a class="headerlink" href="#87-migrate_provider_settings_from_file" title="Permanent link">&para;</a></h3>
+<p><code>services/provider_settings.py:103</code> reconciles provider settings between the <code>provider_settings</code> table (one row, <code>id = 1</code>) and <code>userConfig.json</code>. On the very first boot it imports the file into the database; on every later boot it mirrors the database back over the file. This is the single most important precedence rule in configuration and is explained in <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>.</p>
+<h3 id="88-import_default_templates_on_startup">8.8 <code>import_default_templates_on_startup</code><a class="headerlink" href="#88-import_default_templates_on_startup" title="Permanent link">&para;</a></h3>
+<p><code>templates/default_templates.py:22</code> scans the repository-level <code>templates/</code> directory (resolved as <code>parents[3]</code> of the module, <code>default_templates.py:58</code>) for subfolders containing <code>template.json</code>. At this snapshot there are 16: <code>civic</code>, <code>dynamic</code>, <code>editorial</code>, <code>executive</code>, <code>general</code>, <code>horizon</code>, <code>landmark</code>, <code>modern</code>, <code>momentum</code>, <code>mosaic</code>, <code>nova</code>, <code>pulse</code>, <code>signal</code>, <code>standard</code>, <code>swift</code>, <code>verdant</code>. For each one it:</p>
+<ol>
+<li>Loads <code>template.json</code>, rewrites every string starting with <code>static/</code> to <code>/app_data/templates/&lt;id&gt;/static/...</code> (<code>default_templates.py:257</code>), validates <code>layouts</code> and <code>merged_components</code>, and builds a <code>TemplateV2</code> row with <code>is_default=True</code> (<code>default_templates.py:113</code>).</li>
+<li>Deletes <code>APP_DATA_DIRECTORY/templates/&lt;id&gt;/static</code> and copies the bundled <code>static/</code> folder over it (<code>default_templates.py:295</code>), so renamed assets never linger after an upgrade.</li>
+<li>Inserts the row, or overwrites name, description, layouts, components, theme and assets of the existing row, and commits.</li>
+</ol>
+<p>Afterwards <code>_remove_stale_default_templates</code> (<code>default_templates.py:154</code>) deletes any <code>is_default</code> row whose id was not imported and removes its asset folder. The template format itself is in <a href="../16-template-v2-format/">Template v2 format</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Bundled templates are authoritative and rewritten on every boot. Editing a default template through the API or directly in the database is silently reverted by the next restart. Make changes in <code>templates/&lt;name&gt;/template.json</code> instead, or copy the template to a custom one.</p>
+</div>
+<h3 id="89-update_env_with_user_config">8.9 <code>update_env_with_user_config</code><a class="headerlink" href="#89-update_env_with_user_config" title="Permanent link">&para;</a></h3>
+<p>The last step (<code>utils/user_config.py:378</code>) copies the merged configuration into <code>os.environ</code>, where every provider getter reads it. The same function then runs per request through <code>UserConfigEnvUpdateMiddleware</code>.</p>
+<h3 id="810-shutdown">8.10 Shutdown<a class="headerlink" href="#810-shutdown" title="Permanent link">&para;</a></h3>
+<p>After <code>yield</code>, <code>dispose_engines()</code> (<code>services/database.py:145</code>) calls <code>sql_engine.dispose()</code> to close every pooled connection.</p>
+<h2 id="step-9-sessionauthmiddleware-as-a-decision-tree">Step 9: <code>SessionAuthMiddleware</code> as a decision tree<a class="headerlink" href="#step-9-sessionauthmiddleware-as-a-decision-tree" title="Permanent link">&para;</a></h2>
+<p><code>SessionAuthMiddleware.dispatch</code> (<code>api/middlewares.py:55</code>) decides, for every request, whether it may proceed and as whom. This section follows its control flow; the account, password, JWT and API-key mechanics are in <a href="../25-auth-and-multiuser/">Auth and multi-user</a>.</p>
+<pre class="mermaid"><code>flowchart TD
+    A["Request"] --&gt; B{"PRESENTON_ELECTRON is true?"}
+    B --&gt;|"yes"| B1{"desktop token, Host and Origin valid?"}
+    B1 --&gt;|"no"| B2["503 / 403 / 401 JSON"]
+    B1 --&gt;|"yes"| C
+    B --&gt;|"no"| C{"DISABLE_AUTH truthy?"}
+    C --&gt;|"yes"| C1{"Presenton Cloud path and LLM is presenton?"}
+    C1 --&gt;|"yes"| C2["Proxy to cloud, return its response"]
+    C1 --&gt;|"no"| Z["call_next: route runs with no owner"]
+    C --&gt;|"no"| D{"OPTIONS, or path not protected, or public auth path?"}
+    D --&gt;|"yes"| Z
+    D --&gt;|"no"| E{"any row in user table?"}
+    E --&gt;|"no"| E1["428 setup_required"]
+    E --&gt;|"yes"| F{"principal from cookie JWT or Bearer API key?"}
+    F --&gt;|"none"| F1["401 Unauthorized"]
+    F --&gt;|"found"| G{"admin-only path and not an admin browser session?"}
+    G --&gt;|"yes"| G1["403 Admin browser session required"]
+    G --&gt;|"no"| H["store principal on request.state, set owner contextvars"]
+    H --&gt; I{"JWT principal and cloud path and LLM is presenton?"}
+    I --&gt;|"yes"| I1["Proxy to cloud, return its response"]
+    I --&gt;|"no"| J{"path starts with /app_data/ and not authorized?"}
+    J --&gt;|"yes"| J1["404 Asset not found"]
+    J --&gt;|"no"| K["call_next: route runs as this owner"]
+    K --&gt; R["finally: reset contextvars"]</code></pre>
+<h3 id="91-desktop-guard">9.1 Desktop guard<a class="headerlink" href="#91-desktop-guard" title="Permanent link">&para;</a></h3>
+<p><code>desktop_request_denied(request)</code> (<code>api/v1/auth/desktop.py:25</code>) is a no-op unless <code>PRESENTON_ELECTRON == "true"</code>. In Electron it requires a <code>PRESENTON_DESKTOP_TOKEN</code> of at least 32 characters and a non-empty <code>PRESENTON_DESKTOP_ORIGINS</code> (otherwise 503 <code>{"detail": "Desktop session unavailable"}</code>), checks the raw <code>Host</code> header and any <code>Origin</code> header against those origins (403 <code>{"detail": "Forbidden desktop origin"}</code>; forwarded headers are deliberately ignored to defeat DNS rebinding), lets CORS preflights through, and finally compares the <code>x-presenton-desktop-token</code> header or <code>presenton_desktop_session</code> cookie with <code>hmac.compare_digest</code> (401 on mismatch).</p>
+<h3 id="92-auth-disabled-path">9.2 Auth-disabled path<a class="headerlink" href="#92-auth-disabled-path" title="Permanent link">&para;</a></h3>
+<p>With <code>DISABLE_AUTH</code> truthy (<code>1</code>, <code>true</code>, <code>yes</code>, <code>on</code>, via <code>_is_truthy</code>, <code>utils/get_env.py:11</code>), which is how Electron runs, the middleware only offers the request to the Presenton Cloud proxy with <code>allow_unowned=True</code> and otherwise calls the route directly. No owner is set, so rows are written with <code>owner_id = NULL</code> and reads are not filtered.</p>
+<h3 id="93-which-paths-need-authentication">9.3 Which paths need authentication<a class="headerlink" href="#93-which-paths-need-authentication" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/middlewares.py (excerpt)</span><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_requires_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PUBLIC_AUTH_PREFIXES</span><span class="p">):</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>            <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/"</span><span class="p">):</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>            <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PUBLIC_APP_DATA_PREFIXES</span><span class="p">):</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="k">return</span> <span class="kc">False</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/app_data/"</span><span class="p">):</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>            <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>        <span class="k">return</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PROTECTED_NON_API_PATHS</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Needs auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/api/v1/auth/status</code>, <code>/verify</code>, <code>/setup</code>, <code>/login</code>, <code>/logout</code> (<code>_PUBLIC_AUTH_PATHS</code>, <code>middlewares.py:30</code>)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>any other <code>/api/...</code> (including <code>/api/v1/auth/presenton/...</code>, because <code>_PUBLIC_AUTH_PREFIXES</code> is empty)</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>/app_data/fonts/...</code>, <code>/app_data/templates/...</code></td>
+<td>no</td>
+</tr>
+<tr>
+<td>any other <code>/app_data/...</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>/docs</code>, <code>/openapi.json</code>, <code>/redoc</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td>everything else, including <code>/static/...</code></td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p><code>OPTIONS</code> requests always pass, so CORS preflights reach <code>CORSMiddleware</code>.</p>
+<h3 id="94-first-run-setup-http-428">9.4 First-run setup: HTTP 428<a class="headerlink" href="#94-first-run-setup-http-428" title="Permanent link">&para;</a></h3>
+<p>For protected paths the middleware opens its own <code>AsyncSession</code> and runs <code>SELECT count(*) FROM user</code>. Zero rows means no administrator has been created yet:</p>
+<div class="language-http highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">428</span> <span class="ne">Precondition Required</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="na">content-type</span><span class="o">:</span> <span class="l">application/json</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">{</span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Login setup is required"</span><span class="p">,</span><span class="w"> </span><span class="nt">"setup_required"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">}</span>
+</span></code></pre></div>
+<p>The Next.js app uses this to route to the setup screen (<a href="../23-settings-and-auth-ui/">Settings, onboarding, auth UI</a>).</p>
+<h3 id="95-principal-resolution-and-401">9.5 Principal resolution and 401<a class="headerlink" href="#95-principal-resolution-and-401" title="Permanent link">&para;</a></h3>
+<p><code>resolve_request_principal</code> (<code>api/v1/auth/principal.py:22</code>) tries, in order, the <code>presenton_session</code> cookie (a JWT read by <code>VersionedJWTStrategy</code>, which also checks that the token's <code>av</code> claim equals the user's current <code>auth_version</code>, <code>api/v1/auth/users.py:136</code>) and then an <code>Authorization: Bearer &lt;api key&gt;</code> header verified by <code>services/api_keys.py</code>. It returns a frozen <code>AuthPrincipal(user_id, username, is_admin, method)</code> where <code>method</code> is <code>"jwt"</code> or <code>"api_key"</code>. Neither present, or a bad key, yields <code>401 {"detail": "Unauthorized"}</code>.</p>
+<h3 id="96-admin-only-paths">9.6 Admin-only paths<a class="headerlink" href="#96-admin-only-paths" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/middlewares.py (excerpt)</span><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>            <span class="n">admin_only</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>                <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/v1/admin/"</span><span class="p">)</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>                <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/v1/ppt/codex/auth/"</span><span class="p">)</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>                <span class="ow">or</span> <span class="p">(</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>                    <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/v1/ppt/fonts/"</span><span class="p">)</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>                    <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"DELETE"</span><span class="p">}</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>                <span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>                <span class="ow">or</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">{</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>                    <span class="s2">"/api/v1/ppt/ollama/models/pull"</span><span class="p">,</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>                    <span class="s2">"/api/v1/ppt/ollama/models/available"</span><span class="p">,</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>                    <span class="s2">"/api/v1/ppt/openai/models/available"</span><span class="p">,</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>                    <span class="s2">"/api/v1/ppt/images/test"</span><span class="p">,</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>                    <span class="s2">"/api/v1/ppt/openrouter/providers/available"</span><span class="p">,</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>                <span class="p">}</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>            <span class="p">)</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>            <span class="k">if</span> <span class="n">admin_only</span> <span class="ow">and</span> <span class="p">(</span><span class="n">principal</span><span class="o">.</span><span class="n">method</span> <span class="o">!=</span> <span class="s2">"jwt"</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">principal</span><span class="o">.</span><span class="n">is_admin</span><span class="p">):</span>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>                <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>                    <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>                    <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Admin browser session required"</span><span class="p">},</span>
+</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>                <span class="p">)</span>
+</span></code></pre></div>
+<p>These are the endpoints that change global state (users, API keys, provider settings, the global ChatGPT token, shared fonts) or that make the server fetch an arbitrary URL supplied by the caller (OpenAI-compatible and Ollama model discovery, image provider tests).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The check requires <code>principal.method == "jwt"</code>. An API key that belongs to the administrator still cannot reach these paths, by design: API keys are for automation, and settings changes require a browser session. Note also that <code>/api/v1/ppt/anthropic/models/available</code> and <code>/api/v1/ppt/google/models/available</code> are not in the list; they call fixed vendor hosts with the caller's key, so any signed-in user may use them.</p>
+</div>
+<h3 id="97-request-state-and-the-internal-session-token">9.7 Request state and the internal session token<a class="headerlink" href="#97-request-state-and-the-internal-session-token" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/middlewares.py (excerpt)</span><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>            <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">auth_principal</span> <span class="o">=</span> <span class="n">principal</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>            <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>            <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">auth_username</span> <span class="o">=</span> <span class="n">principal</span><span class="o">.</span><span class="n">username</span>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>            <span class="k">if</span> <span class="n">principal</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"api_key"</span> <span class="ow">and</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>                <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">internal_session_token</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>                    <span class="k">await</span> <span class="n">get_jwt_strategy</span><span class="p">()</span><span class="o">.</span><span class="n">write_token</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>                <span class="p">)</span>
+</span></code></pre></div>
+<p>For API-key callers the middleware mints a short-term browser-style JWT for the same user. Some routes later need to make the server call itself as that user, most importantly the export pipeline, which opens the presentation in a headless browser. <code>build_export_cookie_header</code> (<code>api/v1/ppt/endpoints/presentation.py:1473</code>) prefers the incoming <code>Cookie</code> header and otherwise turns <code>internal_session_token</code> into <code>presenton_session=&lt;jwt&gt;</code>. See <a href="../24-export-pipeline/">PPTX and PDF export</a>.</p>
+<h3 id="98-owner-contextvars-cloud-proxy-and-asset-check">9.8 Owner contextvars, cloud proxy and asset check<a class="headerlink" href="#98-owner-contextvars-cloud-proxy-and-asset-check" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/middlewares.py (excerpt)</span><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>            <span class="n">context_token</span> <span class="o">=</span> <span class="n">set_current_owner_id</span><span class="p">(</span><span class="n">principal</span><span class="o">.</span><span class="n">user_id</span><span class="p">)</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>            <span class="n">admin_context_token</span> <span class="o">=</span> <span class="n">set_current_owner_is_admin</span><span class="p">(</span><span class="n">principal</span><span class="o">.</span><span class="n">is_admin</span><span class="p">)</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>                <span class="k">if</span> <span class="n">principal</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"jwt"</span><span class="p">:</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>                    <span class="n">cloud_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">maybe_proxy_presenton_cloud_request</span><span class="p">(</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>                        <span class="n">request</span><span class="p">,</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>                        <span class="n">session</span><span class="p">,</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>                        <span class="n">user</span><span class="p">,</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>                    <span class="p">)</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>                    <span class="k">if</span> <span class="n">cloud_response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>                        <span class="k">return</span> <span class="n">cloud_response</span>
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>                <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>                    <span class="s2">"/app_data/"</span>
+</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>                <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_app_data_path_authorized</span><span class="p">(</span>
+</span><span id="__span-15-15"><a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>                    <span class="n">path</span><span class="p">,</span>
+</span><span id="__span-15-16"><a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>                    <span class="n">user_id</span><span class="o">=</span><span class="n">principal</span><span class="o">.</span><span class="n">user_id</span><span class="p">,</span>
+</span><span id="__span-15-17"><a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a>                    <span class="n">is_admin</span><span class="o">=</span><span class="n">principal</span><span class="o">.</span><span class="n">is_admin</span><span class="p">,</span>
+</span><span id="__span-15-18"><a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a>                <span class="p">):</span>
+</span><span id="__span-15-19"><a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a>                    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+</span><span id="__span-15-20"><a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a>                        <span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span>
+</span><span id="__span-15-21"><a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a>                        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Asset not found"</span><span class="p">},</span>
+</span><span id="__span-15-22"><a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a>                    <span class="p">)</span>
+</span><span id="__span-15-23"><a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a>                <span class="k">return</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="__span-15-24"><a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a>            <span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-15-25"><a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a>                <span class="n">reset_current_owner_is_admin</span><span class="p">(</span><span class="n">admin_context_token</span><span class="p">)</span>
+</span><span id="__span-15-26"><a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a>                <span class="n">reset_current_owner_id</span><span class="p">(</span><span class="n">context_token</span><span class="p">)</span>
+</span></code></pre></div>
+<ul>
+<li><strong>Presenton Cloud proxy.</strong> For browser sessions, <code>maybe_proxy_presenton_cloud_request</code> (<code>services/presenton_cloud_proxy.py:407</code>) forwards a fixed set of generation, editing, chat and asset paths to Presenton Cloud when the saved provider is <code>LLM = "presenton"</code>, then mirrors results into the local database. It is described in <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>.</li>
+<li><strong><code>/app_data</code> authorization.</strong> <code>is_app_data_path_authorized</code> (<code>assets.py:78</code>) decodes the URL path up to 8 times (failing closed beyond that), rejects NUL bytes, backslashes and <code>.</code>/<code>..</code> segments, applies the namespace rule from Step 4, and then re-applies it to the <code>realpath</code> of the target so a symlink cannot alias another user's file. A refusal returns 404, not 403, so the response does not reveal that the file exists.</li>
+</ul>
+<h2 id="step-10-request-scoped-owner-context">Step 10: Request-scoped owner context<a class="headerlink" href="#step-10-request-scoped-owner-context" title="Permanent link">&para;</a></h2>
+<h3 id="101-two-contextvars">10.1 Two contextvars<a class="headerlink" href="#101-two-contextvars" title="Permanent link">&para;</a></h3>
+<p><code>api/v1/auth/context.py</code> defines the entire mechanism in 34 lines:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/auth/context.py (excerpt)</span><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">_CURRENT_OWNER_ID</span><span class="p">:</span> <span class="n">ContextVar</span><span class="p">[</span><span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="s2">"presenton_current_owner_id"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="p">)</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">_CURRENT_OWNER_IS_ADMIN</span><span class="p">:</span> <span class="n">ContextVar</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="s2">"presenton_current_owner_is_admin"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<p><code>ContextVar</code> values are per asyncio task context, so concurrent requests each see their own owner. The middleware sets them before <code>call_next</code> and resets them with the saved tokens in <code>finally</code>.</p>
+<h3 id="102-what-reads-them">10.2 What reads them<a class="headerlink" href="#102-what-reads-them" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Consumer</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_scope_owned_selects</code>, a <code>do_orm_execute</code> listener on every <code>Session</code> (<code>services/database.py:67</code>)</td>
+<td>adds <code>with_loader_criteria(model, owner_id == current)</code> for seven tables, and "own or shared default" for <code>TemplateV2</code>, to every ORM <code>SELECT</code></td>
+</tr>
+<tr>
+<td><code>_stamp_new_owned_rows</code>, a <code>before_flush</code> listener (<code>services/database.py:100</code>)</td>
+<td>sets <code>owner_id = current owner</code> on every new owned object before INSERT</td>
+</tr>
+<tr>
+<td><code>owner_id</code> fields with <code>default_factory=get_current_owner_id</code> in eight SQL models (for example <code>models/sql/presentation.py:25</code>)</td>
+<td>fills <code>owner_id</code> the moment the Python object is constructed</td>
+</tr>
+<tr>
+<td><code>_owned_directory</code> (<code>utils/asset_directory_utils.py:23</code>)</td>
+<td>writes files under <code>&lt;root&gt;/users/&lt;owner_id&gt;/</code></td>
+</tr>
+<tr>
+<td><code>_OwnerScopedStaticFiles.lookup_path</code> (<code>assets.py:25</code>)</td>
+<td>refuses other users' files</td>
+</tr>
+<tr>
+<td><code>authenticated_internal_request_headers</code> (<code>api/v1/auth/internal.py:10</code>)</td>
+<td>mints a JWT cookie for server-to-server calls on behalf of the owner</td>
+</tr>
+</tbody>
+</table>
+<div class="language-python highlight"><span class="filename">servers/fastapi/services/database.py (excerpt)</span><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nd">@event</span><span class="o">.</span><span class="n">listens_for</span><span class="p">(</span><span class="n">Session</span><span class="p">,</span> <span class="s2">"do_orm_execute"</span><span class="p">)</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">_scope_owned_selects</span><span class="p">(</span><span class="n">execute_state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="sd">"""Apply tenant criteria to every ORM SELECT performed during a request."""</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="n">owner_id</span> <span class="o">=</span> <span class="n">get_current_owner_id</span><span class="p">()</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>    <span class="k">if</span> <span class="p">(</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>        <span class="n">owner_id</span> <span class="ow">is</span> <span class="kc">None</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>        <span class="ow">or</span> <span class="ow">not</span> <span class="n">execute_state</span><span class="o">.</span><span class="n">is_select</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>        <span class="ow">or</span> <span class="n">execute_state</span><span class="o">.</span><span class="n">execution_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"skip_owner_scope"</span><span class="p">)</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>    <span class="p">):</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>        <span class="k">return</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>    <span class="n">statement</span> <span class="o">=</span> <span class="n">execute_state</span><span class="o">.</span><span class="n">statement</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">_STRICT_OWNER_MODELS</span><span class="p">:</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>        <span class="n">statement</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">options</span><span class="p">(</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>            <span class="n">with_loader_criteria</span><span class="p">(</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>                <span class="n">model</span><span class="p">,</span>
+</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>                <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">owner_id</span> <span class="o">==</span> <span class="n">owner_id</span><span class="p">,</span>
+</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>                <span class="n">include_aliases</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-17-19"><a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>            <span class="p">)</span>
+</span><span id="__span-17-20"><a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="103-why-the-models-default-owner_id-from-the-context">10.3 Why the models default <code>owner_id</code> from the context<a class="headerlink" href="#103-why-the-models-default-owner_id-from-the-context" title="Permanent link">&para;</a></h3>
+<p>The models declare <code>owner_id</code> with <code>default_factory=get_current_owner_id</code> and <code>exclude=True</code>. The default factory captures the owner at construction time, so any route can write <code>PresentationModel(...)</code> without threading a user id through every helper. <code>exclude=True</code> keeps <code>owner_id</code> out of every serialized API response. The <code>before_flush</code> listener then acts as the authoritative stamp: it overwrites <code>owner_id</code> on new objects even when a value was supplied, which matters for objects deserialized from request bodies, such as the <code>slides: List[SlideModel]</code> accepted by <code>PATCH /api/v1/ppt/presentation/update</code> (<code>presentation.py:2532</code>). A client that put another user's id in that JSON would have it replaced before INSERT.</p>
+<p>The net effect is that an endpoint written with no knowledge of users is automatically tenant-safe for reads and inserts. Asking for another user's presentation id simply returns <code>None</code> from <code>session.get</code>, which the route turns into its normal 404.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The automatic filter applies only to ORM <code>SELECT</code>s (<code>execute_state.is_select</code>). Bulk <code>UPDATE</code> and <code>DELETE</code> statements are not rewritten, which is why the code adds explicit owner predicates to them, for example <code>delete(SlideModel).where(SlideModel.presentation == presentation.id, SlideModel.owner_id == get_current_owner_id())</code> (<code>presentation.py:2568</code>) and the chat history deletes in <code>services/chat/sql_chat_history.py:134</code>. Any new bulk statement must do the same.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Background work does not rely on inherited context. Every <code>BackgroundTasks</code> entry point receives the owner id explicitly and sets it again, for example <code>_run_generate_presentation_task</code> calls <code>set_current_owner_id(owner_id)</code> and <code>set_current_owner_is_admin(False)</code> and resets both in <code>finally</code> (<code>presentation.py:3198</code>). Startup code such as Step 8.6 runs with no owner, so its queries see every tenant's rows. The escape hatch for a deliberate cross-tenant query is the execution option <code>skip_owner_scope</code>.</p>
+</div>
+<h2 id="step-11-worked-example-adding-a-router-and-endpoint-the-presenton-way">Step 11: Worked example: adding a router and endpoint the Presenton way<a class="headerlink" href="#step-11-worked-example-adding-a-router-and-endpoint-the-presenton-way" title="Permanent link">&para;</a></h2>
+<p>Suppose you want <code>GET /api/v1/ppt/summary/{presentation_id}</code> returning a presentation's title and slide count. The following code is illustrative and is not in the repository.</p>
+<p><strong>1. Create the router module</strong> next to the others, with a short prefix and a tag:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/summary.py (new, illustrative)</span><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">uuid</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">HTTPException</span>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">func</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.ext.asyncio</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncSession</span>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sqlmodel</span><span class="w"> </span><span class="kn">import</span> <span class="n">select</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>
+</span><span id="__span-18-8"><a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">models.sql.presentation</span><span class="w"> </span><span class="kn">import</span> <span class="n">PresentationModel</span>
+</span><span id="__span-18-9"><a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="kn">from</span><span class="w"> </span><span class="nn">models.sql.slide</span><span class="w"> </span><span class="kn">import</span> <span class="n">SlideModel</span>
+</span><span id="__span-18-10"><a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="kn">from</span><span class="w"> </span><span class="nn">services.database</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_async_session</span>
+</span><span id="__span-18-11"><a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>
+</span><span id="__span-18-12"><a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="n">SUMMARY_ROUTER</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"/summary"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"Summary"</span><span class="p">])</span>
+</span><span id="__span-18-13"><a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>
+</span><span id="__span-18-14"><a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>
+</span><span id="__span-18-15"><a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="nd">@SUMMARY_ROUTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/</span><span class="si">{presentation_id}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="__span-18-16"><a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_summary</span><span class="p">(</span>
+</span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>    <span class="n">presentation_id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span>
+</span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>    <span class="n">sql_session</span><span class="p">:</span> <span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_async_session</span><span class="p">),</span>
+</span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="p">):</span>
+</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>    <span class="n">presentation</span> <span class="o">=</span> <span class="k">await</span> <span class="n">sql_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PresentationModel</span><span class="p">,</span> <span class="n">presentation_id</span><span class="p">)</span>
+</span><span id="__span-18-21"><a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">presentation</span><span class="p">:</span>
+</span><span id="__span-18-22"><a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Presentation not found"</span><span class="p">)</span>
+</span><span id="__span-18-23"><a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a>    <span class="n">slide_count</span> <span class="o">=</span> <span class="k">await</span> <span class="n">sql_session</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span>
+</span><span id="__span-18-24"><a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>        <span class="n">select</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="n">SlideModel</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+</span><span id="__span-18-25"><a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>            <span class="n">SlideModel</span><span class="o">.</span><span class="n">presentation</span> <span class="o">==</span> <span class="n">presentation_id</span>
+</span><span id="__span-18-26"><a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a>        <span class="p">)</span>
+</span><span id="__span-18-27"><a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a>    <span class="p">)</span>
+</span><span id="__span-18-28"><a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">presentation</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="s2">"title"</span><span class="p">:</span> <span class="n">presentation</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="s2">"slides"</span><span class="p">:</span> <span class="n">slide_count</span><span class="p">}</span>
+</span></code></pre></div>
+<p><strong>2. Register it</strong> in <code>api/v1/ppt/router.py</code> with <code>API_V1_PPT_ROUTER.include_router(SUMMARY_ROUTER)</code>. The full path becomes <code>/api/v1/ppt/summary/{presentation_id}</code>. Nothing in <code>api/main.py</code> changes.</p>
+<p><strong>3. Inherit security for free.</strong> Because the path starts with <code>/api/</code>, <code>SessionAuthMiddleware</code> requires a session cookie or API key. Because <code>session.get</code> is an ORM select, <code>_scope_owned_selects</code> limits it to the caller's rows; another user's id returns 404. The <code>count()</code> query selects from <code>SlideModel</code> through the ORM, so the loader criteria apply there too.</p>
+<p><strong>4. Decide on admin access.</strong> If the endpoint changes global state, either add the path to the <code>admin_only</code> expression in <code>api/middlewares.py:100</code> or depend on <code>require_browser_admin_principal</code> (<code>api/v1/auth/principal.py:67</code>) inside the route.</p>
+<p><strong>5. If you add a table</strong>, follow the existing pattern: give the model an <code>owner_id</code> field with <code>default_factory=get_current_owner_id</code>, <code>exclude=True</code> and <code>ForeignKey("user.id", ondelete="CASCADE")</code>; add the class to <code>_STRICT_OWNER_MODELS</code> (<code>services/database.py:56</code>) and to the <code>create_all</code> list (<code>services/database.py:124</code>); import it in <code>alembic/env.py</code>; write an Alembic revision whose <code>down_revision</code> is the current head <code>026c0ba8b35c</code>; and update <code>REVISION_HEAD</code> plus <code>_infer_revision_from_schema</code> in <code>migrations.py</code>. <a href="../07-data-model/">Data model</a> explains each of these pieces.</p>
+<p><strong>6. If it must work with Presenton Cloud selected</strong>, decide whether the path belongs in one of the <code>CLOUD_*</code> path sets in <code>services/presenton_cloud_proxy.py:42</code>. Paths that are not listed are always served locally.</p>
+<p><strong>7. If it is long-running</strong>, create an <code>AsyncTaskModel</code> row, schedule a <code>BackgroundTasks</code> function, and pass <code>get_current_owner_id()</code> into it so the task can call <code>set_current_owner_id</code> itself, as <code>generate_presentation_async</code> does (<code>presentation.py:3241</code>). Step 8.6 will then fail it cleanly if the server restarts.</p>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>server.py</code> binds Uvicorn to <code>127.0.0.1</code> with three flags, and <code>api/main.py</code> does real work at import time: MIME table, optional Sentry, routers, seven <code>/app_data</code> mounts, <code>/static</code>, CORS and middleware.</li>
+<li>The 101 routes hang off seven top-level routers; <code>/api/v1/ppt</code> aggregates 17 feature routers and <code>/api/v2/ppt/presentation</code> holds the Smart generation API.</li>
+<li>Middleware executes in reverse registration order: icon fallback, then session auth, then the per-request config reload, then CORS, so auth rejections carry no CORS headers.</li>
+<li>The lifespan migrates or creates the schema, bootstraps the admin, fails orphaned tasks, reconciles provider settings, re-imports 16 bundled templates and loads configuration into <code>os.environ</code>.</li>
+<li><code>SessionAuthMiddleware</code> handles the Electron guard, auth-disabled mode, public paths, 428 setup, JWT or API-key principals, the admin-only list, the cloud proxy and <code>/app_data</code> authorization.</li>
+<li>Two contextvars plus two SQLAlchemy session listeners make every ORM read and insert owner-scoped without the route code mentioning users.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../06-configuration-and-providers/">Configuration and LLM providers</a> to see what <code>update_env_with_user_config</code> actually loads and how a provider name becomes an LLM client.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../04-running-locally/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Running it locally">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Running it locally
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../06-configuration-and-providers/" class="md-footer__link md-footer__link--next" aria-label="Next: Configuration and LLM providers">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Configuration and LLM providers
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

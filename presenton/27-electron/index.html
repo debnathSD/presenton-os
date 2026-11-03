@@ -1,0 +1,4110 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/27-electron/">
+      
+      
+        <link rel="prev" href="../26-docker-and-deployment/">
+      
+      
+        <link rel="next" href="../28-ci-tests-security/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Electron desktop app - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#electron-desktop-app" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Electron desktop app
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-0-the-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 0: The map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-electron-package-and-its-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The electron/ package and its scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-what-each-build-script-produces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: What each build script produces
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: What each build script produces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-build-nextjs-resourcescjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 build-nextjs-resources.cjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-ensure-spacy-modelcjs-and-serverspec-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 ensure-spacy-model.cjs and server.spec (FastAPI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-export-runtime-chromium-and-imagemagick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Export runtime, Chromium and ImageMagick
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-packaging-with-buildjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Packaging with build.js
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-process-start-up-before-any-window-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Process start-up, before any window exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-where-user-data-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Where user data lives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-whenready-ports-environment-and-the-desktop-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: whenReady, ports, environment and the desktop secret
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: whenReady, ports, environment and the desktop secret">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-auth-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Auth mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Ports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-environment-published-to-the-renderer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Environment published to the renderer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-the-per-launch-desktop-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 The per-launch desktop secret
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-spawning-the-two-servers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Spawning the two servers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Spawning the two servers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-pre-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Pre-flight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 FastAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-readiness-polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Readiness polling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-nextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Next.js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#75-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5 Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-the-window-and-navigation-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: The window and navigation rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-the-desktop-transport-guard-on-the-servers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: The desktop transport guard on the servers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: The desktop transport guard on the servers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-the-tests-that-pin-this-down" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 The tests that pin this down
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-ipc-handlers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: IPC handlers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: IPC handlers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-export-presentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 export-presentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-read-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 read-file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-shutdown-and-the-update-banner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Shutdown and the update banner
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-signing-notarization-and-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: Signing, notarization and releases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 12: Signing, notarization and releases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-macos-direct-distribution-dmg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 macOS direct distribution (DMG)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-mac-app-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Mac App Store
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-linux-ci-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Linux CI build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-release-files-to-r2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Release files to R2
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-13-running-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 13: Running it yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-0-the-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 0: The map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-electron-package-and-its-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The electron/ package and its scripts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-what-each-build-script-produces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: What each build script produces
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: What each build script produces">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-build-nextjs-resourcescjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 build-nextjs-resources.cjs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-ensure-spacy-modelcjs-and-serverspec-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 ensure-spacy-model.cjs and server.spec (FastAPI)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-export-runtime-chromium-and-imagemagick" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Export runtime, Chromium and ImageMagick
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-packaging-with-buildjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Packaging with build.js
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-process-start-up-before-any-window-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Process start-up, before any window exists
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-where-user-data-lives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Where user data lives
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-whenready-ports-environment-and-the-desktop-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: whenReady, ports, environment and the desktop secret
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: whenReady, ports, environment and the desktop secret">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-auth-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Auth mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-ports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Ports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-environment-published-to-the-renderer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Environment published to the renderer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-the-per-launch-desktop-secret" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 The per-launch desktop secret
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-spawning-the-two-servers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Spawning the two servers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Spawning the two servers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-pre-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Pre-flight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 FastAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-readiness-polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Readiness polling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-nextjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Next.js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#75-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5 Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-the-window-and-navigation-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: The window and navigation rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-the-desktop-transport-guard-on-the-servers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: The desktop transport guard on the servers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: The desktop transport guard on the servers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-the-tests-that-pin-this-down" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 The tests that pin this down
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-ipc-handlers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: IPC handlers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: IPC handlers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-export-presentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 export-presentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-read-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 read-file
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-shutdown-and-the-update-banner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Shutdown and the update banner
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-signing-notarization-and-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: Signing, notarization and releases
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 12: Signing, notarization and releases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-macos-direct-distribution-dmg" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 macOS direct distribution (DMG)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-mac-app-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Mac App Store
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-linux-ci-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Linux CI build
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-release-files-to-r2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Release files to R2
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-13-running-it-yourself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 13: Running it yourself
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="electron-desktop-app">Electron desktop app<a class="headerlink" href="#electron-desktop-app" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>electron/package.json</code>, <code>electron/build.js</code>, <code>electron/tsconfig.json</code>, <code>electron/app/main.ts</code>, <code>electron/app/utils/*.ts</code>, <code>electron/app/ipc/*.ts</code>, <code>electron/app/preloads/index.ts</code>, <code>electron/scripts/*.cjs</code>, <code>servers/fastapi/server.spec</code>, <code>servers/fastapi/api/v1/auth/desktop.py</code>, <code>servers/nextjs/lib/desktop-auth.ts</code>, <code>servers/nextjs/tests/desktop-security.test.mjs</code>, <code>docs/macos/dev/*.md</code>, <code>.github/workflows/electron-linux-ubuntu22.yml</code>, <code>.github/workflows/sync-releaes-to-r2.yml</code>  ·  <strong>Builds on:</strong> <a href="../03-runtime-topology/">Runtime topology</a>, <a href="../25-auth-and-multiuser/">Auth and multi-user</a>, <a href="../26-docker-and-deployment/">Docker build and deployment</a>  ·  <strong>Time:</strong> ~45 min</p>
+</div>
+<p>The desktop app is the same two servers you met in the Docker image (FastAPI and the Next.js standalone server), but with no nginx, no <code>start.js</code>, and no account system. Electron's main process takes over every job those pieces did: it picks loopback ports, writes the environment, spawns a PyInstaller-frozen FastAPI binary and the Next.js <code>server.js</code>, mints a per-launch secret that both servers check on every request, and runs the PPTX/PDF export runner as a child process. This chapter follows the code from <code>npm run build:all</code> through first launch to shutdown, then covers signing, notarization, the Linux CI build, and how release files reach Cloudflare R2.</p>
+<h2 id="step-0-the-map">Step 0: The map<a class="headerlink" href="#step-0-the-map" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TB
+  subgraph Main["Electron main process (app_dist/main.js)"]
+    M1["initializeAppPaths()"] --&gt; M2["findUnusedPorts() from 40000"]
+    M2 --&gt; M3["setupEnv() and initializeDesktopSession()"]
+    M3 --&gt; M4["createWindow() hidden"]
+    M4 --&gt; M5["startServers()"]
+    M5 --&gt; M6["loadURL /upload"]
+  end
+  subgraph Children["Child processes on 127.0.0.1"]
+    F["resources/fastapi/fastapi --port P1"]
+    N["Electron-as-Node resources/nextjs/server.js on P2"]
+    E["export runner.mjs (per export)"]
+  end
+  R["Renderer (BrowserWindow, preload exposes window.env and window.electron)"]
+  M5 --&gt; F
+  M5 --&gt; N
+  R -- "HTTP + x-presenton-desktop-token" --&gt; N
+  R -- "HTTP + x-presenton-desktop-token" --&gt; F
+  R -- "ipcRenderer.invoke export-presentation" --&gt; Main
+  Main --&gt; E</code></pre>
+<p>The rest of this chapter walks the boxes in order.</p>
+<h2 id="step-1-the-electron-package-and-its-scripts">Step 1: The <code>electron/</code> package and its scripts<a class="headerlink" href="#step-1-the-electron-package-and-its-scripts" title="Permanent link">&para;</a></h2>
+<p><code>electron/package.json</code> is both the npm manifest and the release metadata store. Besides <code>version</code> (<code>0.9.12-beta</code>, <code>electron/package.json:4</code>) it carries three custom keys the build scripts read:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+<th>Read by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>exportVersion</code></td>
+<td><code>v1.0.51</code> (<code>electron/package.json:5</code>)</td>
+<td><code>scripts/sync-export-runtime.cjs:15</code>, <code>app/utils/export-msix-runtime.ts:28</code></td>
+</tr>
+<tr>
+<td><code>exportChromiumBuildId</code></td>
+<td><code>149.0.7827.196</code> (<code>electron/package.json:6</code>)</td>
+<td><code>scripts/prepare-export-chromium.cjs:44</code>, <code>app/utils/export-chromium.ts:60</code></td>
+</tr>
+<tr>
+<td><code>exportMacChromiumBuildIds</code></td>
+<td><code>darwin-arm64: 1625085</code>, <code>darwin-x64: 1625072</code> (<code>electron/package.json:7</code>)</td>
+<td>same two files, macOS branch</td>
+</tr>
+</tbody>
+</table>
+<p><code>main</code> points at <code>app_dist/main.js</code> (<code>electron/package.json:11</code>), the compiled output of <code>app/**</code> produced by <code>tsc</code> with <code>tsconfig.json</code> (<code>rootDir: ./app</code>, <code>outDir: ./app_dist</code>, <code>module: commonjs</code>, <code>target: es2016</code>, <code>strict: true</code>, <code>sourceMap</code> with <code>inlineSources</code>, <code>noEmitOnError</code>; <code>electron/tsconfig.json:12</code> to <code>:103</code>). Electron itself is pinned exactly to <code>42.11.16</code> and electron-builder to <code>26.15.0</code> (<code>electron/package.json:94</code> and <code>:95</code>).</p>
+<p>The scripts form a pipeline. The full release chain is <code>build:all</code> (<code>electron/package.json:65</code>):</p>
+<pre class="mermaid"><code>flowchart LR
+  A["clean:build"] --&gt; B["setup:env"]
+  B --&gt; C["build:ts"]
+  C --&gt; D["install:pyinstaller (echo only)"]
+  D --&gt; E["build:nextjs"]
+  E --&gt; F["build:fastapi"]
+  F --&gt; G["build:electron"]</code></pre>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setup:env</code></td>
+<td><code>npm install</code>, <code>uv sync</code> in <code>servers/fastapi</code>, <code>npm install</code> in <code>servers/nextjs</code>, then <code>setup:export-runtime</code> and <code>prepare:imagemagick</code> (<code>:38</code>)</td>
+</tr>
+<tr>
+<td><code>build:ts</code></td>
+<td>Deletes <code>app_dist</code> then runs <code>tsc</code> (<code>:42</code>)</td>
+</tr>
+<tr>
+<td><code>build:nextjs</code></td>
+<td><code>node scripts/build-nextjs-resources.cjs</code> (<code>:54</code>)</td>
+</tr>
+<tr>
+<td><code>build:fastapi</code></td>
+<td>Deletes <code>resources/fastapi</code>, runs the echo-only <code>build:vectorstore</code>, runs <code>ensure-spacy-model.cjs</code> with <code>MEM0_SPACY_STRICT=true</code>, then <code>uv run --with pyinstaller python -m PyInstaller --distpath ../../electron/resources server.spec</code>, then <code>copy-fastapi-assets.cjs</code> (<code>:55</code>)</td>
+</tr>
+<tr>
+<td><code>build:electron</code></td>
+<td><code>copy:templates</code>, <code>generate:version</code>, <code>build:export-runtime</code>, <code>prepare:export-chromium</code>, <code>prepare:imagemagick</code>, <code>typecheck</code>, <code>build:ts</code>, <code>check:main-no-undef</code>, then <code>node build.js</code> (<code>:58</code>)</td>
+</tr>
+<tr>
+<td><code>build:electron:mac:signed</code> and <code>build:all:mac:signed</code></td>
+<td>Same chain with <code>PRESENTON_MAC_TARGET=dmg PRESENTON_REQUIRE_MAC_SIGNING=1</code> (<code>:59</code>, <code>:66</code>)</td>
+</tr>
+<tr>
+<td><code>build:electron:mas-dev</code>, <code>build:electron:mas</code></td>
+<td><code>PRESENTON_MAC_TARGET=mas-dev</code> or <code>mas</code> (<code>:60</code>, <code>:61</code>)</td>
+</tr>
+<tr>
+<td><code>dist:*</code></td>
+<td>Package-only reruns: <code>node build.js</code> with the same env, no rebuild (<code>:62</code> to <code>:64</code>)</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td><code>setup:desktop-runtime</code>, <code>copy:templates</code>, delete <code>app_dist</code>, <code>tsc</code>, then <code>electron . --no-sandbox</code> (<code>:36</code>)</td>
+</tr>
+<tr>
+<td><code>test:security</code></td>
+<td><code>build:ts</code> then <code>node --test scripts/security-dependencies.test.cjs scripts/private-storage.test.cjs</code> (<code>:41</code>)</td>
+</tr>
+<tr>
+<td><code>cleanup:installed-app-cache</code></td>
+<td>Removes Chromium caches from an installed app's profile (<code>:70</code>)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>install:pyinstaller</code> installs nothing</p>
+<p>The script is literally <code>echo 'pyinstaller will be installed via uv run --with when building'</code> (<code>electron/package.json:39</code>). PyInstaller is pulled in ephemerally by <code>uv run --with pyinstaller</code> inside <code>build:fastapi</code>. Do not look for it in <code>servers/fastapi/pyproject.toml</code>.</p>
+</div>
+<h2 id="step-2-what-each-build-script-produces">Step 2: What each build script produces<a class="headerlink" href="#step-2-what-each-build-script-produces" title="Permanent link">&para;</a></h2>
+<p>All scripts live in <code>electron/scripts/</code>. Every one writes into <code>electron/resources/</code>, which <code>build.js</code> later packs.</p>
+<h3 id="21-build-nextjs-resourcescjs">2.1 <code>build-nextjs-resources.cjs</code><a class="headerlink" href="#21-build-nextjs-resourcescjs" title="Permanent link">&para;</a></h3>
+<p>It deletes <code>resources/nextjs</code> and <code>servers/nextjs/.next-build</code>, then runs <code>npm run build</code> in <code>servers/nextjs</code> with two extra variables: <code>PRESENTON_ELECTRON_BUILD=true</code> and <code>NEXT_PUBLIC_PRESENTON_ELECTRON_PLATFORM=&lt;process.platform&gt;</code> (<code>electron/scripts/build-nextjs-resources.cjs:26</code> to <code>:36</code>). Those two flags change the Next.js build:</p>
+<ul>
+<li><code>next.config.mjs:5</code> and <code>:37</code> set <code>images.unoptimized</code> when <code>PRESENTON_ELECTRON_BUILD</code> is <code>true</code>, because a packaged app lives in a read-only directory such as <code>/opt/Presenton</code> and Next's image optimizer writes into <code>&lt;distDir&gt;/cache</code>.</li>
+<li><code>app/(presentation-generator)/components/SmartHtmlSlide.tsx:22</code> switches to an in-page renderer when the platform constant is <code>linux</code>.</li>
+</ul>
+<p>The script then copies <code>.next-build/standalone/*</code> into <code>resources/nextjs/</code>, and copies <code>.next-build/static</code> and <code>public/</code> to both the bundle root and the nested <code>servers/nextjs/</code> directory (<code>electron/scripts/build-nextjs-resources.cjs:51</code> to <code>:86</code>), because Next.js 16 standalone output traces the app under <code>servers/nextjs/</code> and runs <code>server.js</code> from there.</p>
+<h3 id="22-ensure-spacy-modelcjs-and-serverspec-fastapi">2.2 <code>ensure-spacy-model.cjs</code> and <code>server.spec</code> (FastAPI)<a class="headerlink" href="#22-ensure-spacy-modelcjs-and-serverspec-fastapi" title="Permanent link">&para;</a></h3>
+<p><code>ensure-spacy-model.cjs</code> creates <code>servers/fastapi/.venv</code> if missing, checks <code>spacy.load("en_core_web_sm")</code> through <code>uv run python -c</code>, and otherwise installs the pinned wheel <code>en_core_web_sm-3.8.0-py3-none-any.whl</code> from the explosion/spacy-models GitHub release (<code>electron/scripts/ensure-spacy-model.cjs:8</code> to <code>:14</code>). With <code>MEM0_SPACY_STRICT=true</code> (set by <code>build:fastapi</code>) a failure aborts the build; without it the script only warns that "Mem0 will self-disable at runtime" (<code>:92</code> to <code>:98</code>).</p>
+<p>PyInstaller then freezes <code>server.py</code> using <code>servers/fastapi/server.spec</code>. The spec matters because much of FastAPI's dependency tree is loaded dynamically:</p>
+<ul>
+<li><code>collect_all</code> for <code>fastembed</code>, <code>fastembed_vectorstore</code>, <code>onnxruntime</code>, <code>pptx</code>, <code>docx2everything</code>, <code>greenlet</code>, <code>llmai</code>, <code>spacy</code>, <code>en_core_web_sm</code>, wrapped in <code>safe_collect_all</code> so a missing optional package yields empty lists (<code>servers/fastapi/server.spec:13</code> to <code>:40</code>).</li>
+<li><code>datas</code> ships <code>assets</code>, <code>templates/assets/fonts.json</code>, <code>static</code>, <code>alembic</code>, and a pre-warmed <code>fastembed_cache</code> only if that directory exists (<code>:42</code> to <code>:44</code>, <code>:66</code> to <code>:71</code>).</li>
+<li>Hidden imports for mem0's string-loaded vector stores and embedders: <code>mem0.configs.vector_stores.*</code>, <code>mem0.embeddings.fastembed</code>, <code>mem0.llms.openai</code>, <code>mem0.vector_stores.qdrant</code> (<code>:48</code> to <code>:52</code>).</li>
+<li><code>EXE(name="fastapi", console=True, upx=False, exclude_binaries=True)</code> plus <code>COLLECT(name="fastapi")</code> produce a one-folder build (<code>:111</code> to <code>:136</code>), so the output is <code>electron/resources/fastapi/fastapi</code> with <code>_internal/</code> next to it.</li>
+</ul>
+<p><code>server.py</code> is the entry point. It accepts <code>--port</code> (required), <code>--reload</code> (<code>"true"</code> or anything else), and <code>--log-level</code> (default <code>info</code>), and always binds <code>host = "127.0.0.1"</code> (<code>servers/fastapi/server.py:7</code> to <code>:21</code>). Finally <code>copy-fastapi-assets.cjs</code> copies <code>servers/fastapi/static</code> and <code>servers/fastapi/assets</code> beside the binary (<code>electron/scripts/copy-fastapi-assets.cjs:8</code> to <code>:11</code>), because FastAPI resolves read-only resources relative to its working directory (see <code>servers/fastapi/utils/path_helpers.py:15</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: dynamic imports break the frozen binary silently</p>
+<p>If you add a dependency that imports modules by string (plugins, provider registries), PyInstaller will not trace it. The symptom is an <code>ImportError</code> only in the packaged app, never in <code>npm run dev</code> (which runs <code>uv run python server.py</code>). Add it to <code>hiddenimports</code> or a <code>safe_collect_all</code> call in <code>server.spec</code>.</p>
+</div>
+<h3 id="23-export-runtime-chromium-and-imagemagick">2.3 Export runtime, Chromium and ImageMagick<a class="headerlink" href="#23-export-runtime-chromium-and-imagemagick" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Output</th>
+<th>Key behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sync-export-runtime.cjs</code></td>
+<td><code>resources/export/</code></td>
+<td>Runs the root <code>scripts/sync-presentation-export.cjs</code> to fetch <code>@presenton/export-core</code> at <code>exportVersion</code>, copies <code>presentation-export/</code> into <code>resources/export</code>, then validates the version and the Sharp native runtime with <code>validateExportRuntime</code> (<code>electron/scripts/sync-export-runtime.cjs:35</code> to <code>:73</code>). Flags: <code>--check-only</code>, <code>--force</code>, <code>--allow-version-override</code></td>
+</tr>
+<tr>
+<td><code>prepare-export-chromium.cjs</code></td>
+<td><code>resources/chromium/</code> plus <code>presenton-runtime.json</code></td>
+<td>Uses <code>@puppeteer/browsers</code> to install Chrome for Testing <code>149.0.7827.196</code> (Windows, Linux) or Chromium snapshot builds on macOS; validates the binary (<code>codesign --verify --deep --strict</code> on macOS, <code>--version</code> on Linux, a layout check on Windows), canonicalizes macOS framework symlinks and ad-hoc re-signs; writes a manifest with <code>browser</code>, <code>buildId</code>, <code>platform</code>, <code>nodePlatform</code>, <code>arch</code>, <code>executable</code> (<code>electron/scripts/prepare-export-chromium.cjs:143</code> to <code>:240</code>, <code>:463</code> to <code>:535</code>). <code>SKIP_BUNDLED_CHROMIUM=1</code> skips it</td>
+</tr>
+<tr>
+<td><code>prepare-imagemagick.cjs</code></td>
+<td><code>resources/imagemagick/&lt;platform&gt;-&lt;arch&gt;/</code></td>
+<td>ImageMagick <code>7.1.2-18</code> by default (<code>IMAGEMAGICK_VERSION</code>). Windows: portable Q16 <code>.7z</code> extracted with <code>7zip-bin</code>. Linux x64 only: the release AppImage. macOS: copies a Homebrew or <code>IMAGEMAGICK_VENDOR_DIR</code> prefix, relinks dylibs, ad-hoc signs (<code>electron/scripts/prepare-imagemagick.cjs:9</code>, <code>:134</code> to <code>:157</code>, <code>:642</code> to <code>:678</code>)</td>
+</tr>
+<tr>
+<td><code>copy-templates.cjs</code></td>
+<td><code>resources/templates/</code></td>
+<td>Copies the repository <code>templates/</code> directory (<code>electron/scripts/copy-templates.cjs:5</code> to <code>:16</code>)</td>
+</tr>
+<tr>
+<td><code>generate-version.cjs</code></td>
+<td><code>electron/version.json</code></td>
+<td>Writes <code>version</code>, <code>message</code> (from <code>UPDATE_MESSAGE</code> or the existing file), and GitHub release download URLs for <code>.deb</code>, <code>.dmg</code>, <code>.exe</code> (<code>electron/scripts/generate-version.cjs:17</code> to <code>:30</code>)</td>
+</tr>
+<tr>
+<td><code>check-main-no-undef.cjs</code></td>
+<td>none</td>
+<td>Type-checks <code>app_dist/**/*.js</code>, <code>build.js</code> and <code>scripts/*.cjs</code> with <code>allowJs</code>/<code>checkJs</code> and fails only on diagnostic code 2304 ("Cannot find name") (<code>electron/scripts/check-main-no-undef.cjs:50</code> to <code>:76</code>)</td>
+</tr>
+<tr>
+<td><code>clean-build.cjs</code></td>
+<td>none</td>
+<td>Deletes everything in <code>resources/</code> except <code>document-extraction</code> and <code>ui</code>, and deletes <code>app_dist</code> (<code>electron/scripts/clean-build.cjs:6</code> to <code>:24</code>)</td>
+</tr>
+<tr>
+<td><code>upload-sourcemaps.cjs</code></td>
+<td>none</td>
+<td>Uploads <code>app_dist/**/*.js.map</code> with <code>sentry-cli sourcemaps upload --release presenton-electron@&lt;version&gt; --url-prefix app:///app_dist --rewrite --validate</code> (<code>electron/scripts/upload-sourcemaps.cjs:74</code> to <code>:104</code>)</td>
+</tr>
+<tr>
+<td><code>cleanup-installed-app-cache.cjs</code></td>
+<td>none</td>
+<td>Deletes <code>Cache</code>, <code>GPUCache</code>, <code>Crashpad</code>, <code>Code Cache</code>, <code>Shared Dictionary</code> and related folders under each candidate user-data dir; <code>--dry-run</code>, <code>--include-puppeteer</code>, <code>--verbose</code></td>
+</tr>
+<tr>
+<td><code>rebuild_notice_all.py</code></td>
+<td><code>NOTICE</code></td>
+<td>Regenerates the third-party notice file from Python and Node license files</td>
+</tr>
+</tbody>
+</table>
+<p>Two directories are checked into git and preserved by <code>clean:build</code>: <code>resources/document-extraction/liteparse_runner.mjs</code> (the LiteParse document parser runner, shared with Docker) and <code>resources/ui/</code> (fonts, images and Tailwind CSS for the splash).</p>
+<h2 id="step-3-packaging-with-buildjs">Step 3: Packaging with <code>build.js</code><a class="headerlink" href="#step-3-packaging-with-buildjs" title="Permanent link">&para;</a></h2>
+<p><code>node build.js</code> calls <code>electron-builder</code> programmatically (<code>electron/build.js:1016</code>). Before it does, two guards run:</p>
+<ol>
+<li><code>assertSourceBundleResourcesReady()</code> (<code>electron/build.js:730</code>, called at <code>:987</code>) uses <code>collectMissingBundleResources</code> (<code>:674</code> to <code>:728</code>) to require the FastAPI binary, <code>fastapi/_internal/llmai/data/models.json</code>, a Next.js <code>server.js</code> (root or nested), <code>export/runner.mjs</code>, <code>export/node_modules/@presenton/export-core/dist/index.js</code>, and a valid Sharp runtime. Missing items produce an error that tells you to run <code>npm run build:nextjs &amp;&amp; npm run build:fastapi</code> first.</li>
+<li><code>assertDirectMacReleaseReadiness()</code> (<code>:516</code>, called at <code>:993</code>) runs only when <code>PRESENTON_REQUIRE_MAC_SIGNING=1</code> (Step 10).</li>
+</ol>
+<p>The electron-builder configuration (<code>electron/build.js:874</code> to <code>:979</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>appId</code></td>
+<td><code>com.presenton.presenton</code> (<code>:13</code>)</td>
+<td>Bundle ID</td>
+</tr>
+<tr>
+<td><code>asar</code></td>
+<td><code>true</code></td>
+<td>App code is packed</td>
+</tr>
+<tr>
+<td><code>asarUnpack</code></td>
+<td><code>resources/**</code>, <code>node_modules/**</code> (<code>:878</code> to <code>:882</code>)</td>
+<td>Child processes need real files: the FastAPI binary, Chromium, ImageMagick, and LiteParse which "runs from FastAPI via Electron-as-Node"</td>
+</tr>
+<tr>
+<td><code>files</code></td>
+<td><code>resources</code>, <code>app_dist</code>, <code>NOTICE</code> (<code>:888</code> to <code>:892</code>)</td>
+<td>Nothing else from <code>electron/</code> ships</td>
+</tr>
+<tr>
+<td><code>extraResources</code></td>
+<td>root <code>scripts/user-config-env.cjs</code> to <code>user-config-env.cjs</code> (<code>:893</code> to <code>:898</code>)</td>
+<td>Shared env-to-config normalizer, loaded from <code>process.resourcesPath</code></td>
+</tr>
+<tr>
+<td><code>mac.target</code></td>
+<td><code>PRESENTON_MAC_TARGET</code> or <code>dmg</code> (<code>:902</code>)</td>
+<td><code>dmg</code>, <code>mas-dev</code>, <code>mas</code></td>
+</tr>
+<tr>
+<td><code>mac.hardenedRuntime</code></td>
+<td><code>!isMasBuild</code> (<code>:904</code>)</td>
+<td>Required for notarization</td>
+</tr>
+<tr>
+<td><code>mac.notarize</code></td>
+<td><code>true</code> unless MAS or <code>PRESENTON_SKIP_NOTARIZATION=1</code> (<code>:912</code>)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>linux.target</code></td>
+<td><code>AppImage</code>, <code>deb</code>, category <code>Office</code> (<code>:939</code> to <code>:944</code>)</td>
+<td><code>deb.afterInstall</code> uses <code>build/after-install.tpl</code></td>
+</tr>
+<tr>
+<td><code>win.target</code></td>
+<td><code>nsis</code>, <code>appx</code> (<code>:948</code> to <code>:953</code>)</td>
+<td>NSIS is per-user, lets the user change the install dir (<code>:954</code> to <code>:966</code>)</td>
+</tr>
+<tr>
+<td><code>dmg.size</code></td>
+<td><code>2300m</code> (<code>:969</code>)</td>
+<td>The app is large</td>
+</tr>
+<tr>
+<td><code>artifactName</code></td>
+<td><code>Presenton-${version}.${ext}</code></td>
+<td>The R2 sync workflow parses this name (Step 12)</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>afterPack</code> hook (<code>electron/build.js:764</code> to <code>:796</code>) runs only for macOS. It re-checks the packaged resources (so a signed app can never ship without its servers), <code>chmod 0o755</code> the FastAPI binary, prunes native <code>prebuilds/</code> folders for other architectures (<code>pruneUnsupportedPackagedPrebuilds</code>, <code>:811</code>), and canonicalizes the bundled Chromium framework symlinks (<code>normalizeBundledMacChromiumForPackaging</code> from <code>prepare-export-chromium.cjs</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: the resources are unpacked, so paths end in <code>app.asar.unpacked</code></p>
+<p>In a packaged app <code>app.getAppPath()</code> returns <code>.../app.asar</code>. <code>constants.ts</code> derives <code>resourceBaseDir</code> as <code>${baseDir}.unpacked</code> (<code>electron/app/utils/constants.ts:12</code> to <code>:13</code>), and every resource path (FastAPI dir, Next.js dir, export root, Chromium cache, ImageMagick) is built from it. If you add a new bundled binary, put it under <code>resources/</code> or it will be inside the asar and cannot be spawned.</p>
+</div>
+<h2 id="step-4-process-start-up-before-any-window-exists">Step 4: Process start-up, before any window exists<a class="headerlink" href="#step-4-process-start-up-before-any-window-exists" title="Permanent link">&para;</a></h2>
+<p><code>main.ts</code> runs top-level code before <code>app.whenReady()</code>. In order:</p>
+<ol>
+<li><code>require("dotenv").config()</code> (<code>electron/app/main.ts:1</code>): a <code>.env</code> in the working directory is loaded into <code>process.env</code>. This is how a developer feeds provider keys to <code>npm run dev</code>.</li>
+<li><code>installSafeConsole()</code> (<code>:57</code>) replaces <code>console.log/warn/error</code> with writers that drop <code>EPIPE</code> and "write after end" errors (<code>electron/app/utils/safe-console.ts:14</code> to <code>:27</code>, <code>:88</code> to <code>:100</code>). A GUI app launched from Finder or a <code>.desktop</code> file may have no attached stdout.</li>
+<li>Platform switches: macOS appends <code>use-mock-keychain</code> to avoid Keychain prompts for Chromium's encrypted storage (<code>:61</code> to <code>:63</code>). Linux disables the Chromium sandbox only when <code>chrome-sandbox</code> is missing or not root-owned <code>4755</code>, and adds <code>disable-dev-shm-usage</code> only when <code>/dev/shm</code> is not writable (<code>:67</code> to <code>:91</code>). <code>gtk-version 3</code> and <code>app.disableHardwareAcceleration()</code> follow (<code>:183</code>, <code>:187</code>).</li>
+<li><code>app.requestSingleInstanceLock()</code> (<code>:189</code> to <code>:192</code>). A second launch quits, and the first instance's <code>second-instance</code> handler restores and focuses its window (<code>:324</code> to <code>:328</code>).</li>
+<li><code>initializeAppPaths()</code> (<code>:194</code>) decides every directory (Step 5).</li>
+<li><code>prepareChromiumCacheRecovery()</code> (<code>:195</code>) quarantines a corrupt <code>Shared Dictionary</code> cache once per app version and Electron version, recording a sentinel <code>chromium-cache-recovery.json</code>. <code>PRESENTON_CHROMIUM_CACHE_RECOVERY=off|force</code> overrides (<code>electron/app/utils/chromium-cache-recovery.ts:19</code> to <code>:31</code>).</li>
+<li><code>initMainSentry()</code> (<code>:201</code>) initializes <code>@sentry/electron/main</code> with a hard-coded DSN unless <code>SENTRY_ENABLED</code> is <code>0/false/no/off</code>. Traces sample at <code>0.2</code> when packaged and <code>1.0</code> otherwise; <code>sendDefaultPii</code> defaults to false (<code>electron/app/sentry/main.ts:53</code> to <code>:80</code>).</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: crash reporting is on by default</p>
+<p>The desktop app reports errors and breadcrumbs (export starts and finishes with presentation <code>id</code>, <code>title</code>, and memory snapshots, <code>electron/app/ipc/export_handlers.ts:71</code> to <code>:76</code>) to Presenton's Sentry project unless the environment sets <code>SENTRY_ENABLED=false</code>. A fork that ships its own build should replace the DSN in <code>electron/app/sentry/main.ts:58</code>.</p>
+</div>
+<h2 id="step-5-where-user-data-lives">Step 5: Where user data lives<a class="headerlink" href="#step-5-where-user-data-lives" title="Permanent link">&para;</a></h2>
+<p><code>initializeAppPaths()</code> (<code>electron/app/utils/constants.ts:240</code> to <code>:301</code>) tries candidates in order and keeps the first that <code>ensurePrivateDirectory</code> accepts:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Candidates (first usable wins)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>App data base</td>
+<td>Windows: <code>%APPDATA%</code>, <code>%LOCALAPPDATA%</code>, <code>~/AppData/Roaming</code>. macOS: <code>~/Library/Application Support</code>. Linux: <code>$XDG_CONFIG_HOME</code>, <code>~/.config</code>. Fallback <code>&lt;tempRoot&gt;/presenton-app-data</code> (<code>:142</code> to <code>:176</code>)</td>
+</tr>
+<tr>
+<td><code>userDataDir</code></td>
+<td>Electron's <code>userData</code>, then <code>&lt;base&gt;/Presenton Open Source</code>, then <code>&lt;tempRoot&gt;/presenton-user-data</code> (<code>:247</code> to <code>:254</code>)</td>
+</tr>
+<tr>
+<td><code>appDataDir</code></td>
+<td>Packaged: same as <code>userDataDir</code>. Dev: <code>electron/app_data</code> (<code>:255</code> to <code>:260</code>)</td>
+</tr>
+<tr>
+<td><code>tempDir</code></td>
+<td><code>&lt;tempRoot&gt;/presenton</code> (not on Windows), then <code>&lt;userData&gt;/temp</code></td>
+</tr>
+<tr>
+<td><code>logsDir</code></td>
+<td><code>&lt;userData&gt;/logs</code></td>
+</tr>
+<tr>
+<td><code>cacheDir</code></td>
+<td><code>&lt;userData&gt;/Cache</code> (also passed as <code>--disk-cache-dir</code>)</td>
+</tr>
+<tr>
+<td><code>userConfigPath</code></td>
+<td><code>&lt;userData&gt;/userConfig.json</code> (<code>:287</code>)</td>
+</tr>
+<tr>
+<td>Downloads</td>
+<td>Electron <code>downloads</code>, then <code>XDG_DOWNLOAD_DIR</code> from <code>~/.config/user-dirs.dirs</code> on Linux, then <code>~/Downloads</code>, then <code>&lt;userData&gt;/exports</code> (<code>:198</code> to <code>:222</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>The fallback directory name <code>Presenton Open Source</code> (<code>:21</code>) matches <code>productName</code> in <code>electron/package.json</code>. The first candidate, however, is Electron's own <code>userData</code> path, which Electron derives from the application name, and <code>build.js</code> passes <code>productName: "Presenton"</code> to electron-builder (<code>electron/build.js:876</code>); which folder name an installed build ends up using was not verified for this chapter. FastAPI receives the chosen path as <code>APP_DATA_DIRECTORY</code>, so its SQLite file and <code>images/</code>, <code>uploads/</code>, <code>exports/</code> subfolders all land there.</p>
+<p><code>ensurePrivateDirectory</code> (<code>electron/app/utils/private-storage.ts:26</code> to <code>:55</code>) is stricter than <code>mkdir</code>. On POSIX it walks every parent from <code>/</code> down, and throws if any parent is owned by someone other than the user or root, or is group/world-writable without the sticky bit, until it reaches a parent that is already private (<code>0o077</code> bits clear). It then creates the directory with mode <code>0o700</code>, rejects it if it belongs to another user, resolves symlinks to the canonical path, and <code>chmod</code>s it to <code>0o700</code>. <code>writePrivateFileSync</code> (<code>:57</code> to <code>:69</code>) writes through a random temp file opened with <code>wx</code> and <code>0o600</code>, <code>fsync</code>s, and renames, so a planted symlink at the target is replaced rather than followed.</p>
+<p><code>userConfig.json</code> itself is written by <code>updateUserConfigFile</code> (<code>electron/app/utils/user-config-store.ts:220</code> to <code>:233</code>): a <code>.lock</code> file opened with <code>wx</code> and mode <code>0o600</code> (5 s timeout, 30 s stale threshold, <code>:11</code> to <code>:14</code>), a read of the primary or the <code>.bak</code> backup if the primary is corrupt, then an atomic temp-file write with <code>fsync</code> and rename, and a refreshed <code>.bak</code>.</p>
+<h2 id="step-6-whenready-ports-environment-and-the-desktop-secret">Step 6: <code>whenReady</code>, ports, environment and the desktop secret<a class="headerlink" href="#step-6-whenready-ports-environment-and-the-desktop-secret" title="Permanent link">&para;</a></h2>
+<p>The <code>app.whenReady()</code> callback (<code>electron/app/main.ts:455</code> to <code>:530</code>) is the real boot sequence.</p>
+<h3 id="61-auth-mode">6.1 Auth mode<a class="headerlink" href="#61-auth-mode" title="Permanent link">&para;</a></h3>
+<div class="language-ts highlight"><span class="filename">electron/app/main.ts (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">function</span><span class="w"> </span><span class="nx">resolveElectronDisableAuth</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">raw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">ELECTRON_DISABLE_AUTH</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">DISABLE_AUTH</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="p">)</span><span class="o">?</span><span class="p">.</span><span class="nx">trim</span><span class="p">().</span><span class="nx">toLowerCase</span><span class="p">();</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">raw</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s2">"true"</span><span class="p">;</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">([</span><span class="s2">"0"</span><span class="p">,</span><span class="w"> </span><span class="s2">"false"</span><span class="p">,</span><span class="w"> </span><span class="s2">"no"</span><span class="p">,</span><span class="w"> </span><span class="s2">"off"</span><span class="p">].</span><span class="nx">includes</span><span class="p">(</span><span class="nx">raw</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s2">"false"</span><span class="p">;</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isDisableAuthEnabledValue</span><span class="p">(</span><span class="nx">raw</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="s2">"true"</span><span class="p">;</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="s2">"true"</span><span class="p">;</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Auth is disabled unless someone explicitly sets <code>ELECTRON_DISABLE_AUTH</code> or <code>DISABLE_AUTH</code> to a false value (<code>:150</code> to <code>:164</code>). The result is written back into <code>process.env.DISABLE_AUTH</code>, <code>ELECTRON_DISABLE_AUTH</code>, and <code>PRESENTON_ELECTRON=true</code> (<code>:456</code> to <code>:459</code>). With auth disabled, FastAPI's <code>SessionAuthMiddleware</code> skips account checks (see <a href="../25-auth-and-multiuser/">Auth and multi-user</a>), and rows are created with a null <code>owner_id</code>.</p>
+<h3 id="62-ports">6.2 Ports<a class="headerlink" href="#62-ports" title="Permanent link">&para;</a></h3>
+<p><code>findUnusedPorts(40000, 2)</code> (<code>electron/app/utils/index.ts:39</code> to <code>:66</code>) probes ports upward from 40000 by opening a <code>net.createServer()</code> on each and closing it. The first free port becomes FastAPI's, the second Next.js's. Typical result: FastAPI <code>40000</code>, Next.js <code>40001</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: the port probe is not a reservation</p>
+<p>The probe calls <code>server.listen(port)</code> with no host, closes the server, and moves on. Another process can take the port between the probe and the child's bind. There is no retry; the symptom would be the <code>Server did not start within 120000ms</code> error from Step 7.</p>
+</div>
+<h3 id="63-environment-published-to-the-renderer">6.3 Environment published to the renderer<a class="headerlink" href="#63-environment-published-to-the-renderer" title="Permanent link">&para;</a></h3>
+<p><code>setupEnv(fastApiPort, nextjsPort)</code> (<code>electron/app/utils/index.ts:5</code> to <code>:22</code>) sets:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>APP_VERSION</code></td>
+<td><code>app.getVersion()</code></td>
+</tr>
+<tr>
+<td><code>SENTRY_RELEASE</code></td>
+<td><code>presenton-electron@&lt;version&gt;</code> unless set</td>
+</tr>
+<tr>
+<td><code>SENTRY_ENVIRONMENT</code></td>
+<td><code>production</code> when packaged, else <code>development</code>, unless set</td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_FAST_API</code></td>
+<td><code>http://127.0.0.1:&lt;fastApiPort&gt;</code></td>
+</tr>
+<tr>
+<td><code>FAST_API_INTERNAL_URL</code></td>
+<td>same as <code>NEXT_PUBLIC_FAST_API</code></td>
+</tr>
+<tr>
+<td><code>TEMP_DIRECTORY</code></td>
+<td><code>tempDir</code></td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_URL</code></td>
+<td><code>http://127.0.0.1:&lt;nextjsPort&gt;</code></td>
+</tr>
+<tr>
+<td><code>USER_CONFIG_PATH</code></td>
+<td><code>&lt;userData&gt;/userConfig.json</code></td>
+</tr>
+</tbody>
+</table>
+<p>The comment at <code>electron/app/main.ts:464</code> to <code>:467</code> explains the ordering: renderer processes snapshot the environment at launch, so these must be set before the first <code>BrowserWindow</code>. The preload (<code>electron/app/preloads/index.ts:3</code> to <code>:14</code>) then exposes exactly three values and two functions:</p>
+<div class="language-ts highlight"><span class="filename">electron/app/preloads/index.ts</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">contextBridge</span><span class="p">.</span><span class="nx">exposeInMainWorld</span><span class="p">(</span><span class="s1">'env'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nx">NEXT_PUBLIC_FAST_API</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.NEXT_PUBLIC_FAST_API</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">''</span><span class="p">,</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nx">APP_VERSION</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.APP_VERSION</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">''</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nx">DISABLE_AUTH</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.DISABLE_AUTH</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">''</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">});</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nx">contextBridge</span><span class="p">.</span><span class="nx">exposeInMainWorld</span><span class="p">(</span><span class="s1">'electron'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nx">exportPresentation</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">format</span><span class="o">:</span><span class="w"> </span><span class="s2">"pptx"</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="s2">"pdf"</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nx">ipcRenderer</span><span class="p">.</span><span class="nx">invoke</span><span class="p">(</span><span class="s2">"export-presentation"</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="p">,</span><span class="w"> </span><span class="nx">format</span><span class="p">),</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nx">readFile</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="nx">filePath</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">ipcRenderer</span><span class="p">.</span><span class="nx">invoke</span><span class="p">(</span><span class="s2">"read-file"</span><span class="p">,</span><span class="w"> </span><span class="nx">filePath</span><span class="p">),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">});</span>
+</span></code></pre></div>
+<p>The Next.js client reads <code>window.env.NEXT_PUBLIC_FAST_API</code> to find FastAPI (<code>servers/nextjs/utils/api.ts:45</code>), <code>window.env.DISABLE_AUTH</code> to skip login (<code>servers/nextjs/utils/auth.ts:7</code>), and <code>window.electron</code> to export and to preview documents (<code>app/(presentation-generator)/presentation/components/PresentationHeader.tsx:213</code>, <code>app/(presentation-generator)/documents-preview/components/DocumentPreviewPage.tsx:96</code>).</p>
+<h3 id="64-the-per-launch-desktop-secret">6.4 The per-launch desktop secret<a class="headerlink" href="#64-the-per-launch-desktop-secret" title="Permanent link">&para;</a></h3>
+<p>Running two HTTP servers on loopback with auth disabled would let any web page or local process drive them. <code>initializeDesktopSession</code> closes that gap (<code>electron/app/utils/desktop-auth.ts:12</code> to <code>:50</code>):</p>
+<div class="language-ts highlight"><span class="filename">electron/app/utils/desktop-auth.ts (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">randomBytes</span><span class="p">(</span><span class="mf">32</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="s2">"hex"</span><span class="p">);</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="c1">// Never persist this credential in userConfig or expose it through preload.</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PRESENTON_DESKTOP_TOKEN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">token</span><span class="p">;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PRESENTON_DESKTOP_ORIGINS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">origins</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">","</span><span class="p">);</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">session</span><span class="p">.</span><span class="nx">cookies</span><span class="p">.</span><span class="nx">set</span><span class="p">({</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="kt">origins</span><span class="p">[</span><span class="mf">0</span><span class="p">],</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="kt">DESKTOP_COOKIE_NAME</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="kt">token</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nx">httpOnly</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nx">sameSite</span><span class="o">:</span><span class="w"> </span><span class="s2">"strict"</span><span class="p">,</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">"/"</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="p">});</span>
+</span></code></pre></div>
+<p>It is called with origins <code>[http://127.0.0.1:&lt;nextjsPort&gt;, http://127.0.0.1:&lt;fastApiPort&gt;]</code> (<code>electron/app/main.ts:471</code> to <code>:474</code>). Three things happen:</p>
+<ol>
+<li>A 64-hex-character token is generated and placed only in the main process environment, which both children inherit.</li>
+<li>An <code>httpOnly</code>, <code>SameSite=Strict</code> cookie <code>presenton_desktop_session</code> is set for the Next.js origin.</li>
+<li><code>session.webRequest.onBeforeSendHeaders</code> rewrites every outgoing request: it removes any <code>x-presenton-desktop-token</code> header the page tried to set, adds the real one only when the request origin exactly equals one of the two app origins, and strips the desktop cookie from requests to any other origin (cookies are scoped by host, not port, so another loopback service would otherwise receive it).</li>
+</ol>
+<p>Step 9 shows the server side of this handshake.</p>
+<h2 id="step-7-spawning-the-two-servers">Step 7: Spawning the two servers<a class="headerlink" href="#step-7-spawning-the-two-servers" title="Permanent link">&para;</a></h2>
+<p>After <code>createWindow()</code> creates the hidden window (Step 8) and <code>syncUserConfigFromEnv()</code> seeds <code>userConfig.json</code> from environment variables using the same normalizer Docker uses (<code>electron/app/utils/user-config-env.ts:28</code> to <code>:45</code>; it skips the write when a config exists and no config variables are set), <code>startServers(fastApiPort, nextjsPort)</code> runs (<code>electron/app/main.ts:330</code> to <code>:423</code>).</p>
+<h3 id="71-pre-flight">7.1 Pre-flight<a class="headerlink" href="#71-pre-flight" title="Permanent link">&para;</a></h3>
+<p>It resolves the ImageMagick runtime (bundled <code>resources/imagemagick/&lt;platform&gt;-&lt;arch&gt;</code> first, then the system <code>magick</code> on <code>PATH</code>, each validated by running <code>-version</code>; <code>electron/app/utils/imagemagick-runtime.ts:177</code> to <code>:195</code>), the export runtime root (on Microsoft Store installs it copies <code>resources/export</code> into the user cache because <code>WindowsApps</code> blocks native addons; <code>electron/app/utils/export-msix-runtime.ts:67</code> to <code>:91</code>), and a launchable Chromium (<code>resolveLaunchableExportChromiumPath</code>, <code>electron/app/utils/export-chromium.ts:424</code>). Missing Chromium or ImageMagick only logs a warning.</p>
+<h3 id="72-fastapi">7.2 FastAPI<a class="headerlink" href="#72-fastapi" title="Permanent link">&para;</a></h3>
+<p>The environment passed on top of the inherited <code>process.env</code> (<code>electron/app/main.ts:367</code> to <code>:389</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DEBUG</code></td>
+<td><code>True</code> in dev, <code>False</code> packaged</td>
+</tr>
+<tr>
+<td><code>APP_DATA_DIRECTORY</code>, <code>TEMP_DIRECTORY</code>, <code>USER_CONFIG_PATH</code></td>
+<td>From Step 5</td>
+</tr>
+<tr>
+<td><code>MIGRATE_DATABASE_ON_STARTUP</code></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>DISABLE_AUTH</code></td>
+<td>Result of Step 6.1</td>
+</tr>
+<tr>
+<td><code>PRESENTON_ELECTRON</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>IMAGEMAGICK_BINARY</code>, <code>MAGICK_HOME</code>, <code>MAGICK_CONFIGURE_PATH</code>, <code>PATH</code></td>
+<td>When ImageMagick was found (<code>:166</code> to <code>:181</code>)</td>
+</tr>
+<tr>
+<td><code>LITEPARSE_RUNNER_PATH</code></td>
+<td><code>resources/document-extraction/liteparse_runner.mjs</code> (<code>electron/app/utils/liteparse-check.ts:4</code>)</td>
+</tr>
+<tr>
+<td><code>LITEPARSE_NODE_BINARY</code>, <code>ELECTRON_RUN_AS_NODE</code></td>
+<td><code>process.execPath</code> and <code>1</code>: LiteParse runs on Electron's embedded Node</td>
+</tr>
+<tr>
+<td><code>EXPORT_PACKAGE_ROOT</code></td>
+<td>Export runtime root</td>
+</tr>
+<tr>
+<td><code>PUPPETEER_CACHE_DIR</code>, <code>PUPPETEER_TMP_DIR</code>, <code>PUPPETEER_EXECUTABLE_PATH</code></td>
+<td><code>&lt;cache&gt;/puppeteer</code>, <code>&lt;temp&gt;/puppeteer</code>, bundled Chromium</td>
+</tr>
+</tbody>
+</table>
+<p><code>startFastApiServer</code> (<code>electron/app/utils/servers.ts:127</code> to <code>:196</code>) chooses the command:</p>
+<div class="language-ts highlight"><span class="filename">electron/app/utils/servers.ts (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isDev</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nx">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"uv"</span><span class="p">;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nx">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"run"</span><span class="p">,</span><span class="w"> </span><span class="s2">"python"</span><span class="p">,</span><span class="w"> </span><span class="s2">"server.py"</span><span class="p">,</span><span class="w"> </span><span class="s2">"--port"</span><span class="p">,</span><span class="w"> </span><span class="nx">port</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span><span class="w"> </span><span class="s2">"--reload"</span><span class="p">,</span><span class="w"> </span><span class="s2">"true"</span><span class="p">];</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">binary</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">platform</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"win32"</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">"fastapi.exe"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">"fastapi"</span><span class="p">;</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nx">command</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">directory</span><span class="p">,</span><span class="w"> </span><span class="nx">binary</span><span class="p">);</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nx">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"--port"</span><span class="p">,</span><span class="w"> </span><span class="nx">port</span><span class="p">.</span><span class="nx">toString</span><span class="p">()];</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="p">}</span>
+</span></code></pre></div>
+<p>The child runs with <code>cwd</code> set to the FastAPI directory, <code>stdio: ["ignore", "pipe", "pipe"]</code>, and <code>windowsHide</code> when packaged on Windows. Every stdout and stderr chunk is appended to <code>&lt;logs&gt;/fastapi-server.log</code> and echoed to the console (<code>:146</code> to <code>:179</code>). Readiness is polled at <code>http://127.0.0.1:&lt;port&gt;/docs</code> (<code>:193</code>).</p>
+<h3 id="73-readiness-polling">7.3 Readiness polling<a class="headerlink" href="#73-readiness-polling" title="Permanent link">&para;</a></h3>
+<p><code>waitForServer(url, 120000, signal)</code> (<code>electron/app/utils/servers.ts:365</code> to <code>:428</code>) loops for up to 120 s: each attempt is an <code>http.get</code> carrying the <code>x-presenton-desktop-token</code> header, with a 5 s socket timeout. Any status from 200 to 499 counts as ready; errors or 5xx wait 1 s and retry. An <code>AbortController</code> cancels the wait if the server is stopped.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: a 401 means ready</p>
+<p>Because the probe accepts any status below 500, a FastAPI that answers <code>401 Unauthorized</code> or <code>428</code> (setup required) on <code>/docs</code> (for example when you run with auth enabled) is treated as up. The probe checks liveness, not correctness.</p>
+</div>
+<h3 id="74-nextjs">7.4 Next.js<a class="headerlink" href="#74-nextjs" title="Permanent link">&para;</a></h3>
+<p>Only after FastAPI is ready does <code>startNextJsServer</code> run (<code>electron/app/main.ts:395</code> to <code>:417</code>). It forwards <code>NEXT_PUBLIC_FAST_API</code>, <code>FAST_API_INTERNAL_URL</code>, <code>TEMP_DIRECTORY</code>, <code>NEXT_PUBLIC_URL</code>, <code>USER_CONFIG_PATH</code>, <code>APP_DATA_DIRECTORY</code>, <code>DISABLE_AUTH</code>, <code>EXPORT_PACKAGE_ROOT</code>, <code>PRESENTON_APP_ROOT=&lt;resourceBaseDir&gt;</code>, and the Puppeteer variables. In development it runs <code>npm run dev -- -H 127.0.0.1 -p &lt;port&gt;</code> in <code>servers/nextjs</code> (<code>electron/app/utils/servers.ts:207</code> to <code>:218</code>). Packaged, it locates <code>server.js</code> (<code>:17</code> to <code>:32</code>), copies static assets beside it if missing (<code>:65</code> to <code>:87</code>), and spawns it with Electron in Node mode:</p>
+<div class="language-ts highlight"><span class="filename">electron/app/utils/servers.ts (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="w">    </span><span class="nx">nextjsProcess</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">spawn</span><span class="p">(</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">      </span><span class="nx">nodeExecutable</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">      </span><span class="p">[</span><span class="nx">serverScript</span><span class="p">],</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="p">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">        </span><span class="nx">cwd</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">        </span><span class="nx">stdio</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"ignore"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pipe"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pipe"</span><span class="p">],</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">        </span><span class="nx">env</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">          </span><span class="p">...</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">          </span><span class="p">...</span><span class="nx">env</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">          </span><span class="nx">ELECTRON_RUN_AS_NODE</span><span class="o">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">          </span><span class="nx">HOSTNAME</span><span class="o">:</span><span class="w"> </span><span class="s2">"127.0.0.1"</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">          </span><span class="nx">PORT</span><span class="o">:</span><span class="w"> </span><span class="kt">port.toString</span><span class="p">(),</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">        </span><span class="nx">windowsHide</span><span class="o">:</span><span class="w"> </span><span class="kt">process.platform</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"win32"</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="p">);</span>
+</span></code></pre></div>
+<p>On macOS <code>nodeExecutable</code> is <code>Contents/Frameworks/&lt;name&gt; Helper.app/Contents/MacOS/&lt;name&gt; Helper</code> when it exists (<code>:34</code> to <code>:62</code>): the helper is marked <code>LSUIElement</code>, so the Node child does not appear as a second Dock icon. Logs go to <code>&lt;logs&gt;/nextjs-server.log</code>.</p>
+<p>Because there is no nginx, the Next.js <code>proxy.ts</code> rewrites <code>/app_data/*</code> and <code>/static/*</code> requests to FastAPI at request time (<code>servers/nextjs/proxy.ts:107</code> to <code>:112</code>), using the <code>FAST_API_INTERNAL_URL</code> that only exists at runtime.</p>
+<h3 id="75-failure">7.5 Failure<a class="headerlink" href="#75-failure" title="Permanent link">&para;</a></h3>
+<p>Any exception in <code>startServers</code> stops both children and is rethrown. <code>whenReady</code> shows <code>dialog.showErrorBox("Presenton Could Not Start", ...)</code> and calls <code>forceQuitApp(1)</code> (<code>electron/app/main.ts:492</code> to <code>:502</code>).</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant M as Main process
+  participant F as FastAPI child
+  participant N as Next.js child
+  participant W as BrowserWindow
+  M-&gt;&gt;M: findUnusedPorts, setupEnv, initializeDesktopSession
+  M-&gt;&gt;W: new BrowserWindow (show false)
+  M-&gt;&gt;F: spawn fastapi --port 40000
+  loop every 1 s up to 120 s
+    M-&gt;&gt;F: GET /docs with desktop token
+  end
+  F--&gt;&gt;M: 200
+  M-&gt;&gt;N: spawn server.js with ELECTRON_RUN_AS_NODE
+  loop every 1 s up to 120 s
+    M-&gt;&gt;N: GET / with desktop token
+  end
+  N--&gt;&gt;M: 200
+  M-&gt;&gt;W: loadURL http://127.0.0.1:40001/upload
+  W--&gt;&gt;M: ready-to-show
+  M-&gt;&gt;W: show and focus
+  M-&gt;&gt;M: startUpdateChecker after 2 min</code></pre>
+<h2 id="step-8-the-window-and-navigation-rules">Step 8: The window and navigation rules<a class="headerlink" href="#step-8-the-window-and-navigation-rules" title="Permanent link">&para;</a></h2>
+<p><code>createWindow(appOrigin)</code> (<code>electron/app/main.ts:247</code> to <code>:310</code>) builds a 1280x720 window with <code>show: false</code>, background <code>#f3f5ff</code>, and these <code>webPreferences</code>: <code>contextIsolation: true</code>, <code>nodeIntegration: false</code>, <code>sandbox: false</code>, and the preload <code>app_dist/preloads/index.js</code>. It is revealed on <code>ready-to-show</code>.</p>
+<p>Navigation is locked to the Next.js origin:</p>
+<ul>
+<li><code>will-navigate</code> and <code>will-redirect</code> call <code>isAllowedMainWindowUrl</code>, which compares <code>new URL(url).origin</code> to <code>appOrigin</code>. Anything else is cancelled and handed to <code>openUrlOutsideApp</code> (<code>:285</code> to <code>:293</code>).</li>
+<li><code>setWindowOpenHandler</code> denies every new window and opens the URL externally (<code>:297</code> to <code>:300</code>).</li>
+<li><code>openExternalUrl</code> only accepts <code>http:</code> and <code>https:</code> (<code>electron/app/utils/open-target.ts:6</code>, <code>:20</code> to <code>:46</code>). Other schemes are blocked with a warning.</li>
+</ul>
+<p>Once servers are up, the window loads <code>http://127.0.0.1:&lt;nextjsPort&gt;/upload</code> when auth is disabled, or the root path otherwise (<code>electron/app/main.ts:511</code> to <code>:515</code>).</p>
+<p>There is no custom application menu, tray icon, deep-link protocol handler or <code>autoUpdater</code> in <code>electron/app/**</code>; a search for <code>Menu</code>, <code>setAsDefaultProtocolClient</code>, <code>open-url</code> and <code>autoUpdater</code> finds nothing. Electron's default menu applies.</p>
+<h2 id="step-9-the-desktop-transport-guard-on-the-servers">Step 9: The desktop transport guard on the servers<a class="headerlink" href="#step-9-the-desktop-transport-guard-on-the-servers" title="Permanent link">&para;</a></h2>
+<p>Both servers enforce the secret from Step 6.4 before anything else. FastAPI's version (<code>servers/fastapi/api/v1/auth/desktop.py:25</code> to <code>:48</code>) is the first statement of <code>SessionAuthMiddleware.dispatch</code> (<code>servers/fastapi/api/middlewares.py:55</code> to <code>:58</code>):</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/auth/desktop.py (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">desktop_request_denied</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JSONResponse</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"PRESENTON_ELECTRON"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"true"</span><span class="p">:</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">token</span> <span class="o">=</span> <span class="n">desktop_token</span><span class="p">()</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">origins</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"PRESENTON_DESKTOP_ORIGINS"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)))</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">hosts</span> <span class="o">=</span> <span class="p">{</span><span class="n">urlsplit</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span><span class="o">.</span><span class="n">netloc</span> <span class="k">for</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">origins</span><span class="p">}</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">32</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">hosts</span><span class="p">:</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Desktop session unavailable"</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">503</span><span class="p">)</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="c1"># Check the actual Host, not forwarded headers: DNS rebinding must not turn</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="c1"># an attacker's hostname into an authorized local application origin.</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">origin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"origin"</span><span class="p">)</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"host"</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hosts</span> <span class="ow">or</span> <span class="p">(</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">origins</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="p">):</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Forbidden desktop origin"</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">)</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"OPTIONS"</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">origins</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"access-control-request-method"</span><span class="p">):</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># The exact-origin CORS middleware answers without executing a route.</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>    <span class="n">supplied</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DESKTOP_TOKEN_HEADER</span><span class="p">)</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="n">DESKTOP_COOKIE_NAME</span><span class="p">,</span> <span class="s2">""</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="p">)</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">hmac</span><span class="o">.</span><span class="n">compare_digest</span><span class="p">(</span><span class="n">supplied</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">token</span><span class="o">.</span><span class="n">encode</span><span class="p">()):</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">({</span><span class="s2">"detail"</span><span class="p">:</span> <span class="s2">"Unauthorized"</span><span class="p">},</span> <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">)</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>    <span class="k">return</span> <span class="kc">None</span>
+</span></code></pre></div>
+<p>The Next.js twin (<code>servers/nextjs/lib/desktop-auth.ts:14</code> to <code>:44</code>) runs first in <code>proxy()</code> (<code>servers/nextjs/proxy.ts:97</code> to <code>:99</code>) and therefore covers pages, API routes, <code>/_next/image</code> and the asset rewrites. It uses <code>crypto.timingSafeEqual</code> after a length check. Decision table, identical on both servers:</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRESENTON_ELECTRON</code> is not <code>true</code></td>
+<td>Guard is a no-op (Docker, local dev without Electron)</td>
+</tr>
+<tr>
+<td>Token shorter than 32 chars or no origins configured</td>
+<td><code>503 {"detail":"Desktop session unavailable"}</code></td>
+</tr>
+<tr>
+<td><code>Host</code> header not one of the two <code>127.0.0.1:&lt;port&gt;</code> values, or an <code>Origin</code> header that is not exactly one of the two origins</td>
+<td><code>403 {"detail":"Forbidden desktop origin"}</code></td>
+</tr>
+<tr>
+<td>CORS preflight from an allowed origin (FastAPI only)</td>
+<td>Passed to the CORS middleware</td>
+</tr>
+<tr>
+<td>Header or cookie token does not match</td>
+<td><code>401 {"detail":"Unauthorized"}</code></td>
+</tr>
+<tr>
+<td>Otherwise</td>
+<td>Request proceeds</td>
+</tr>
+</tbody>
+</table>
+<p>A request from a malicious web page to <code>http://127.0.0.1:40000/api/...</code> therefore fails three ways: its <code>Origin</code> is wrong, it cannot read the <code>httpOnly</code> cookie, and the <code>onBeforeSendHeaders</code> hook will not attach the header to a foreign-origin request. A DNS-rebinding page fails the <code>Host</code> check, which deliberately ignores <code>X-Forwarded-Host</code>.</p>
+<p>Server-to-server calls carry the token too. The Electron export task gets <code>cookieHeader: desktopCookieHeader()</code> (<code>electron/app/ipc/export_handlers.ts:89</code>), and both servers expose a <code>desktop_cookie_header()</code> helper that returns <code>presenton_desktop_session=&lt;token&gt;</code> only when <code>PRESENTON_ELECTRON=true</code> (<code>servers/fastapi/api/v1/auth/desktop.py:18</code> to <code>:22</code>, <code>servers/nextjs/lib/desktop-auth.ts:7</code> to <code>:12</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: anonymous desktop calls do not inherit admin</p>
+<p><code>DISABLE_AUTH=true</code> makes the desktop single-user, but the guard still runs first. <code>servers/fastapi/tests/unit/test_desktop_security.py:76</code> to <code>:79</code> asserts that <code>/api/v1/auth/status</code>, <code>/api/v1/auth/verify</code>, <code>/api/v1/admin/provider-settings</code>, <code>/docs</code>, <code>/openapi.json</code> and <code>/app_data/userConfig.json</code> all return 401 without the token. If you add a new route that should be reachable from a non-Electron client in desktop mode, it will not be.</p>
+</div>
+<h3 id="91-the-tests-that-pin-this-down">9.1 The tests that pin this down<a class="headerlink" href="#91-the-tests-that-pin-this-down" title="Permanent link">&para;</a></h3>
+<p><code>servers/nextjs/tests/desktop-security.test.mjs</code> bundles <code>lib/desktop-auth.ts</code>, <code>proxy.ts</code>, the <code>user-config</code> and <code>read-file</code> routes, and the Electron <code>desktop-auth.ts</code> and <code>readable-file-access.ts</code> with esbuild (<code>:16</code> to <code>:45</code>), sets a 64-character token and origins <code>127.0.0.1:40001,127.0.0.1:40000</code>, and checks:</p>
+<table>
+<thead>
+<tr>
+<th>Test (line)</th>
+<th>Assertion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>:59</code></td>
+<td>Anonymous requests to ten paths, including <code>/api/v1/auth/status</code>, <code>/app_data/fastapi.db</code>, <code>/static/icon.svg</code>, <code>/pdf-maker?exportSession=arbitrary</code>, <code>/dashboard</code> and <code>/_next/image?url=private</code>, all get 401</td>
+</tr>
+<tr>
+<td><code>:65</code></td>
+<td>A valid token with <code>Origin: https://attacker.example</code>, <code>Origin: null</code>, a wrong <code>Host</code>, a wrong port, or <code>X-Forwarded-Host</code> spoofing gets 403; a wrong token gets 401; a valid cookie alone passes; a missing server token gets 503</td>
+</tr>
+<tr>
+<td><code>:77</code></td>
+<td>The original <code>text/plain</code> CSRF attack against <code>/api/user-config</code> gets 401 without the token and 415 with it; only <code>application/json</code> updates succeed</td>
+</tr>
+<tr>
+<td><code>:167</code></td>
+<td>Document readers deny credentials files, task files, traversal and symlinks</td>
+</tr>
+<tr>
+<td><code>:196</code></td>
+<td><code>initializeDesktopSession</code> generates a fresh 64-hex token per call, sets an <code>httpOnly</code> <code>SameSite=Strict</code> cookie, injects the header only for the two exact origins, and strips both header and cookie for <code>https://external.example</code>, <code>127.0.0.1:40002</code>, <code>127.0.0.1:40001.attacker.example</code> and <code>localhost:40001</code></td>
+</tr>
+</tbody>
+</table>
+<p>On the Electron side, <code>npm run test:security</code> runs <code>scripts/private-storage.test.cjs</code> (private directory modes, rejection of writable parents and foreign owners, symlink handling, <code>0o600</code> config/lock/backup files, Windows temp placement) and <code>scripts/security-dependencies.test.cjs</code> (electron-builder's updater strips <code>Authorization</code> and <code>PRIVATE-TOKEN</code> on cross-origin redirects, AppImage <code>LD_LIBRARY_PATH</code> never contains an empty entry, packaging file filters still match, plus the shared glob checks from <code>scripts/glob-security-checks.cjs</code>).</p>
+<h2 id="step-10-ipc-handlers">Step 10: IPC handlers<a class="headerlink" href="#step-10-ipc-handlers" title="Permanent link">&para;</a></h2>
+<p>Only two channels exist (<code>electron/app/ipc/index.ts:4</code> to <code>:7</code>).</p>
+<h3 id="101-export-presentation">10.1 <code>export-presentation</code><a class="headerlink" href="#101-export-presentation" title="Permanent link">&para;</a></h3>
+<p><code>ipcMain.handle("export-presentation", (_, id, title, exportAs))</code> (<code>electron/app/ipc/export_handlers.ts:57</code> to <code>:176</code>) is the desktop replacement for the server-side export task described in <a href="../24-export-pipeline/">PPTX and PDF export</a>:</p>
+<ol>
+<li>Fail fast with a reinstall message if no export Chromium is available (<code>:60</code> to <code>:69</code>).</li>
+<li>
+<p>Build <code>http://127.0.0.1:&lt;nextjsPort&gt;/pdf-maker?id=&lt;id&gt;&amp;fastapiUrl=&lt;NEXT_PUBLIC_FAST_API&gt;</code> and the task JSON:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"export"</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://127.0.0.1:40001/pdf-maker?id=...&amp;fastapiUrl=http%3A%2F%2F127.0.0.1%3A40000"</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pptx"</span><span class="p">,</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">"title"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Quarterly review"</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">"fastapiUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://127.0.0.1:40000"</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">"cookieHeader"</span><span class="p">:</span><span class="w"> </span><span class="s2">"presenton_desktop_session=&lt;64 hex&gt;"</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
+</span></code></pre></div>
+</li>
+<li>
+<p>Write it to <code>&lt;temp&gt;/export-XXXX/export_task.json</code> with flag <code>wx</code> and mode <code>0o600</code> (<code>:92</code> to <code>:97</code>).</p>
+</li>
+<li>Spawn <code>runner.mjs export_task.json</code> with <code>NODE_ENV=development</code> and the Puppeteer variables (<code>:129</code> to <code>:144</code>). The runtime is chosen from a fallback list: <code>EXPORT_NODE_BINARY</code>, <code>NODE_BINARY</code>, <code>node</code>, <code>/usr/bin/node</code>, <code>/usr/local/bin/node</code> (or <code>node.exe</code>, <code>node.cmd</code> on Windows), and finally Electron itself with <code>ELECTRON_RUN_AS_NODE=1</code> (<code>:179</code> to <code>:216</code>). Only spawn errors <code>ENOENT</code>, <code>EACCES</code>, <code>EPERM</code>, <code>EAGAIN</code> move to the next candidate (<code>:218</code> to <code>:222</code>); a broken Puppeteer cache folder is deleted and the same runtime retried once (<code>:303</code> to <code>:326</code>).</li>
+<li>Read <code>export_task.response.json</code> (retrying once if missing), resolve <code>path</code> or a <code>file:</code> URL, move the file to the Downloads directory (copy and unlink across devices), and show an "Open File / Open Folder / Cancel" dialog (<code>:145</code> to <code>:161</code>, <code>electron/app/utils/dialog.ts:6</code> to <code>:43</code>).</li>
+<li>Always delete the temp directory (<code>:171</code> to <code>:175</code>). Active export children are tracked and killed on quit (<code>stopActiveExportProcesses</code>, <code>:44</code> to <code>:54</code>).</li>
+</ol>
+<p>The renderer receives <code>{ success: true, message: "Export completed." }</code> or <code>{ success: false, message }</code>.</p>
+<h3 id="102-read-file">10.2 <code>read-file</code><a class="headerlink" href="#102-read-file" title="Permanent link">&para;</a></h3>
+<p><code>read-file</code> returns <code>{ content }</code> for a local text file (<code>electron/app/ipc/read_file.ts:4</code> to <code>:13</code>), but <code>resolveReadableLocalFile</code> (<code>electron/app/utils/readable-file-access.ts:45</code> to <code>:70</code>) only allows paths that resolve (with <code>path.resolve</code>) to a <code>.txt</code> file under <code>&lt;appData&gt;/{images,uploads,exports,pptx-to-html,pptx-to-json,fonts,templates}</code> or the temp directory, and still lie there after <code>realpath</code> (so a symlink out is rejected). It is used to preview extracted document text.</p>
+<h2 id="step-11-shutdown-and-the-update-banner">Step 11: Shutdown and the update banner<a class="headerlink" href="#step-11-shutdown-and-the-update-banner" title="Permanent link">&para;</a></h2>
+<p><code>forceQuitApp(exitCode)</code> (<code>electron/app/main.ts:441</code> to <code>:452</code>) is idempotent. It unregisters global shortcuts, stops the update checker, kills active export children, stops both servers, and calls <code>app.exit</code>. <code>window-all-closed</code>, <code>before-quit</code> and <code>will-quit</code> all route to it (<code>:532</code> to <code>:546</code>), cancelling the default quit so cleanup finishes first.</p>
+<p>Each server's <code>stop()</code> calls <code>terminateChildProcess</code> (<code>electron/app/utils/lifecycle.ts:110</code> to <code>:146</code>): <code>tree-kill</code> with <code>SIGTERM</code>, wait up to 5 s for <code>close</code>, then <code>SIGKILL</code> and wait 2 s, then destroy the stdio streams. <code>tree-kill</code> matters because <code>uv run</code> and <code>npm run dev</code> spawn grandchildren.</p>
+<p>The "auto-update" is a notification, not an updater. <code>startUpdateChecker</code> (<code>electron/app/utils/update-checker.ts:329</code> to <code>:384</code>) waits 2 minutes after the page loads (10 s in dev), then fetches <code>UPDATE_SERVER_URL</code> or <code>https://raw.githubusercontent.com/presenton/presenton/refs/heads/main/electron/version.json</code> up to 3 times, 1 minute apart (<code>:10</code> to <code>:24</code>). <code>isNewerVersion</code> strips everything but digits and dots and compares numerically (<code>:48</code> to <code>:66</code>). When newer, it injects a fixed banner into the page with <code>executeJavaScript</code>, HTML-escaping the release message (<code>:175</code> to <code>:182</code>), whose "Download update" link points to <code>https://presenton.ai/download</code> and opens in the system browser through <code>setWindowOpenHandler</code>. The banner is re-injected after each full navigation.</p>
+<p><code>electron/version.json</code> is the file that feeds it, and <code>generate-version.cjs</code> rewrites it on every <code>build:electron</code>. At the snapshot (the long multi-line <code>message</code> string between <code>version</code> and <code>downloads</code> is omitted here):</p>
+<div class="language-json highlight"><span class="filename">electron/version.json (excerpt)</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.9.12-beta"</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">"downloads"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">"linux"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://github.com/presenton/presenton/releases/download/electron-v0.9.12-beta/Presenton-0.9.12-beta.deb"</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">"mac"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://github.com/presenton/presenton/releases/download/electron-v0.9.12-beta/Presenton-0.9.12-beta.dmg"</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">"windows"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://github.com/presenton/presenton/releases/download/electron-v0.9.12-beta/Presenton-0.9.12-beta.exe"</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: pre-release labels are ignored in version comparison</p>
+<p><code>0.9.12-beta</code> and <code>0.9.12</code> both become <code>[0, 9, 12]</code>, so moving from a beta to the final release of the same number shows no banner. Also note that the <code>downloads</code> URLs are not used by the banner; it always links to the website.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: <code>test_server.py</code> does not match the updater's schema</p>
+<p>The root <code>test_server.py</code> is described as a stub for the version endpoint, but it serves <code>GET /versions</code> with keys <code>latest</code>, <code>versions</code>, <code>download_url</code>, <code>release_notes</code> (<code>test_server.py:19</code> to <code>:29</code>), while the updater reads <code>data.version</code> and <code>data.message</code> from the URL it is given. Pointing <code>UPDATE_SERVER_URL</code> at the stub makes <code>isNewerVersion</code> throw on <code>undefined.replace</code>, which is caught and logged as "Update check failed". Serve a copy of <code>electron/version.json</code> instead.</p>
+</div>
+<h2 id="step-12-signing-notarization-and-releases">Step 12: Signing, notarization and releases<a class="headerlink" href="#step-12-signing-notarization-and-releases" title="Permanent link">&para;</a></h2>
+<h3 id="121-macos-direct-distribution-dmg">12.1 macOS direct distribution (DMG)<a class="headerlink" href="#121-macos-direct-distribution-dmg" title="Permanent link">&para;</a></h3>
+<p><code>npm run build:all:mac:signed</code> sets <code>PRESENTON_REQUIRE_MAC_SIGNING=1</code>, and <code>assertDirectMacReleaseReadiness</code> (<code>electron/build.js:516</code> to <code>:530</code>) then requires:</p>
+<ol>
+<li>macOS as the build host.</li>
+<li>A <code>Developer ID Application</code> identity, either <code>PRESENTON_MAC_SIGN_IDENTITY</code>/<code>CSC_NAME</code> (which must exist in the keychain and must not be a development, Apple Distribution or MAS certificate) or the first one found by <code>security find-identity -v</code> (<code>:532</code> to <code>:583</code>).</li>
+<li>Notarization credentials: one complete group of <code>APPLE_ID</code> + <code>APPLE_APP_SPECIFIC_PASSWORD</code> + <code>APPLE_TEAM_ID</code>, or <code>APPLE_API_KEY</code> + <code>APPLE_API_KEY_ID</code> + <code>APPLE_API_ISSUER</code>, or <code>APPLE_KEYCHAIN_PROFILE</code>. <code>PRESENTON_SKIP_NOTARIZATION=1</code> is rejected in this mode (<code>:593</code> to <code>:623</code>).</li>
+<li>A preflight <code>codesign --force --sign &lt;identity&gt; --options runtime</code> on a temp file with a 30 s timeout, which catches a locked keychain before electron-builder starts (<code>:625</code> to <code>:650</code>).</li>
+</ol>
+<p>Signing uses <code>signDirectMacApp</code> (<code>:216</code> to <code>:238</code>), which wraps <code>@electron/osx-sign</code> in two ways: nested data files with extensions such as <code>.pak</code>, <code>.onnx</code>, <code>.pyc</code>, <code>.ttf</code>, <code>.wasm</code>, <code>.json</code> are signed with <code>timestamp: "none"</code> (Apple requires secure timestamps for Mach-O code only; <code>:61</code> to <code>:95</code>), and <code>codesign</code> calls that fail with a timestamp error are retried with exponential backoff capped at 30 s, <code>PRESENTON_CODESIGN_TIMESTAMP_RETRIES</code> times (default 4; <code>:240</code> to <code>:287</code>). The direct entitlements (<code>electron/build/entitlements.mac.plist</code>) are <code>allow-jit</code>, <code>allow-unsigned-executable-memory</code> and <code>disable-library-validation</code>. The last one lets a hardened-runtime app load libraries that are not signed by the same team; that this is needed for the PyInstaller and ImageMagick libraries is an inference, the plist carries no comment.</p>
+<p><code>docs/macos/dev/direct-distribution.md</code> documents the one-time setup (install a Developer ID Application certificate, <code>xcrun notarytool store-credentials "presenton-notary"</code>, then <code>export APPLE_KEYCHAIN_PROFILE="presenton-notary"</code>) and the verification commands: <code>codesign --verify --deep --strict</code>, <code>xcrun stapler validate</code>, and <code>spctl --assess</code> expecting <code>source=Notarized Developer ID</code>. <code>docs/macos/dev/signed-dmg-build-steps.md</code> records the full manual flow including post-build steps: sign the DMG container with <code>codesign --timestamp</code>, <code>xcrun notarytool submit --wait</code>, <code>xcrun stapler staple</code>, regenerate the <code>.blockmap</code> with <code>app-builder blockmap</code>, and update <code>sha512</code>/<code>size</code> in <code>latest-mac.yml</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: the docs and <code>build.js</code> disagree on DMG signing</p>
+<p>Both macOS docs say <code>dmg.sign</code> is <code>false</code>. In <code>build.js</code> it is <code>shouldSignDirectMacDmg = isDirectMacBuild &amp;&amp; requireDirectMacSigning</code> (<code>electron/build.js:54</code>, <code>:968</code>), so the <code>:mac:signed</code> scripts ask electron-builder to sign the DMG while plain <code>build:all</code> does not. The manual "sign the DMG container" steps in the doc may therefore be redundant for <code>:mac:signed</code> builds. Verify with <code>codesign -dv</code> on the DMG before repeating them.</p>
+</div>
+<h3 id="122-mac-app-store">12.2 Mac App Store<a class="headerlink" href="#122-mac-app-store" title="Permanent link">&para;</a></h3>
+<p><code>PRESENTON_MAC_TARGET=mas-dev</code> or <code>mas</code> switches to sandboxed builds. <code>build.js</code> requires a decodable provisioning profile in <code>electron/build/</code> (<code>AppleDevelopment.provisionprofile</code>, <code>AppleDev.provisionprofile</code> or <code>AppDev.provisionprofile</code> for <code>mas-dev</code>; <code>MacAppStore.provisionprofile</code> or <code>AppDistri.provisionprofile</code> for <code>mas</code>), checked with <code>security cms -D</code> then <code>openssl cms -verify -noverify</code> (<code>:19</code> to <code>:35</code>, <code>:146</code> to <code>:205</code>). MAS distribution also needs both an app certificate (<code>Apple Distribution</code> or <code>3rd Party Mac Developer Application</code>) and a <code>3rd Party Mac Developer Installer</code> certificate with the same team qualifier (<code>:326</code> to <code>:364</code>), derives <code>CFBundleShortVersionString</code> from the package version or <code>PRESENTON_APP_STORE_VERSION</code> (must be <code>X.Y.Z</code>), and the build number from <code>PRESENTON_APP_STORE_BUILD</code> (<code>:96</code> to <code>:135</code>). The MAS entitlements add <code>app-sandbox</code>, the application group <code>S6W5C54KL6.com.presenton.presenton</code>, <code>network.client</code>, <code>network.server</code>, user-selected and Downloads read-write (<code>electron/build/entitlements.mas.plist</code>). The repository ships only <code>MacAppStore.provisionprofile.replace_me</code>.</p>
+<h3 id="123-linux-ci-build">12.3 Linux CI build<a class="headerlink" href="#123-linux-ci-build" title="Permanent link">&para;</a></h3>
+<p><code>.github/workflows/electron-linux-ubuntu22.yml</code> builds on <code>ubuntu-22.04</code> (to link against an older glibc) and runs only on pushes to the <code>electron-linux-ubuntu22</code> branch or manual dispatch, guarded again by <code>if: github.ref_name == 'electron-linux-ubuntu22'</code> (<code>:3</code> to <code>:19</code>). Steps: Node 22 with npm cache keyed on both lockfiles, Python 3.11, <code>astral-sh/setup-uv</code> pinned by commit SHA, <code>apt-get install build-essential fakeroot libarchive-tools rpm</code>, then <code>npm run build:all</code> in <code>electron/</code> with <code>CI=false</code> (electron-builder 26 otherwise attempts an implicit GitHub publish) and <code>CSC_IDENTITY_AUTO_DISCOVERY=false</code> (<code>:47</code> to <code>:62</code>). It asserts that at least one <code>.deb</code> and one <code>.AppImage</code> exist, uploads them as the <code>presenton-electron-linux-ubuntu-22</code> artifact, and publishes them to a temporary prerelease tagged <code>presenton-electron-linux-ubuntu-22</code> in the <code>presenton/presenton-export</code> repository using the <code>RELEASE_REPO_TOKEN</code> secret (<code>:64</code> to <code>:110</code>).</p>
+<p>The <code>.deb</code> post-install script <code>electron/build/after-install.tpl</code> links <code>/usr/bin/&lt;executable&gt;</code> through <code>update-alternatives</code>, sets <code>chrome-sandbox</code> to <code>4755</code> only if unprivileged user namespaces are unavailable, refreshes MIME and desktop databases, and installs an AppArmor profile when the host's AppArmor accepts it (needed on Ubuntu 24+).</p>
+<h3 id="124-release-files-to-r2">12.4 Release files to R2<a class="headerlink" href="#124-release-files-to-r2" title="Permanent link">&para;</a></h3>
+<p><code>.github/workflows/sync-releaes-to-r2.yml</code> (the file name is misspelled in the repository) triggers on <code>release: published</code>, runs in the <code>sync_r2</code> environment, downloads the release's <code>*.deb</code>, <code>*.dmg</code>, <code>*.exe</code> and <code>*.AppImage</code> assets with <code>gh release download</code>, extracts the version from the first file name with <code>sed -E 's/^Presenton-(.+)\.(deb|dmg|exe|AppImage)$/\1/'</code>, installs rclone, writes an rclone config for Cloudflare R2 from <code>R2_ACCESS_KEY</code>, <code>R2_SECRET_KEY</code> and <code>R2_ACCOUNT_ID</code>, and runs <code>rclone copy assets r2:presenton-desktop/&lt;version&gt; --transfers=8</code> (<code>:3</code> to <code>:56</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: the R2 sync depends on <code>artifactName</code></p>
+<p>The version extraction only works because <code>build.js</code> names every artifact <code>Presenton-${version}.${ext}</code>. The same <code>release: published</code> event also triggers the Docker release workflow (see <a href="../28-ci-tests-security/">CI, tests, security</a>), so a GitHub release that carries no desktop assets will make the R2 job fail (nothing matches the download patterns), and a release with an unexpected file name would upload to a wrong R2 prefix.</p>
+</div>
+<p>There is no workflow in the snapshot that builds macOS or Windows installers; those are built on maintainer machines with the scripts above.</p>
+<h2 id="step-13-running-it-yourself">Step 13: Running it yourself<a class="headerlink" href="#step-13-running-it-yourself" title="Permanent link">&para;</a></h2>
+<p>From <code>electron/</code> on a machine with Node, npm, Python 3.11 and <code>uv</code> (the steps in <code>CONTRIBUTING.md</code> and <code>docs/macos/dev/README.md</code>):</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">cd</span><span class="w"> </span>electron
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>npm<span class="w"> </span>run<span class="w"> </span>setup:env<span class="w">      </span><span class="c1"># first time: all dependencies, export runtime, ImageMagick</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>npm<span class="w"> </span>run<span class="w"> </span>dev<span class="w">            </span><span class="c1"># export Chromium, templates, tsc, then electron . --no-sandbox</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>npm<span class="w"> </span>run<span class="w"> </span>build:all<span class="w">      </span><span class="c1"># unsigned installers into electron/dist/</span>
+</span></code></pre></div>
+<p>In <code>dev</code> mode <code>isDev</code> is <code>!app.isPackaged</code> (<code>electron/app/utils/constants.ts:10</code>): FastAPI runs as <code>uv run python server.py --reload true</code> from <code>servers/fastapi</code>, Next.js runs <code>next dev</code>, app data goes to <code>electron/app_data</code>, and a <code>.env</code> in <code>electron/</code> is loaded by <code>dotenv</code>. Logs are always in <code>&lt;userData&gt;/logs/fastapi-server.log</code> and <code>nextjs-server.log</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha: a missing referenced doc</p>
+<p><code>docs/macos/dev/README.md</code>, <code>docs/macos/dev/mac-app-store-setup.md</code> and <code>electron/.gitignore</code> refer to <code>docs/electron-dependency-strategy.md</code>, which does not exist in the snapshot. The behavior it would describe (bundled Chromium, ImageMagick, export runtime) is what Steps 2.3 and 7.1 reconstruct from the scripts.</p>
+</div>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The desktop app is FastAPI frozen by PyInstaller (<code>server.spec</code>) plus the Next.js standalone server run on Electron's own Node, both bound to <code>127.0.0.1</code> on ports found from 40000 upward, with resources unpacked from the asar.</li>
+<li><code>main.ts</code> disables account auth by default, publishes <code>NEXT_PUBLIC_FAST_API</code>, <code>NEXT_PUBLIC_URL</code> and friends before creating the window, and exposes only <code>window.env</code> (three values) and <code>window.electron</code> (export and read-file) through the preload.</li>
+<li>A random 32-byte token, delivered as an <code>httpOnly</code> cookie and an injected header for exactly two origins, is checked by <code>desktop_request_denied</code> and <code>desktopRequestDenied</code> on every request, together with exact <code>Host</code> and <code>Origin</code> checks.</li>
+<li>User data lives in a private (<code>0o700</code>) per-user directory named <code>Presenton Open Source</code>, and <code>userConfig.json</code> is written atomically with locks, backups and <code>0o600</code> permissions.</li>
+<li>Exports run <code>runner.mjs</code> as a child with a runtime fallback chain and land in Downloads; updates are a polled banner, not an in-place updater.</li>
+<li>macOS releases are Developer ID signed and notarized by <code>build.js</code> guards, Linux packages come from an Ubuntu 22.04 workflow, and published release assets are mirrored to R2 by version.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../28-ci-tests-security/">CI, tests, security</a> for every workflow, the test suites, and a catalogue of the hardening measures referenced throughout this chapter.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../26-docker-and-deployment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Docker build and deployment">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Docker build and deployment
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../28-ci-tests-security/" class="md-footer__link md-footer__link--next" aria-label="Next: CI, tests, security">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                CI, tests, security
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

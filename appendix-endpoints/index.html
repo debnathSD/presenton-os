@@ -1,0 +1,5019 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/appendix-endpoints/">
+      
+      
+        <link rel="prev" href="../appendix-glossary/">
+      
+      
+        <link rel="next" href="../appendix-files/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Endpoint index - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#endpoint-index" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Endpoint index
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../presenton/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-how-the-full-paths-are-assembled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: How the full paths are assembled
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-how-the-index-was-built-and-checked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: How the index was built and checked
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-how-the-access-class-is-decided" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: How the access class is decided
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-fastapi-routes-auth-and-admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: FastAPI routes, auth and admin
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: FastAPI routes, auth and admin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#presenton-cloud-provider-link-oauth-device-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presenton Cloud provider link (OAuth device flow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Admin
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-fastapi-routes-presentation-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: FastAPI routes, presentation lifecycle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: FastAPI routes, presentation lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#presentation-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presentation (v1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outlines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outlines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slide
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#presentation-v2-smart-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presentation (v2, Smart mode)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-tasks-webhook-mock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async tasks, webhook, mock
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-fastapi-routes-documents-images-icons-fonts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: FastAPI routes, documents, images, icons, fonts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: FastAPI routes, documents, images, icons, fonts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#images-and-icons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Images and icons
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fonts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fonts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-fastapi-routes-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: FastAPI routes, templates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-fastapi-routes-providers-chat-community" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: FastAPI routes, providers, chat, community
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: FastAPI routes, providers, chat, community">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-discovery-ollama-and-generation-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model discovery, Ollama and generation defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#codex-chatgpt-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codex (ChatGPT OAuth)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-paths-the-presenton-cloud-proxy-intercepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Paths the Presenton Cloud proxy intercepts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-nextjs-api-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Next.js API routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-mcp-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: MCP tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-nginx-served-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: nginx-served paths
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-how-the-full-paths-are-assembled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: How the full paths are assembled
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-how-the-index-was-built-and-checked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: How the index was built and checked
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-how-the-access-class-is-decided" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: How the access class is decided
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-fastapi-routes-auth-and-admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: FastAPI routes, auth and admin
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: FastAPI routes, auth and admin">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#presenton-cloud-provider-link-oauth-device-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presenton Cloud provider link (OAuth device flow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#admin" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Admin
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-fastapi-routes-presentation-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: FastAPI routes, presentation lifecycle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: FastAPI routes, presentation lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#presentation-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presentation (v1)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#outlines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Outlines
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slide
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#presentation-v2-smart-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Presentation (v2, Smart mode)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-tasks-webhook-mock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async tasks, webhook, mock
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-fastapi-routes-documents-images-icons-fonts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: FastAPI routes, documents, images, icons, fonts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: FastAPI routes, documents, images, icons, fonts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#images-and-icons" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Images and icons
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fonts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fonts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-fastapi-routes-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: FastAPI routes, templates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-fastapi-routes-providers-chat-community" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: FastAPI routes, providers, chat, community
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: FastAPI routes, providers, chat, community">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-discovery-ollama-and-generation-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model discovery, Ollama and generation defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#codex-chatgpt-oauth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codex (ChatGPT OAuth)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-paths-the-presenton-cloud-proxy-intercepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Paths the Presenton Cloud proxy intercepts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-nextjs-api-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Next.js API routes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-mcp-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: MCP tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-nginx-served-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: nginx-served paths
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="endpoint-index">Endpoint index<a class="headerlink" href="#endpoint-index" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/api/main.py</code>, <code>servers/fastapi/api/middlewares.py</code>, <code>servers/fastapi/api/v1/**</code>, <code>servers/fastapi/api/v2/**</code>, <code>servers/fastapi/mcp_server.py</code>, <code>servers/nextjs/app/api/**/route.ts</code>, <code>servers/nextjs/proxy.ts</code>, <code>nginx.conf</code>  ·  <strong>Builds on:</strong> <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>, <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>  ·  <strong>Time:</strong> ~30 min (reference)</p>
+</div>
+<p>This appendix is a complete, mechanically built index of every HTTP surface in the Presenton snapshot: all 102 FastAPI application routes, the 11 Next.js API route files, the MCP tools, and every nginx <code>location</code> block. For each FastAPI route you get the method, the full path after all router prefixes, the handler function, the exact decorator line, the access class enforced by <code>SessionAuthMiddleware</code> and the handler, and a one-line purpose. The first steps explain how the index was produced and how to read the access column, so you can rebuild it after upstream changes.</p>
+<h2 id="step-1-how-the-full-paths-are-assembled">Step 1: How the full paths are assembled<a class="headerlink" href="#step-1-how-the-full-paths-are-assembled" title="Permanent link">&para;</a></h2>
+<p>FastAPI composes a route's public path from the prefix of every <code>APIRouter</code> it is nested in. Presenton nests routers at most three levels deep. <code>servers/fastapi/api/main.py:68</code> to <code>servers/fastapi/api/main.py:74</code> include seven top-level routers on the app:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/main.py (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">lifespan</span><span class="o">=</span><span class="n">app_lifespan</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Routers</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_PPT_ROUTER</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_WEBHOOK_ROUTER</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_MOCK_ROUTER</span><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_AUTH_ROUTER</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_ADMIN_ROUTER</span><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V1_ASYNC_TASKS_ROUTER</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">API_V2_ROUTER</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>API_V1_PPT_ROUTER</code> (<code>servers/fastapi/api/v1/ppt/router.py:22</code>, prefix <code>/api/v1/ppt</code>) includes seventeen endpoint routers, <code>API_V1_AUTH_ROUTER</code> (<code>servers/fastapi/api/v1/auth/router.py:27</code>) includes the Presenton Cloud provider router at <code>servers/fastapi/api/v1/auth/router.py:28</code>, and <code>API_V2_ROUTER</code> (<code>servers/fastapi/api/v2/router.py:6</code>, prefix <code>/api/v2</code>) includes <code>API_V2_PPT_ROUTER</code> (prefix <code>/ppt</code>), which includes <code>PRESENTATION_V2_ROUTER</code> (prefix <code>/presentation</code>).</p>
+<pre class="mermaid"><code>flowchart LR
+    APP["FastAPI app (api/main.py)"]
+    APP --&gt; PPT["API_V1_PPT_ROUTER /api/v1/ppt"]
+    APP --&gt; WH["API_V1_WEBHOOK_ROUTER /api/v1/webhook"]
+    APP --&gt; MOCK["API_V1_MOCK_ROUTER /api/v1/mock"]
+    APP --&gt; AUTH["API_V1_AUTH_ROUTER /api/v1/auth"]
+    APP --&gt; ADM["API_V1_ADMIN_ROUTER /api/v1/admin"]
+    APP --&gt; AT["API_V1_ASYNC_TASKS_ROUTER /api/v1/async-tasks"]
+    APP --&gt; V2["API_V2_ROUTER /api/v2"]
+    AUTH --&gt; PO["PRESENTON_OAUTH_ROUTER /presenton"]
+    V2 --&gt; V2P["API_V2_PPT_ROUTER /ppt"]
+    V2P --&gt; V2PR["PRESENTATION_V2_ROUTER /presentation"]
+    PPT --&gt; E1["/files /fonts /outlines /slide /images /icons"]
+    PPT --&gt; E2["/ollama /openai /openrouter /anthropic /google"]
+    PPT --&gt; E3["/generation /codex/auth /presentation /chat"]
+    PPT --&gt; E4["/template /community/presentations"]</code></pre>
+<p>The complete prefix table, with the line that declares each router:</p>
+<table>
+<thead>
+<tr>
+<th>Router variable</th>
+<th>Declared at</th>
+<th>Own prefix</th>
+<th>Effective prefix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>API_V1_AUTH_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/auth/router.py:27</code></td>
+<td><code>/api/v1/auth</code></td>
+<td><code>/api/v1/auth</code></td>
+</tr>
+<tr>
+<td><code>PRESENTON_OAUTH_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/auth/presenton_oauth.py:29</code></td>
+<td><code>/presenton</code></td>
+<td><code>/api/v1/auth/presenton</code></td>
+</tr>
+<tr>
+<td><code>API_V1_ADMIN_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:41</code></td>
+<td><code>/api/v1/admin</code></td>
+<td><code>/api/v1/admin</code></td>
+</tr>
+<tr>
+<td><code>API_V1_ASYNC_TASKS_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/async_tasks/router.py:14</code></td>
+<td><code>/api/v1/async-tasks</code></td>
+<td><code>/api/v1/async-tasks</code></td>
+</tr>
+<tr>
+<td><code>API_V1_WEBHOOK_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/webhook/router.py:10</code></td>
+<td><code>/api/v1/webhook</code></td>
+<td><code>/api/v1/webhook</code></td>
+</tr>
+<tr>
+<td><code>API_V1_MOCK_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/mock/router.py:9</code></td>
+<td><code>/api/v1/mock</code></td>
+<td><code>/api/v1/mock</code></td>
+</tr>
+<tr>
+<td><code>FILES_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/files.py:16</code></td>
+<td><code>/files</code></td>
+<td><code>/api/v1/ppt/files</code></td>
+</tr>
+<tr>
+<td><code>FONTS_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:18</code></td>
+<td><code>/fonts</code></td>
+<td><code>/api/v1/ppt/fonts</code></td>
+</tr>
+<tr>
+<td><code>OUTLINES_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:40</code></td>
+<td><code>/outlines</code></td>
+<td><code>/api/v1/ppt/outlines</code></td>
+</tr>
+<tr>
+<td><code>SLIDE_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/slide.py:30</code></td>
+<td><code>/slide</code></td>
+<td><code>/api/v1/ppt/slide</code></td>
+</tr>
+<tr>
+<td><code>IMAGES_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:31</code></td>
+<td><code>/images</code></td>
+<td><code>/api/v1/ppt/images</code></td>
+</tr>
+<tr>
+<td><code>ICONS_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/icons.py:7</code></td>
+<td><code>/icons</code></td>
+<td><code>/api/v1/ppt/icons</code></td>
+</tr>
+<tr>
+<td><code>OLLAMA_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:13</code></td>
+<td><code>/ollama</code></td>
+<td><code>/api/v1/ppt/ollama</code></td>
+</tr>
+<tr>
+<td><code>OPENAI_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openai.py:9</code></td>
+<td><code>/openai</code></td>
+<td><code>/api/v1/ppt/openai</code></td>
+</tr>
+<tr>
+<td><code>OPENROUTER_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openrouter.py:11</code></td>
+<td><code>/openrouter</code></td>
+<td><code>/api/v1/ppt/openrouter</code></td>
+</tr>
+<tr>
+<td><code>ANTHROPIC_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/anthropic.py:9</code></td>
+<td><code>/anthropic</code></td>
+<td><code>/api/v1/ppt/anthropic</code></td>
+</tr>
+<tr>
+<td><code>GOOGLE_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/google.py:6</code></td>
+<td><code>/google</code></td>
+<td><code>/api/v1/ppt/google</code></td>
+</tr>
+<tr>
+<td><code>GENERATION_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/generation.py:7</code></td>
+<td><code>/generation</code></td>
+<td><code>/api/v1/ppt/generation</code></td>
+</tr>
+<tr>
+<td><code>CODEX_AUTH_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:48</code></td>
+<td><code>/codex/auth</code></td>
+<td><code>/api/v1/ppt/codex/auth</code></td>
+</tr>
+<tr>
+<td><code>PRESENTATION_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:136</code></td>
+<td><code>/presentation</code></td>
+<td><code>/api/v1/ppt/presentation</code></td>
+</tr>
+<tr>
+<td><code>CHAT_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py:28</code></td>
+<td><code>/chat</code></td>
+<td><code>/api/v1/ppt/chat</code></td>
+</tr>
+<tr>
+<td><code>TEMPLATE_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:96</code></td>
+<td><code>/template</code></td>
+<td><code>/api/v1/ppt/template</code></td>
+</tr>
+<tr>
+<td><code>COMMUNITY_ROUTER</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/community.py:11</code></td>
+<td><code>/community/presentations</code></td>
+<td><code>/api/v1/ppt/community/presentations</code></td>
+</tr>
+<tr>
+<td><code>API_V2_ROUTER</code></td>
+<td><code>servers/fastapi/api/v2/router.py:6</code></td>
+<td><code>/api/v2</code></td>
+<td><code>/api/v2</code></td>
+</tr>
+<tr>
+<td><code>API_V2_PPT_ROUTER</code></td>
+<td><code>servers/fastapi/api/v2/ppt/router.py:6</code></td>
+<td><code>/ppt</code></td>
+<td><code>/api/v2/ppt</code></td>
+</tr>
+<tr>
+<td><code>PRESENTATION_V2_ROUTER</code></td>
+<td><code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:35</code></td>
+<td><code>/presentation</code></td>
+<td><code>/api/v2/ppt/presentation</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-2-how-the-index-was-built-and-checked">Step 2: How the index was built and checked<a class="headerlink" href="#step-2-how-the-index-was-built-and-checked" title="Permanent link">&para;</a></h2>
+<p>The route rows below were extracted with a short Python script that parses every file under <code>servers/fastapi/api/</code> with the standard <code>ast</code> module, finds every decorator of the form <code>@&lt;NAME&gt;.get|post|put|patch|delete|api_route(...)</code>, reads the literal path argument, and joins it with the effective prefix of <code>&lt;NAME&gt;</code> from the table in Step 1. That produced 101 decorated routes. A second pass with <code>grep -E "_ROUTER\.(get|post|put|patch|delete|api_route)"</code> found 102 matches; the extra one is the only route in the codebase registered without decorator syntax:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/fonts.py (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">FONTS_ROUTER</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/check"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">FontCheckResponse</span><span class="p">)(</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">check_fonts_in_pptx_handler</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>There is no <code>add_api_route</code>, no <code>@app.get</code>, no <code>api_route</code> and no <code>websocket</code> route anywhere outside the tests. The only other decorator on <code>app</code> is the HTTP middleware at <code>servers/fastapi/api/main.py:106</code>.</p>
+<p>As an independent cross-check, the committed OpenAPI document <code>servers/fastapi/openai_spec.json</code> (the file the MCP server loads) contains 93 paths and 100 operations. Every operation in it appears in this index. Two routes in the code are absent from that file: <code>POST /api/v1/ppt/images/test</code> and <code>POST /api/v1/ppt/presentation/{id}/regenerate</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>openai_spec.json</code> is a static snapshot written by <code>servers/fastapi/scripts/generate_openapi_spec.py</code> (<code>json.dumps(app.openapi(), ...)</code>). It is not regenerated at startup. The MCP server reads it at import time (<code>servers/fastapi/mcp_server.py:281</code>), so if you add or change a route that an MCP tool maps to, you must regenerate the file or the MCP tool keeps the old schema. In this snapshot the file already lags the code by two routes.</p>
+</div>
+<p><strong>Total: 102 FastAPI application routes.</strong> On top of those, FastAPI itself serves <code>/openapi.json</code>, <code>/docs</code>, <code>/docs/oauth2-redirect</code> and <code>/redoc</code>, and the app mounts <code>/static</code> (<code>servers/fastapi/api/main.py:86</code>) plus seven owner-scoped static mounts <code>/app_data/{exports,fonts,images,pptx-to-html,pptx-to-json,templates,uploads}</code> created by <code>mount_app_data_assets</code> (<code>servers/fastapi/api/v1/auth/assets.py:39</code>) when <code>APP_DATA_DIRECTORY</code> is set.</p>
+<p>Route count by area:</p>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Routes</th>
+<th>Area</th>
+<th>Routes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth (local + Presenton Cloud link)</td>
+<td>9</td>
+<td>Images</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Admin</td>
+<td>10</td>
+<td>Icons</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Async tasks</td>
+<td>2</td>
+<td>Fonts</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Webhook</td>
+<td>2</td>
+<td>Templates</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Mock</td>
+<td>2</td>
+<td>Providers (models, Ollama, Codex, generation defaults)</td>
+<td>15</td>
+</tr>
+<tr>
+<td>Presentation (v1)</td>
+<td>17</td>
+<td>Chat</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Outlines</td>
+<td>3</td>
+<td>Community</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Slide</td>
+<td>2</td>
+<td>Presentation (v2, Smart)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Files</td>
+<td>4</td>
+<td><strong>Total</strong></td>
+<td><strong>102</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-3-how-the-access-class-is-decided">Step 3: How the access class is decided<a class="headerlink" href="#step-3-how-the-access-class-is-decided" title="Permanent link">&para;</a></h2>
+<p>Access control is applied in two layers. The first is <code>SessionAuthMiddleware.dispatch</code> (<code>servers/fastapi/api/middlewares.py:55</code>), which runs for every request. The second is a per-handler dependency on a few routers.</p>
+<pre class="mermaid"><code>flowchart TD
+    R["Incoming request"] --&gt; D{"PRESENTON_ELECTRON is true"}
+    D --&gt;|"yes"| DG["desktop_request_denied: Host, Origin, desktop token"]
+    D --&gt;|"no"| A{"DISABLE_AUTH truthy"}
+    DG --&gt;|"denied"| X503["503, 403 or 401"]
+    DG --&gt;|"allowed"| A
+    A --&gt;|"yes"| CP["Presenton Cloud proxy check, then route"]
+    A --&gt;|"no"| P{"OPTIONS, public auth path, or path not protected"}
+    P --&gt;|"yes"| ROUTE["Route handler"]
+    P --&gt;|"no"| U{"Any row in user table"}
+    U --&gt;|"no"| E428["428 Login setup is required"]
+    U --&gt;|"yes"| PR{"Principal from cookie or Bearer API key"}
+    PR --&gt;|"none"| E401["401 Unauthorized"]
+    PR --&gt;|"found"| AD{"Admin-only path"}
+    AD --&gt;|"yes, and not a JWT admin"| E403["403 Admin browser session required"]
+    AD --&gt;|"no, or JWT admin"| OWN["Set owner context vars, cloud proxy, app_data ownership"]
+    OWN --&gt; ROUTE</code></pre>
+<p>The relevant lists, verbatim:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/middlewares.py (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">SessionAuthMiddleware</span><span class="p">(</span><span class="n">BaseHTTPMiddleware</span><span class="p">):</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">_PUBLIC_AUTH_PATHS</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="s2">"/api/v1/auth/status"</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="s2">"/api/v1/auth/verify"</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="s2">"/api/v1/auth/setup"</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="s2">"/api/v1/auth/login"</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="s2">"/api/v1/auth/logout"</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="p">}</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">_PUBLIC_AUTH_PREFIXES</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">_PUBLIC_APP_DATA_PREFIXES</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="s2">"/app_data/fonts/"</span><span class="p">,</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>        <span class="s2">"/app_data/templates/"</span><span class="p">,</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">_PROTECTED_NON_API_PATHS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"/docs"</span><span class="p">,</span> <span class="s2">"/openapi.json"</span><span class="p">,</span> <span class="s2">"/redoc"</span><span class="p">}</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1"># ...</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>            <span class="n">admin_only</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>                <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/v1/admin/"</span><span class="p">)</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>                <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/v1/ppt/codex/auth/"</span><span class="p">)</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>                <span class="ow">or</span> <span class="p">(</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>                    <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/api/v1/ppt/fonts/"</span><span class="p">)</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>                    <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"DELETE"</span><span class="p">}</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>                <span class="p">)</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>                <span class="ow">or</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">{</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>                    <span class="s2">"/api/v1/ppt/ollama/models/pull"</span><span class="p">,</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>                    <span class="s2">"/api/v1/ppt/ollama/models/available"</span><span class="p">,</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>                    <span class="s2">"/api/v1/ppt/openai/models/available"</span><span class="p">,</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>                    <span class="s2">"/api/v1/ppt/images/test"</span><span class="p">,</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>                    <span class="s2">"/api/v1/ppt/openrouter/providers/available"</span><span class="p">,</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>                <span class="p">}</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>            <span class="p">)</span>
+</span></code></pre></div>
+<p>A principal is resolved by <code>resolve_request_principal</code> (<code>servers/fastapi/api/v1/auth/principal.py:22</code>): first the <code>presenton_session</code> cookie (a JWT, <code>method="jwt"</code>), then an <code>Authorization: Bearer sk-presenton-...</code> API key (<code>method="api_key"</code>). The admin-only check requires <code>principal.method == "jwt"</code> <strong>and</strong> <code>is_admin</code>, which is why an administrator's API key is still rejected on admin paths.</p>
+<p>The legend used in the <strong>Access</strong> column:</p>
+<table>
+<thead>
+<tr>
+<th>Access value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Public</td>
+<td>Listed in <code>_PUBLIC_AUTH_PATHS</code>; the middleware lets it through without a principal. The handler may still check the cookie itself.</td>
+</tr>
+<tr>
+<td>User</td>
+<td>Any principal: a browser session cookie or a valid user API key. Rows the user does not own are filtered by the ORM owner scope described in <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</td>
+</tr>
+<tr>
+<td>Admin (JWT)</td>
+<td>Matched by the middleware <code>admin_only</code> rule: the caller must be an administrator using a browser session cookie. API keys get 403.</td>
+</tr>
+<tr>
+<td>User, handler admin</td>
+<td>The middleware accepts any principal, but the handler dependency (<code>get_current_admin</code>, <code>require_settings_admin</code> or <code>require_presenton_manager</code>) reads only the session cookie and requires <code>is_superuser</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>DISABLE_AUTH=true</code> (the Electron runtime) short-circuits the middleware completely: every route is reachable without a principal. However, the admin handlers that depend on <code>get_current_admin</code> (<code>servers/fastapi/api/v1/auth/users.py:219</code>) still read the cookie, find no user, and return 401. So in auth-disabled mode <code>/api/v1/admin/api-keys</code> and <code>/api/v1/admin/users</code> are unusable, while <code>/api/v1/admin/provider-settings</code> works because <code>require_settings_admin</code> returns early when auth is disabled (<code>servers/fastapi/api/v1/admin/router.py:136</code>).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The font rule is method based: every <code>POST</code> or <code>DELETE</code> under <code>/api/v1/ppt/fonts/</code> is admin only. That includes <code>POST /api/v1/ppt/fonts/check</code>, which only analyzes a PPTX. The custom template hook calls it (<code>servers/nextjs/app/(presentation-generator)/custom-template/hooks/useTemplateCreation.ts:150</code>), so a non-admin user running that flow receives a 403 from this call.</p>
+</div>
+<p>Middleware order also matters. Starlette wraps the most recently added middleware outermost, so for a request the order is <code>static_icon_fallback_middleware</code> (<code>servers/fastapi/api/main.py:106</code>), then <code>SessionAuthMiddleware</code>, then <code>UserConfigEnvUpdateMiddleware</code>, then <code>CORSMiddleware</code>, then the router. A 401 or 403 produced by <code>SessionAuthMiddleware</code> is therefore returned before the CORS layer runs.</p>
+<h2 id="step-4-fastapi-routes-auth-and-admin">Step 4: FastAPI routes, auth and admin<a class="headerlink" href="#step-4-fastapi-routes-auth-and-admin" title="Permanent link">&para;</a></h2>
+<h3 id="local-authentication">Local authentication<a class="headerlink" href="#local-authentication" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/auth/status</code></td>
+<td><code>get_status</code></td>
+<td><code>servers/fastapi/api/v1/auth/router.py:58</code></td>
+<td>Public</td>
+<td>Returns <code>configured</code>, <code>authenticated</code>, <code>username</code>, <code>user_id</code>, <code>role</code> for the session cookie. With auth disabled it always answers <code>username: "electron"</code>, <code>role: "admin"</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/auth/verify</code></td>
+<td><code>verify_session</code></td>
+<td><code>servers/fastapi/api/v1/auth/router.py:81</code></td>
+<td>Public (handler requires principal)</td>
+<td>Resolves cookie or API key, 401 if none. If <code>X-Original-URI</code> is present it applies the <code>/app_data</code> ownership rule (403 on mismatch). This is nginx's <code>auth_request</code> target.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/setup</code></td>
+<td><code>setup_credentials</code></td>
+<td><code>servers/fastapi/api/v1/auth/router.py:110</code></td>
+<td>Public</td>
+<td>Creates the first account as <code>is_superuser=True</code>, <code>admin_slot="primary"</code>. 409 once any user exists. Does not log in (<code>authenticated: false</code>).</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/login</code></td>
+<td><code>login</code></td>
+<td><code>servers/fastapi/api/v1/auth/router.py:155</code></td>
+<td>Public</td>
+<td>Case-insensitive username lookup, password verify with transparent rehash, sets the <code>presenton_session</code> cookie (30 days, <code>httponly</code>, <code>samesite=lax</code>). 428 before setup.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/logout</code></td>
+<td><code>logout</code></td>
+<td><code>servers/fastapi/api/v1/auth/router.py:191</code></td>
+<td>Public</td>
+<td>Deletes the session cookie and returns <code>{"success": true}</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="presenton-cloud-provider-link-oauth-device-flow">Presenton Cloud provider link (OAuth device flow)<a class="headerlink" href="#presenton-cloud-provider-link-oauth-device-flow" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/auth/presenton/status</code></td>
+<td><code>presenton_provider_status</code></td>
+<td><code>servers/fastapi/api/v1/auth/presenton_oauth.py:120</code></td>
+<td>User</td>
+<td>Reports <code>linked</code>, <code>can_manage</code>, <code>cloud_generation_enabled</code>; <code>email</code> only when the caller can manage the provider.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/presenton/logout</code></td>
+<td><code>logout_presenton_account</code></td>
+<td><code>servers/fastapi/api/v1/auth/presenton_oauth.py:141</code></td>
+<td>User, handler admin</td>
+<td>Revokes and clears the global cloud credential. If <code>LLM</code> was <code>presenton</code>, saves <code>LLM: None</code> so the UI must pick a new provider.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/presenton/device/start</code></td>
+<td><code>start_presenton_provider_connection</code></td>
+<td><code>servers/fastapi/api/v1/auth/presenton_oauth.py:164</code></td>
+<td>User, handler admin</td>
+<td>Calls <code>{issuer}/oauth/device_authorization</code>; returns the device payload with <code>verification_uri_complete</code> forced to the plain URI, <code>Cache-Control: no-store</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/auth/presenton/device/poll</code></td>
+<td><code>poll_presenton_provider_connection</code></td>
+<td><code>servers/fastapi/api/v1/auth/presenton_oauth.py:217</code></td>
+<td>User, handler admin</td>
+<td>Exchanges <code>device_code</code> at <code>{issuer}/oauth/token</code>; 202 <code>{"status": "pending"}</code> while pending; on success validates userinfo and stores the encrypted token.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="admin">Admin<a class="headerlink" href="#admin" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/admin/api-keys</code></td>
+<td><code>list_api_keys</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:44</code></td>
+<td>Admin (JWT)</td>
+<td>All API keys, newest first, as <code>ApiKeyPublic</code> (no secret).</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/admin/api-keys</code></td>
+<td><code>create_api_key</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:60</code></td>
+<td>Admin (JWT)</td>
+<td>201. Body <code>user_id</code>, <code>label</code> (default <code>"API client"</code>, 1 to 120 chars), <code>expiry_days</code> (default 90, 1 to 365). Response includes the <code>token</code> once.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/admin/api-keys/{api_key_id}/token</code></td>
+<td><code>get_api_key_token</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:85</code></td>
+<td>Admin (JWT)</td>
+<td>Decrypts and reveals a stored token; 410 if revoked, 409 if not revealable; sends <code>Cache-Control: no-store</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/admin/api-keys/{api_key_id}/revoke</code></td>
+<td><code>revoke_api_key</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:111</code></td>
+<td>Admin (JWT)</td>
+<td>Sets <code>revoked_at</code> (idempotent) and returns the key.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/admin/provider-settings</code></td>
+<td><code>read_provider_settings</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:144</code></td>
+<td>Admin (JWT)</td>
+<td>The singleton provider settings row plus <code>PRESENTON_CONNECTED</code> and <code>PRESENTON_EMAIL</code>.</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/admin/provider-settings</code></td>
+<td><code>update_provider_settings</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:158</code></td>
+<td>Admin (JWT)</td>
+<td>Merges and saves an arbitrary JSON object via <code>save_provider_settings</code>, then reloads env with <code>update_env_with_user_config()</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/admin/users</code></td>
+<td><code>list_users</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:169</code></td>
+<td>Admin (JWT)</td>
+<td>Users ordered by <code>created_at desc, username asc</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/admin/users</code></td>
+<td><code>create_user</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:182</code></td>
+<td>Admin (JWT)</td>
+<td>201. Creates a non-admin user; 409 on a case-insensitive duplicate.</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/admin/users/{user_id}/password</code></td>
+<td><code>reset_user_password</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:215</code></td>
+<td>Admin (JWT)</td>
+<td>Rehashes the password and increments <code>auth_version</code>, which invalidates the user's existing JWTs. Refuses the admin itself and any superuser.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/admin/users/{user_id}</code></td>
+<td><code>delete_user</code></td>
+<td><code>servers/fastapi/api/v1/admin/router.py:236</code></td>
+<td>Admin (JWT)</td>
+<td>204. Deletes a non-admin user (rows cascade) and removes <code>users/{id}</code> under <code>images</code>, <code>exports</code>, <code>uploads</code>, <code>pptx-to-html</code> and <code>pptx-to-json</code>, plus <code>{id}</code> directly under the temp directory. 403 for the admin itself or any superuser.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The admin router rules are enforced twice: by the middleware path rule and by <code>Depends(get_current_admin)</code> or <code>Depends(require_settings_admin)</code>. If you move an admin route out of <code>/api/v1/admin/</code>, the middleware stops protecting it and only the dependency remains. If you add a route to <code>API_V1_ADMIN_ROUTER</code> and forget the dependency, the middleware still protects it, but only while auth is enabled.</p>
+</div>
+<h2 id="step-5-fastapi-routes-presentation-lifecycle">Step 5: FastAPI routes, presentation lifecycle<a class="headerlink" href="#step-5-fastapi-routes-presentation-lifecycle" title="Permanent link">&para;</a></h2>
+<h3 id="presentation-v1">Presentation (v1)<a class="headerlink" href="#presentation-v1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/presentation/all</code></td>
+<td><code>get_all_presentations</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1499</code></td>
+<td>User</td>
+<td>Dashboard list, newest first. <code>include_slides=true</code> (default) inner-joins the slide with <code>index == 0</code>; <code>version</code> filters <code>v1-standard</code> or <code>v2-standard</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/presentation/{id}</code></td>
+<td><code>get_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1551</code></td>
+<td>User</td>
+<td>One presentation with all slides ordered by <code>index</code>. Also the data source of the export runtime.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/ppt/presentation/{id}</code></td>
+<td><code>delete_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1572</code></td>
+<td>User</td>
+<td>204. Deletes the row; slides cascade through the foreign key.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/{id}/duplicate</code></td>
+<td><code>duplicate_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1584</code></td>
+<td>User</td>
+<td>Deep copies the presentation and its slides with new ids; appends <code>" (Copy)"</code> to the title.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/{id}/regenerate</code></td>
+<td><code>regenerate_smart_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1615</code></td>
+<td>User</td>
+<td>204. Smart only: deletes the saved slides so the next <code>/stream/{id}</code> starts over. 400 when the provider is Presenton Cloud or the deck is not a generated Smart deck.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/{id}/export</code></td>
+<td><code>export_existing_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1642</code></td>
+<td>User</td>
+<td>Body <code>{"export_as": "pptx"}</code> or <code>"pdf"</code>. Re-runs the export for a stored deck; returns <code>presentation_id</code>, <code>path</code>, <code>edit_path</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/create</code></td>
+<td><code>create_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1681</code></td>
+<td>User</td>
+<td>Step 1 of the UI flow: inserts a <code>presentations</code> row (<code>version="v2-standard"</code>, <code>n_slides=0</code> meaning auto). No LLM call. Validates slide counts, TOC rule, and community ids (Smart only, max 3).</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/create/blank</code></td>
+<td><code>create_blank_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1783</code></td>
+<td>User</td>
+<td>201. A one-slide deck titled <code>"Untitled Presentation"</code> with layout <code>__blank_slide__</code>, optionally tied to a <code>template_id</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/prepare</code></td>
+<td><code>prepare_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1840</code></td>
+<td>User</td>
+<td>Step 3: body <code>presentation_id</code>, <code>outlines</code>, <code>layout</code> (template id, <code>custom-</code> prefix accepted), <code>title</code>. Stores the outline, copies the template layout, and computes <code>structure</code> (LLM unless the layout is <code>ordered</code>), inserting TOC slides.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/presentation/stream/{id}</code></td>
+<td><code>stream_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2281</code></td>
+<td>User</td>
+<td>Step 4, SSE. Standard: per-slide content, <code>chunk</code> and <code>slide_assets</code> events, then <code>complete</code>. Smart decks are delegated to <code>stream_smart_presentation</code> (<code>slide_html</code>, <code>fonts</code>, <code>generation_metrics</code>).</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/ppt/presentation/update</code></td>
+<td><code>update_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2527</code></td>
+<td>User</td>
+<td>Updates <code>n_slides</code> and <code>title</code>; when <code>slides</code> is sent, deletes the caller's slides for the deck and inserts the new list. Used by editor auto-save.</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/ppt/presentation/slide_update</code></td>
+<td><code>update_presentation_slide</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2585</code></td>
+<td>User</td>
+<td>Body <code>{"slide": {...}}</code>. Updates one slide in place, excluding <code>id</code>, <code>presentation</code> and <code>index</code>; 400 if the slide belongs to a different deck.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/generate</code></td>
+<td><code>generate_presentation_sync</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3169</code></td>
+<td>User</td>
+<td>One-shot API: outline, structure, slides, assets and export in one blocking request. Body <code>GeneratePresentationRequest</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/generate/async</code></td>
+<td><code>generate_presentation_async</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3240</code></td>
+<td>User</td>
+<td>Same work in a <code>BackgroundTasks</code> job. Returns an <code>AsyncTaskModel</code> of type <code>presentation.generate</code>. MCP tool <code>start_standard_presentation</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/presentation/status/{id}</code></td>
+<td><code>check_async_presentation_generation_status</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3282</code></td>
+<td>User</td>
+<td>Older polling path over the same <code>async_tasks</code> table as <code>/api/v1/async-tasks/status/{id}</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/edit</code></td>
+<td><code>edit_presentation_with_new_content</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3301</code></td>
+<td>User</td>
+<td>Body <code>EditPresentationRequest</code> (<code>presentation_id</code>, <code>slides[{index, content}]</code>, <code>export_as</code>). Deep-merges content into matching slides, replaces them, re-exports the same deck.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/presentation/derive</code></td>
+<td><code>derive_presentation_from_existing_one</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3352</code></td>
+<td>User</td>
+<td>Same body; copies the deck to a new id with the content overrides applied and exports the copy.</td>
+</tr>
+</tbody>
+</table>
+<p>A typical async start returns this shape (fields from <code>servers/fastapi/models/sql/async_task.py</code>; <code>owner_id</code> and <code>payload</code> are excluded from serialization):</p>
+<div class="language-json highlight"><span class="filename">POST /api/v1/ppt/presentation/generate/async (response shape)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"task-&lt;64 hex characters&gt;"</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"presentation.generate"</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pending"</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Queued for generation"</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">"created_slides"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">"remaining_slides"</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nt">"presentation_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;uuid&gt;"</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="nt">"created_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;timestamp&gt;"</span><span class="p">,</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span><span class="nt">"updated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;timestamp&gt;"</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>GeneratePresentationRequest.trigger_webhook</code> (<code>servers/fastapi/models/generate_presentation_request.py:44</code>) is declared but never read anywhere in the code. <code>generate_presentation_handler</code> dispatches <code>presentation.generation.completed</code> or <code>presentation.generation.failed</code> to every matching subscription unconditionally (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3133</code> and <code>:3150</code>). Setting <code>trigger_webhook: false</code> does not suppress webhooks.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>POST /presentation/edit</code>, <code>/derive</code>, <code>/generate</code>, <code>/generate/async</code>, <code>/status/{id}</code> and <code>/{id}/export</code> are API-surface routes. The Next.js UI does not call them; it exports through its own <code>POST /api/export-presentation</code> route (Step 10). If you change their payloads, only external API and MCP clients are affected.</p>
+</div>
+<h3 id="outlines">Outlines<a class="headerlink" href="#outlines" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/outlines/{id}</code></td>
+<td><code>get_outline</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:44</code></td>
+<td>User</td>
+<td>Stored outline, or <code>{"slides": []}</code> when none exists yet.</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/v1/ppt/outlines/{id}</code></td>
+<td><code>update_outline</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:59</code></td>
+<td>User</td>
+<td>Replaces the outline, recomputes <code>n_slides</code> and <code>title</code>, and writes the outline to Mem0.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/outlines/stream/{id}</code></td>
+<td><code>stream_outlines</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:84</code></td>
+<td>User</td>
+<td>Step 2, SSE. Loads source documents, streams raw outline JSON as <code>chunk</code> events, parses it with <code>dirtyjson</code>, persists it, and ends with <code>complete</code> (key <code>presentation</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="slide">Slide<a class="headerlink" href="#slide" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/slide/edit</code></td>
+<td><code>edit_slide</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/slide.py:38</code></td>
+<td>User</td>
+<td>Body <code>id</code>, <code>prompt</code>. The LLM picks a layout, rewrites the content, assets are re-fetched, and the slide gets a new id.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/slide/edit-html</code></td>
+<td><code>edit_slide_html</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/slide.py:135</code></td>
+<td>User</td>
+<td>Body <code>id</code>, <code>prompt</code>, optional <code>html</code> (defaults to <code>slide.html_content</code>). The LLM edits the HTML; the slide gets a new id so Next.js re-renders it.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Both slide endpoints deliberately assign <code>slide.id = uuid.uuid4()</code> before committing. Any client that holds the old slide id (for example to call <code>slide_update</code> next) must read the id from the response. The current editor does not call these two routes at all; slide edits from the UI go through the chat assistant in <a href="../presenton/14-editing-and-chat/">Editing and chat assistant</a>.</p>
+</div>
+<h3 id="presentation-v2-smart-mode">Presentation (v2, Smart mode)<a class="headerlink" href="#presentation-v2-smart-mode" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v2/ppt/presentation/generate/smart</code></td>
+<td><code>generate_smart_presentation_sync</code></td>
+<td><code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:229</code></td>
+<td>User</td>
+<td>Blocking Smart generation and export. Body <code>GenerateSmartPresentationRequest</code>. <code>operation_id="generate_smart_presentation"</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v2/ppt/presentation/generate/smart/async</code></td>
+<td><code>generate_smart_presentation_async</code></td>
+<td><code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:264</code></td>
+<td>User</td>
+<td>Queues task type <code>presentation.smart.generate</code>; MCP tool <code>start_smart_presentation</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="async-tasks-webhook-mock">Async tasks, webhook, mock<a class="headerlink" href="#async-tasks-webhook-mock" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/async-tasks</code></td>
+<td><code>list_async_tasks</code></td>
+<td><code>servers/fastapi/api/v1/async_tasks/router.py:20</code></td>
+<td>User</td>
+<td>Filters <code>type</code>, <code>status</code>, <code>created_at</code> (alias of <code>created_at_from</code>), <code>created_at_to</code>; <code>order_by</code> <code>created_at</code> or <code>updated_at</code> (default <code>created_at</code>), <code>order</code> <code>asc</code> or <code>desc</code> (default <code>desc</code>); <code>limit</code> 1 to 200 (default 50); <code>offset</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/async-tasks/status/{id}</code></td>
+<td><code>check_async_task_status</code></td>
+<td><code>servers/fastapi/api/v1/async_tasks/router.py:69</code></td>
+<td>User</td>
+<td>One task. <code>data.path</code>, <code>edit_path</code> and <code>preview_url</code> are made absolute for MCP callers. MCP tool <code>get_job_status</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/webhook/subscribe</code></td>
+<td><code>subscribe_to_webhook</code></td>
+<td><code>servers/fastapi/api/v1/webhook/router.py:23</code></td>
+<td>User</td>
+<td>201. Body <code>url</code>, <code>secret</code>, <code>event</code> (<code>presentation.generation.completed</code> or <code>presentation.generation.failed</code>). Returns <code>{"id": "webhook-&lt;hex&gt;"}</code>.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/webhook/unsubscribe</code></td>
+<td><code>unsubscribe_to_webhook</code></td>
+<td><code>servers/fastapi/api/v1/webhook/router.py:40</code></td>
+<td>User</td>
+<td>204. Body <code>{"id": "..."}</code> (embedded body on a DELETE).</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/mock/presentation-generation-completed</code></td>
+<td><code>mock_presentation_generation_completed</code></td>
+<td><code>servers/fastapi/api/v1/mock/router.py:12</code></td>
+<td>User</td>
+<td>Returns a sample <code>PresentationPathAndEditPath</code> list: the shape of the completed webhook body.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/mock/presentation-generation-failed</code></td>
+<td><code>mock_presentation_generation_completed</code></td>
+<td><code>servers/fastapi/api/v1/mock/router.py:26</code></td>
+<td>User</td>
+<td>Returns a sample <code>APIErrorModel</code> list: the shape of the failed webhook body.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Both mock handlers are named <code>mock_presentation_generation_completed</code>. FastAPI registered each when its decorator ran, so both routes work, but the second definition shadows the first in the module namespace. The two still get distinct OpenAPI operation ids because FastAPI appends the path and method: <code>openai_spec.json</code> lists <code>mock_presentation_generation_completed_api_v1_mock_presentation_generation_failed_get</code> for the failure route.</p>
+</div>
+<p>The webhook POST itself is sent by <code>WebhookService.send_request_to_webhook</code> (<code>servers/fastapi/services/webhook_service.py:36</code>) as JSON with <code>Authorization: Bearer &lt;secret&gt;</code> when a secret was given. Failures are printed and swallowed; there is no retry.</p>
+<h2 id="step-6-fastapi-routes-documents-images-icons-fonts">Step 6: FastAPI routes, documents, images, icons, fonts<a class="headerlink" href="#step-6-fastapi-routes-documents-images-icons-fonts" title="Permanent link">&para;</a></h2>
+<h3 id="files">Files<a class="headerlink" href="#files" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/files/upload</code></td>
+<td><code>upload_files</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/files.py:79</code></td>
+<td>User</td>
+<td>Multipart <code>files</code>. Validates type and size via <code>validate_files(..., 100, UPLOAD_ACCEPTED_FILE_TYPES)</code>, writes them to a fresh temp dir, returns the list of temp paths.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/files/mcp-upload</code></td>
+<td><code>upload_files_for_mcp</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/files.py:103</code></td>
+<td>User</td>
+<td>JSON body <code>files[{filename, content_base64}]</code>, 1 to 32 files, 100 MiB decoded in total. Returns <code>{"file_paths": [...]}</code>. MCP tool <code>upload_files</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/files/decompose</code></td>
+<td><code>decompose_files</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/files.py:133</code></td>
+<td>User</td>
+<td>Body <code>file_paths</code>, <code>language</code>. Parses non-text files with <code>DocumentsLoader</code> into <code>.txt</code> files; returns <code>[{name, file_path}]</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/files/update</code></td>
+<td><code>update_files</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/files.py:176</code></td>
+<td>User</td>
+<td>Multipart <code>file_path</code> and <code>file</code>: overwrites an existing temp file (for edited extracted text).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="images-and-icons">Images and icons<a class="headerlink" href="#images-and-icons" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/images/test</code></td>
+<td><code>test_image_provider</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:56</code></td>
+<td>Admin (JWT)</td>
+<td>Generates one sample image ("A mountain lake on a sunny day") with the posted provider config in a temp dir; 180 s timeout (504). Returns <code>{"image_url": ...}</code> (data URI or URL).</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/images/search</code></td>
+<td><code>search_stock_images</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:206</code></td>
+<td>User</td>
+<td>Pexels or Pixabay search. <code>query</code>, <code>limit</code> 1 to 30 (default 12), <code>provider</code>, <code>strict_api_key</code>; header <code>X-Provider-Api-Key</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/images/generate</code></td>
+<td><code>generate_image</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:256</code></td>
+<td>User</td>
+<td>Generates (or fetches) one image for <code>prompt</code>, optional <code>width</code> and <code>height</code> together; stores an <code>ImageAsset</code> row; returns its <code>/app_data/images/...</code> URL.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/images/generated</code></td>
+<td><code>get_generated_images</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:297</code></td>
+<td>User</td>
+<td>Caller's generated images, newest first.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/images/upload</code></td>
+<td><code>upload_image</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:312</code></td>
+<td>User</td>
+<td>Multipart <code>file</code>; extension and Pillow format checked (AVIF, BMP, GIF, JPEG, PNG, TIFF, WEBP); saved as <code>&lt;uuid&gt;&lt;ext&gt;</code> with <code>is_uploaded=True</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/images/uploaded</code></td>
+<td><code>get_uploaded_images</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:341</code></td>
+<td>User</td>
+<td>Caller's uploaded images, newest first.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/ppt/images/{id}</code></td>
+<td><code>delete_uploaded_image_by_id</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/images.py:356</code></td>
+<td>User</td>
+<td>204. Removes the file and the <code>ImageAsset</code> row.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/icons/search</code></td>
+<td><code>search_icons</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/icons.py:10</code></td>
+<td>User</td>
+<td>Semantic Phosphor icon search over the FastEmbed vector store. <code>query</code>, <code>limit</code> (default 20), <code>icon_type</code> or <code>icon_weight</code> (default <code>bold</code>). Returns icon URLs.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>In <code>delete_uploaded_image_by_id</code> the <code>raise HTTPException(status_code=404, ...)</code> sits inside a <code>try</code> whose <code>except Exception</code> converts everything into a 500 (<code>servers/fastapi/api/v1/ppt/endpoints/images.py:371</code>). A missing image id therefore returns 500 <code>"Failed to delete image: ..."</code>, not 404.</p>
+</div>
+<h3 id="fonts">Fonts<a class="headerlink" href="#fonts" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/fonts/upload</code></td>
+<td><code>upload_font</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:58</code></td>
+<td>Admin (JWT)</td>
+<td>Multipart <code>font_file</code> (<code>.ttf</code>, <code>.otf</code>, <code>.woff</code>, <code>.woff2</code>, <code>.eot</code>); persists a <code>FontUpload</code> row with parsed name metadata.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/fonts/list</code></td>
+<td><code>list_fonts</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:89</code></td>
+<td>User</td>
+<td>All uploaded fonts with family, subfamily, weight and width classes, size and URL.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/fonts/uploaded</code></td>
+<td><code>get_uploaded_fonts</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:130</code></td>
+<td>User</td>
+<td>Compact <code>[{id, name, url}]</code> list.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/fonts/check</code></td>
+<td><code>check_fonts_in_pptx_handler</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:152</code></td>
+<td>Admin (JWT)</td>
+<td>Multipart <code>pptx_file</code>; returns <code>available_fonts</code> and <code>unavailable_fonts</code>. Registered imperatively, not with a decorator.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/ppt/fonts/delete/{filename}</code></td>
+<td><code>delete_font</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:157</code></td>
+<td>Admin (JWT)</td>
+<td>Deletes an uploaded font by stored filename.</td>
+</tr>
+</tbody>
+</table>
+<p>These are summarized here; the font pipeline is covered in <a href="../presenton/19-themes-and-fonts/">Themes and fonts</a>.</p>
+<h2 id="step-7-fastapi-routes-templates">Step 7: FastAPI routes, templates<a class="headerlink" href="#step-7-fastapi-routes-templates" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/template/all</code></td>
+<td><code>list_templates</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1113</code></td>
+<td>User</td>
+<td>Paginated (<code>page</code>, <code>page_size</code> 1 to 100, default 20) list of built-in and the caller's templates; <code>default=true</code> or <code>false</code> filters; templates with zero layouts are skipped. MCP tool <code>list_templates</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/fonts-upload-and-slides-preview</code></td>
+<td><code>upload_template_fonts_and_slides_preview</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1189</code></td>
+<td>User</td>
+<td>Multipart PPTX plus replacement fonts and Google font mappings; renders slide preview images; returns <code>slide_image_urls</code>, <code>pptx_url</code>, <code>modified_pptx_url</code>, <code>fonts</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/mcp-upload</code></td>
+<td><code>upload_template_assets_for_mcp</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1215</code></td>
+<td>User</td>
+<td>Base64 PPTX (100 MiB) and up to 32 fonts (10 MiB each, 100 MiB combined); returns <code>pptx_url</code>, <code>slide_image_urls</code>, <code>fonts</code>. MCP tool <code>upload_template_assets</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/init</code></td>
+<td><code>init_template</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1272</code></td>
+<td>User</td>
+<td>201. Creates a <code>template_v2</code> row with <code>raw_layouts</code> extracted from the PPTX and <code>layouts=None</code>; returns the template id string. Used by the step-by-step UI flow.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/async</code></td>
+<td><code>create_template</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1569</code></td>
+<td>User</td>
+<td>201. Verifies <code>pptx_url</code> resolves to a local file, queues task type <code>template.create</code>, and runs the whole PPTX-to-template pipeline in the background. MCP tool <code>start_template_generation</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/async/{task_id}/retry</code></td>
+<td><code>retry_create_template</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1621</code></td>
+<td>User</td>
+<td>202. Re-queues a failed <code>template.create</code> task from its stored <code>payload</code>; 409 if not failed or already created.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/layouts/generate</code></td>
+<td><code>generate_template_layout_from_prompt</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1696</code></td>
+<td>User</td>
+<td>Body <code>template_id</code>, <code>prompt</code> (1 to 8000 chars). Generates one new <code>SlideLayout</code> in the template's style and returns it with the model's text; nothing is persisted.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/layouts/create</code></td>
+<td><code>create_template_slide_layouts</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1785</code></td>
+<td>User</td>
+<td>Body <code>template_id</code> and <code>index</code> or <code>indices</code> (unique, at most 10). Converts raw PPTX slides into <code>SlideLayout</code>s in parallel. Private templates only.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/template/generate-blocks</code></td>
+<td><code>generate_template_blocks</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1870</code></td>
+<td>User</td>
+<td>Merges similar components into <code>merged_components</code> and generates the template <code>theme</code> concurrently. Private templates only.</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/ppt/template/{template_id}/layouts</code></td>
+<td><code>patch_template_slide_layout</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1925</code></td>
+<td>User</td>
+<td>Merges <code>layout_items</code> into <code>layouts</code> under a per-template <code>asyncio.Lock</code>; updates <code>assets.layout_indexes</code>.</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/api/v1/ppt/template/{template_id}</code></td>
+<td><code>update_template_metadata</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:1975</code></td>
+<td>User</td>
+<td>Partial update: only fields present in the body (<code>name</code>, <code>description</code>, <code>merged_components</code>, <code>layouts</code>, <code>theme</code>, <code>thumbnail</code>, <code>fonts</code>, <code>icon_type</code>) are applied.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/template/{template_id}/theme</code></td>
+<td><code>get_template_theme</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:2088</code></td>
+<td>User</td>
+<td>Stored theme, or a derived one that is then persisted.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/template/{template_id}</code></td>
+<td><code>get_template</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:2122</code></td>
+<td>User</td>
+<td>Full template: <code>layouts</code>, <code>merged_components</code>, <code>theme</code>, <code>fonts</code>, <code>preview_url</code>, <code>layout_count</code>.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/ppt/template/{template_id}</code></td>
+<td><code>delete_template</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/template.py:2157</code></td>
+<td>User</td>
+<td>204. Deletes a private template; 403 <code>"Built-in templates are read-only"</code> for defaults.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Route order inside <code>TEMPLATE_ROUTER</code> matters. <code>/all</code>, <code>/init</code>, <code>/async</code> and the other literal paths are declared before the parameterized <code>/{template_id}</code> routes, so <code>GET /api/v1/ppt/template/all</code> is not captured as a template id. If you add a new literal <code>GET</code> route, declare it above <code>get_template</code> at line 2122.</p>
+</div>
+<p>The template flows are explained in <a href="../presenton/18-custom-templates/">Custom templates from PPTX</a>.</p>
+<h2 id="step-8-fastapi-routes-providers-chat-community">Step 8: FastAPI routes, providers, chat, community<a class="headerlink" href="#step-8-fastapi-routes-providers-chat-community" title="Permanent link">&para;</a></h2>
+<h3 id="model-discovery-ollama-and-generation-defaults">Model discovery, Ollama and generation defaults<a class="headerlink" href="#model-discovery-ollama-and-generation-defaults" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/anthropic/models/available</code></td>
+<td><code>get_available_models</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/anthropic.py:12</code></td>
+<td>User</td>
+<td>Body <code>{"api_key": ...}</code>; lists Anthropic model ids.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/google/models/available</code></td>
+<td><code>get_available_models</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/google.py:9</code></td>
+<td>User</td>
+<td>Body <code>{"api_key": ...}</code>; lists Google model ids.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/openai/models/available</code></td>
+<td><code>get_available_models</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openai.py:12</code></td>
+<td>Admin (JWT)</td>
+<td>Body <code>url</code>, <code>api_key</code>; lists models of any OpenAI-compatible endpoint.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/openrouter/providers/available</code></td>
+<td><code>get_available_openrouter_providers</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/openrouter.py:118</code></td>
+<td>Admin (JWT)</td>
+<td>Body <code>model</code>, <code>api_key</code>, optional <code>base_url</code>; lists OpenRouter upstream providers for a model, sorted by label; redirects are refused.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/ollama/models/supported</code></td>
+<td><code>get_supported_models</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:43</code></td>
+<td>User</td>
+<td>Curated supported Ollama models merged with what is already pulled.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/ollama/models/available</code></td>
+<td><code>get_available_models</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:51</code></td>
+<td>Admin (JWT)</td>
+<td>Pulled models; an <code>ollama_url</code> override requires a trusted <code>Origin</code> or <code>Referer</code> (403 otherwise).</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/ollama/models/library</code></td>
+<td><code>get_library_models</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:60</code></td>
+<td>User</td>
+<td>Static Ollama library list.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/ollama/models/pull</code></td>
+<td><code>pull_model</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/ollama.py:64</code></td>
+<td>Admin (JWT)</td>
+<td>Query <code>model_name</code>, <code>ollama_url</code>; streams pull progress as <code>text/event-stream</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/generation/defaults</code></td>
+<td><code>get_generation_token_defaults</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/generation.py:54</code></td>
+<td>User</td>
+<td>Body <code>provider</code>, <code>model</code>; returns <code>default_max_output_tokens</code> (profile <code>BALANCED</code>) and <code>model_max_output_tokens</code> (profile <code>MODEL_MAX</code>) computed by <code>llmai</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Four functions are named <code>get_available_models</code> (in <code>anthropic.py</code>, <code>google.py</code>, <code>openai.py</code> and <code>ollama.py</code>). They are distinct routes; only the module differs.</p>
+<h3 id="codex-chatgpt-oauth">Codex (ChatGPT OAuth)<a class="headerlink" href="#codex-chatgpt-oauth" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/codex/auth/initiate</code></td>
+<td><code>initiate_codex_auth</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:133</code></td>
+<td>Admin (JWT)</td>
+<td>Starts a PKCE flow and a local callback server; returns the auth URL and a <code>session_id</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/codex/auth/status/{session_id}</code></td>
+<td><code>poll_codex_auth_status</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:170</code></td>
+<td>Admin (JWT)</td>
+<td>Polls the in-memory session; when the code arrives, exchanges and stores tokens.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/codex/auth/exchange</code></td>
+<td><code>exchange_codex_code</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:212</code></td>
+<td>Admin (JWT)</td>
+<td>Manual fallback: paste the redirect URL or code; state mismatch returns 400.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/codex/auth/refresh</code></td>
+<td><code>refresh_codex_token</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:261</code></td>
+<td>Admin (JWT)</td>
+<td>Refreshes the stored access token.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/codex/auth/status</code></td>
+<td><code>get_codex_auth_status</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:300</code></td>
+<td>Admin (JWT)</td>
+<td><code>not_authenticated</code>, <code>expired</code> or authenticated with account details.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/codex/auth/logout</code></td>
+<td><code>logout_codex</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:335</code></td>
+<td>Admin (JWT)</td>
+<td>Clears Codex tokens from env and <code>userConfig.json</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Codex OAuth sessions live in a module-level dict <code>_sessions</code> (<code>servers/fastapi/api/v1/ppt/endpoints/codex_auth.py:56</code>), and <code>initiate</code> binds a local callback server on port 1455. They do not survive a restart and are not shared between processes, so running FastAPI with more than one worker breaks the <code>initiate</code> then <code>status/{session_id}</code> sequence.</p>
+</div>
+<h3 id="chat">Chat<a class="headerlink" href="#chat" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/chat/conversations</code></td>
+<td><code>list_chat_conversations</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py:31</code></td>
+<td>User</td>
+<td>Query <code>presentation_id</code>; returns <code>[{conversation_id, updated_at, last_message_preview}]</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/chat/history</code></td>
+<td><code>get_chat_history</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py:49</code></td>
+<td>User</td>
+<td>Query <code>presentation_id</code>, <code>conversation_id</code>; migrates legacy memory-store threads into SQL on first read.</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/v1/ppt/chat/conversation</code></td>
+<td><code>delete_chat_conversation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py:91</code></td>
+<td>User</td>
+<td>204. Deletes one thread's rows.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/chat/message</code></td>
+<td><code>chat_message</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py:105</code></td>
+<td>User</td>
+<td>Body <code>ChatMessageRequest</code> (<code>presentation_id</code>, <code>presentation_type</code>, <code>message</code> up to 8000 chars, <code>conversation_id</code>, up to 8 <code>attachments</code>). Returns <code>conversation_id</code>, <code>response</code>, <code>tool_calls</code>.</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/ppt/chat/message/stream</code></td>
+<td><code>chat_message_stream</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/chat.py:124</code></td>
+<td>User</td>
+<td>Same body; SSE with <code>chunk</code>, <code>status</code>, <code>trace</code>, <code>complete</code> (key <code>chat</code>) and <code>error</code> events.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="community">Community<a class="headerlink" href="#community" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Handler</th>
+<th>Source</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/community/presentations</code></td>
+<td><code>list_presentations</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/community.py:14</code></td>
+<td>User</td>
+<td>Proxies the community catalog (<code>https://api.presenton.ai/api/v3/community/presentations</code> by default). <code>page</code>, <code>page_size</code> 1 to 24 (default 8), view and like filters, <code>order_by</code> default <code>priority</code>.</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/ppt/community/presentations/{community_id}</code></td>
+<td><code>get_presentation</code></td>
+<td><code>servers/fastapi/api/v1/ppt/endpoints/community.py:45</code></td>
+<td>User</td>
+<td>One community design (<code>community_id &gt;= 1</code>).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="step-9-paths-the-presenton-cloud-proxy-intercepts">Step 9: Paths the Presenton Cloud proxy intercepts<a class="headerlink" href="#step-9-paths-the-presenton-cloud-proxy-intercepts" title="Permanent link">&para;</a></h2>
+<p>When an administrator links Presenton Cloud and selects <code>LLM=presenton</code>, <code>SessionAuthMiddleware</code> forwards certain requests to the cloud instead of the local handler, through <code>maybe_proxy_presenton_cloud_request</code> (<code>servers/fastapi/services/presenton_cloud_proxy.py:407</code>). The matching rule is <code>should_proxy_presenton_cloud</code> (<code>servers/fastapi/services/presenton_cloud_proxy.py:105</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Set</th>
+<th>Paths</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CLOUD_GENERATION_PATHS</code></td>
+<td><code>/api/v1/ppt/files/upload</code>, <code>/api/v1/ppt/files/decompose</code>, <code>/api/v1/ppt/presentation/create</code>, <code>/api/v1/ppt/presentation/prepare</code></td>
+</tr>
+<tr>
+<td><code>CLOUD_EDIT_PATHS</code></td>
+<td><code>/api/v1/ppt/slide/edit</code>, <code>/api/v1/ppt/presentation/update</code>, <code>/api/v1/ppt/presentation/slide_update</code></td>
+</tr>
+<tr>
+<td><code>CLOUD_SMART_PATHS</code></td>
+<td><code>/api/v2/ppt/presentation/generate-html/init</code>, <code>/api/v2/ppt/presentation/update</code></td>
+</tr>
+<tr>
+<td><code>CLOUD_API_PATH_PREFIXES</code></td>
+<td><code>/api/v1/async-tasks</code>, <code>/api/v1/ppt/outlines/</code>, <code>/api/v1/ppt/presentation/stream/</code>, <code>/api/v1/ppt/template/</code>, <code>/api/v1/ppt/community/presentations</code>, <code>/api/v1/ppt/chat/</code>, <code>/api/v2/ppt/presentation/stream/</code></td>
+</tr>
+<tr>
+<td><code>CLOUD_PRIVATE_ASSET_PATH_PREFIXES</code></td>
+<td><code>/app_data/images/</code>, <code>/app_data/exports/</code>, <code>/app_data/uploads/</code>, <code>/app_data/pptx-to-html/</code>, <code>/app_data/pptx-to-json/</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>CLOUD_SMART_PATHS</code> and the <code>/api/v2/ppt/presentation/stream/</code> prefix name paths that have <strong>no local FastAPI route</strong> in this snapshot. They only exist upstream on Presenton Cloud. With any other provider selected, a request to them falls through to the router and returns 404. Do not count them as local endpoints. The community prefix is GET-only through the proxy (<code>_READ_ONLY_CLOUD_PREFIXES</code>).</p>
+</div>
+<p>How the cloud proxy rewrites and persists results is outside this index; see <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</p>
+<h2 id="step-10-nextjs-api-routes">Step 10: Next.js API routes<a class="headerlink" href="#step-10-nextjs-api-routes" title="Permanent link">&para;</a></h2>
+<p>The Next.js server exposes its own <code>/api/*</code> routes, separate from FastAPI. All of them pass through <code>proxy.ts</code> first (<code>servers/nextjs/proxy.ts:97</code>), whose matcher covers every path except <code>_next/static</code> and <code>favicon.ico</code>. For <code>/api/*</code>, <code>proxy.ts</code> requires a session unless the path is exempt:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/proxy.ts (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">function</span><span class="w"> </span><span class="nx">isApiAuthExempt</span><span class="p">(</span><span class="nx">pathname</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nx">pathname</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s2">"/api/v1/auth/"</span><span class="p">)</span><span class="w"> </span><span class="o">||</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nx">pathname</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"/api/telemetry-status"</span><span class="w"> </span><span class="o">||</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="cm">/** Public image transform used as a browser/Konva image source. */</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nx">pathname</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"/api/update-svg"</span><span class="w"> </span><span class="o">||</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nx">pathname</span><span class="p">.</span><span class="nx">startsWith</span><span class="p">(</span><span class="s2">"/api/export-presentation-data/"</span><span class="p">)</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="p">);</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>It also rewrites <code>/api/v1/*</code>, <code>/api/v2/*</code>, <code>/app_data/*</code> and <code>/static/*</code> to FastAPI (<code>rewriteToFastApi</code>, <code>servers/nextjs/proxy.ts:43</code>). In Docker nginx catches those paths first, so the rewrite matters in Electron and in direct <code>next dev</code> setups. A request carrying <code>Authorization: Bearer sk-presenton-...</code> to a non-FastAPI path gets 403 <code>"API keys are only accepted by the Presenton API"</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Route file</th>
+<th>Methods</th>
+<th>Access</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>servers/nextjs/app/api/export-presentation/route.ts</code></td>
+<td>POST (<code>:92</code>)</td>
+<td>Session (also checked in handler)</td>
+<td>Body <code>{id, format, title}</code>, <code>format</code> <code>pptx</code> or <code>pdf</code>. Runs the bundled export runtime with the caller's cookies, moves the result into <code>exports/users/&lt;user_id&gt;/</code>, returns <code>{success: true, path: "/api/export-presentation/file?name=..."}</code>.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/export-presentation/file/route.ts</code></td>
+<td>GET (<code>:58</code>)</td>
+<td>Session</td>
+<td>Query <code>name</code>; rejects traversal and other users' paths; streams the PDF, PPTX or ZIP with <code>Content-Disposition: attachment</code> and <code>Cache-Control: no-store</code>.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/export-presentation-data/[id]/route.ts</code></td>
+<td>GET (<code>:17</code>)</td>
+<td>Exempt from <code>proxy.ts</code>; requires <code>x-export-cookie</code> header</td>
+<td>Bridge for the headless export browser: forwards the header value as <code>Cookie</code> to FastAPI <code>GET /api/v1/ppt/presentation/{id}</code> and relays the body and status.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/github-stars/route.ts</code></td>
+<td>GET (<code>:12</code>)</td>
+<td>Session</td>
+<td>Fetches <code>stargazers_count</code> of <code>presenton/presenton</code> from the GitHub API; <code>revalidate = 3600</code>; 502 on failure.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/has-required-key/route.ts</code></td>
+<td>GET (<code>:6</code>)</td>
+<td>Session</td>
+<td><code>{hasKey}</code>: whether <code>OPENAI_API_KEY</code> is set in <code>userConfig.json</code> or the environment.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/read-file/route.ts</code></td>
+<td>POST (<code>:8</code>)</td>
+<td>Session (also checked in handler)</td>
+<td>Body <code>{filePath}</code>; reads a local file through <code>readReadableLocalFile</code> restricted to the caller's app-data and temp roots.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/runtime-config/route.ts</code></td>
+<td>GET (<code>:7</code>)</td>
+<td>Session</td>
+<td><code>readRuntimeProviderConfig()</code>: provider config from <code>userConfig.json</code> with credential fields replaced by <code>__configured__</code> and <code>AUTH_*</code> keys dropped.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/telemetry-status/route.ts</code></td>
+<td>GET (<code>:6</code>)</td>
+<td>Exempt</td>
+<td><code>{telemetryEnabled}</code> from <code>DISABLE_ANONYMOUS_TRACKING</code> in env or <code>userConfig.json</code>.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/update-svg/route.ts</code></td>
+<td>GET (<code>:168</code>)</td>
+<td>Exempt</td>
+<td>Recolors a local <code>/static/icons/...</code> SVG (max 5 MiB) using <code>color</code>, <code>stroke</code>, <code>fill</code>, <code>strokeWidth</code>, opacities, line cap and join; returns <code>image/svg+xml</code>.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/upload-image/route.ts</code></td>
+<td>POST (<code>:12</code>)</td>
+<td>Session (also checked in handler)</td>
+<td>Multipart <code>file</code> up to 20 MiB; saved as <code>&lt;32 hex&gt;.png</code> under <code>uploads/users/&lt;user_id&gt;/</code>; returns <code>{success, filePath}</code>.</td>
+</tr>
+<tr>
+<td><code>servers/nextjs/app/api/user-config/route.ts</code></td>
+<td>GET (<code>:39</code>), POST (<code>:69</code>)</td>
+<td>GET: session; POST: admin</td>
+<td>GET: admins receive FastAPI <code>GET /api/v1/admin/provider-settings</code>, other users the redacted runtime config. POST: requires <code>Content-Type: application/json</code> (415 otherwise) and forwards to <code>PUT /api/v1/admin/provider-settings</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>export-presentation-data</code> is exempt from the session check because the headless browser cannot carry the user's cookie jar. It is protected only by requiring the <code>x-export-cookie</code> header, whose value FastAPI then validates as a normal session cookie. The PDF maker page reads that value from the <code>exportCookie</code> query parameter or from the URL fragment (<code>servers/nextjs/app/(export)/pdf-maker/PdfMakerPage.tsx:146</code>), and <code>servers/fastapi/utils/export_utils.py</code> puts it in the fragment. Browsers do not send fragments to servers, and <code>export_from_url</code> strips the fragment before logging the URL (<code>servers/fastapi/services/export_task_service.py:430</code>). See <a href="../presenton/24-export-pipeline/">PPTX and PDF export</a>.</p>
+</div>
+<p>For completeness, the Electron preload exposes two IPC channels instead of HTTP routes: <code>export-presentation</code> and <code>read-file</code> (<code>electron/app/preloads/index.ts</code>), handled in <code>electron/app/ipc/export_handlers.ts</code> and <code>electron/app/ipc/read_file.ts</code>. See <a href="../presenton/27-electron/">Electron desktop app</a>.</p>
+<h2 id="step-11-mcp-tools">Step 11: MCP tools<a class="headerlink" href="#step-11-mcp-tools" title="Permanent link">&para;</a></h2>
+<p><code>servers/fastapi/mcp_server.py</code> builds an MCP server with <code>FastMCP.from_openapi</code> over the static <code>openai_spec.json</code>. It runs on <code>127.0.0.1:8001</code> with transport <code>http</code> (<code>servers/fastapi/mcp_server.py:457</code>), forwards every tool call to FastAPI at <code>http://127.0.0.1:8000</code> with a 600 s read timeout and 15 s connect timeout, and exposes only an allowlist of routes. Everything else is excluded by the final <code>RouteMap(mcp_type=MCPType.EXCLUDE)</code> (<code>servers/fastapi/mcp_server.py:124</code>).</p>
+<table>
+<thead>
+<tr>
+<th>MCP tool name</th>
+<th>Generated name it renames</th>
+<th>HTTP route</th>
+<th>Enabled when <code>PRESENTATION_GENERATION_MODE</code> is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start_standard_presentation</code></td>
+<td><code>generate_presentation_async_api_v1_ppt_presentation_generate_async_post</code></td>
+<td><code>POST /api/v1/ppt/presentation/generate/async</code></td>
+<td><code>standard</code>, <code>both</code></td>
+</tr>
+<tr>
+<td><code>list_templates</code></td>
+<td><code>template_list</code></td>
+<td><code>GET /api/v1/ppt/template/all</code></td>
+<td><code>standard</code>, <code>both</code></td>
+</tr>
+<tr>
+<td><code>upload_template_assets</code></td>
+<td><code>mcp_template_upload</code></td>
+<td><code>POST /api/v1/ppt/template/mcp-upload</code></td>
+<td><code>standard</code>, <code>both</code></td>
+</tr>
+<tr>
+<td><code>start_template_generation</code></td>
+<td><code>create_template_api_v1_ppt_template_async_post</code></td>
+<td><code>POST /api/v1/ppt/template/async</code></td>
+<td><code>standard</code>, <code>both</code></td>
+</tr>
+<tr>
+<td><code>start_smart_presentation</code></td>
+<td><code>generate_smart_presentation_async</code></td>
+<td><code>POST /api/v2/ppt/presentation/generate/smart/async</code></td>
+<td><code>smart</code>, <code>both</code></td>
+</tr>
+<tr>
+<td><code>upload_files</code></td>
+<td><code>mcp_files_upload</code></td>
+<td><code>POST /api/v1/ppt/files/mcp-upload</code></td>
+<td>always</td>
+</tr>
+<tr>
+<td><code>get_job_status</code></td>
+<td><code>check_async_task_status_api_v1_async_tasks_status__id__get</code></td>
+<td><code>GET /api/v1/async-tasks/status/{id}</code></td>
+<td>always</td>
+</tr>
+</tbody>
+</table>
+<p>The default mode is <code>both</code> (<code>servers/fastapi/utils/get_env.py:24</code>), so a stock deployment advertises all seven tools.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant C as MCP client
+    participant N as nginx /mcp
+    participant M as FastMCP on 8001
+    participant F as FastAPI on 8000
+    C-&gt;&gt;N: tools/call with Bearer sk-presenton key
+    N-&gt;&gt;M: proxy_pass, Host localhost:8001
+    M-&gt;&gt;M: PresentonTokenVerifier.verify_token
+    M-&gt;&gt;F: HTTP call with Cookie presenton_session (1 hour JWT)
+    F--&gt;&gt;M: JSON result, links made absolute
+    M--&gt;&gt;C: tool result</code></pre>
+<p>Authentication works as follows. When auth is enabled, <code>create_mcp_auth_provider</code> returns a <code>PresentonTokenVerifier</code> (<code>servers/fastapi/mcp_server.py:285</code>) that accepts only tokens starting with <code>sk-presenton-</code>, verifies them with the same <code>verify_api_key</code> the REST API uses, and mints an internal session JWT with <code>MCP_INTERNAL_SESSION_TTL_SECONDS = 60 * 60</code>. <code>attach_request_auth_header</code> (<code>servers/fastapi/mcp_server.py:365</code>) then sends that JWT to FastAPI as the <code>presenton_session</code> cookie and adds <code>X-Presenton-MCP-Request: 1</code>, so the long-lived API key never reaches a REST handler. The MCP header makes <code>absolute_mcp_result_links</code> qualify <code>path</code>, <code>edit_path</code> and <code>preview_url</code> with <code>PRESENTON_PUBLIC_URL</code> or the forwarded host.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The MCP server is disabled entirely when <code>PRESENTON_ELECTRON</code> is truthy (<code>is_mcp_server_enabled</code>, <code>servers/fastapi/mcp_server.py:319</code>). It also enforces a host allowlist (<code>localhost</code>, <code>127.0.0.1</code>, <code>::1</code>) and origin protection. That is why nginx rewrites the <code>Host</code> header to <code>localhost:8001</code> for <code>/mcp</code>. A reverse proxy in front of the MCP port that preserves the public <code>Host</code> header gets rejected.</p>
+</div>
+<h2 id="step-12-nginx-served-paths">Step 12: nginx-served paths<a class="headerlink" href="#step-12-nginx-served-paths" title="Permanent link">&para;</a></h2>
+<p><code>nginx.conf</code> defines one <code>server</code> listening on port 80 with <code>client_max_body_size 100M</code> at the <code>http</code> level. The <code>map</code> blocks at <code>nginx.conf:16</code> and <code>nginx.conf:20</code> preserve an outer proxy's <code>X-Forwarded-Proto</code> and <code>X-Forwarded-Host</code>, falling back to nginx's own scheme and <code>Host</code>.</p>
+<table>
+<thead>
+<tr>
+<th><code>location</code></th>
+<th>Line</th>
+<th>Target</th>
+<th>Auth</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td><code>nginx.conf:29</code></td>
+<td><code>http://localhost:3000</code> (Next.js)</td>
+<td>Next.js <code>proxy.ts</code> and layouts</td>
+<td>WebSocket upgrade headers, <code>Host $http_host</code>, 30 min read and connect timeouts. Also catches <code>/api/*</code> routes that are not v1 or v2, and <code>/redoc</code>.</td>
+</tr>
+<tr>
+<td><code>/api/v1/</code></td>
+<td><code>nginx.conf:45</code></td>
+<td><code>http://localhost:8000</code></td>
+<td>FastAPI middleware</td>
+<td><code>client_max_body_size 110M</code>; 413 handled by <code>@request_entity_too_large</code>; 30 min timeouts.</td>
+</tr>
+<tr>
+<td><code>/api/v2/</code></td>
+<td><code>nginx.conf:59</code></td>
+<td><code>http://localhost:8000</code></td>
+<td>FastAPI middleware</td>
+<td>Inherits the 100M body limit; no custom 413 page.</td>
+</tr>
+<tr>
+<td><code>@request_entity_too_large</code></td>
+<td><code>nginx.conf:71</code></td>
+<td>none</td>
+<td>none</td>
+<td>Returns 413 <code>{"detail":"File size must be less than 100MB."}</code> as JSON.</td>
+</tr>
+<tr>
+<td><code>/mcp/</code></td>
+<td><code>nginx.conf:77</code></td>
+<td><code>http://localhost:8001/mcp/</code></td>
+<td>FastMCP bearer verifier</td>
+<td><code>client_max_body_size 145M</code>; <code>Host localhost:8001</code>.</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td><code>nginx.conf:94</code></td>
+<td><code>http://localhost:8001/mcp</code></td>
+<td>FastMCP bearer verifier</td>
+<td>Same settings for the path without a trailing slash.</td>
+</tr>
+<tr>
+<td><code>/docs</code></td>
+<td><code>nginx.conf:110</code></td>
+<td><code>http://localhost:8000/docs</code></td>
+<td>FastAPI protected non-API path</td>
+<td>Swagger UI; needs a session because <code>/docs</code> is in <code>_PROTECTED_NON_API_PATHS</code>.</td>
+</tr>
+<tr>
+<td><code>/openapi.json</code></td>
+<td><code>nginx.conf:120</code></td>
+<td><code>http://localhost:8000/openapi.json</code></td>
+<td>FastAPI protected non-API path</td>
+<td>The live schema (not the static <code>openai_spec.json</code>).</td>
+</tr>
+<tr>
+<td><code>= /_auth_check</code></td>
+<td><code>nginx.conf:133</code></td>
+<td><code>http://localhost:8000/api/v1/auth/verify</code></td>
+<td>internal only</td>
+<td>Subrequest with <code>X-Original-URI</code>, <code>Cookie</code> and <code>Authorization</code> passed through; body dropped.</td>
+</tr>
+<tr>
+<td><code>/static/</code></td>
+<td><code>nginx.conf:153</code></td>
+<td><code>alias /app/servers/fastapi/static/</code></td>
+<td>public</td>
+<td><code>expires 1y</code>, <code>Cache-Control: public, immutable</code>. The trailing slash is a deliberate traversal fix (comment at <code>nginx.conf:144</code>).</td>
+</tr>
+<tr>
+<td><code>/app_data/images/</code></td>
+<td><code>nginx.conf:159</code></td>
+<td><code>alias /app_data/images/</code></td>
+<td><code>auth_request /_auth_check</code></td>
+<td><code>disable_symlinks on</code>, private one-year cache.</td>
+</tr>
+<tr>
+<td><code>/app_data/exports/</code></td>
+<td><code>nginx.conf:167</code></td>
+<td><code>alias /app_data/exports/</code></td>
+<td><code>auth_request /_auth_check</code></td>
+<td>Same.</td>
+</tr>
+<tr>
+<td><code>/app_data/uploads/</code></td>
+<td><code>nginx.conf:175</code></td>
+<td><code>alias /app_data/uploads/</code></td>
+<td><code>auth_request /_auth_check</code></td>
+<td>Same.</td>
+</tr>
+<tr>
+<td><code>/app_data/fonts/</code></td>
+<td><code>nginx.conf:183</code></td>
+<td><code>alias /app_data/fonts/</code></td>
+<td>public</td>
+<td>Matches <code>_PUBLIC_APP_DATA_PREFIXES</code> in FastAPI.</td>
+</tr>
+<tr>
+<td><code>/app_data/templates/</code></td>
+<td><code>nginx.conf:190</code></td>
+<td><code>alias /app_data/templates/</code></td>
+<td>public</td>
+<td>Same.</td>
+</tr>
+<tr>
+<td><code>/app_data/pptx-to-html/</code></td>
+<td><code>nginx.conf:197</code></td>
+<td><code>alias /app_data/pptx-to-html/</code></td>
+<td><code>auth_request /_auth_check</code></td>
+<td>Same as images.</td>
+</tr>
+<tr>
+<td><code>/app_data/pptx-to-json/</code></td>
+<td><code>nginx.conf:205</code></td>
+<td><code>alias /app_data/pptx-to-json/</code></td>
+<td><code>auth_request /_auth_check</code></td>
+<td>Same as images.</td>
+</tr>
+</tbody>
+</table>
+<pre class="mermaid"><code>flowchart LR
+    B["Browser or API client :80"] --&gt; NG["nginx"]
+    NG --&gt;|"/"| NX["Next.js :3000"]
+    NG --&gt;|"/api/v1/ and /api/v2/"| FA["FastAPI :8000"]
+    NG --&gt;|"/mcp and /mcp/"| MC["FastMCP :8001"]
+    NG --&gt;|"/docs and /openapi.json"| FA
+    NG --&gt;|"/static/"| ST["files on disk, public"]
+    NG --&gt;|"/app_data/private roots"| AR["auth_request /_auth_check"]
+    AR --&gt; FA
+    AR --&gt;|"2xx"| AD["files on disk"]
+    NG --&gt;|"/app_data/fonts and templates"| AD
+    MC --&gt; FA
+    NX --&gt;|"server-side fetch"| FA</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>nginx and FastAPI must agree on which <code>/app_data</code> roots are public. nginx hardcodes the five private roots with <code>auth_request</code> and leaves <code>fonts</code> and <code>templates</code> open; FastAPI encodes the same split in <code>PRIVATE_APP_DATA_ROOTS</code> and <code>SHARED_APP_DATA_ROOTS</code> (<code>servers/fastapi/api/v1/auth/assets.py:10</code>) and in <code>_PUBLIC_APP_DATA_PREFIXES</code>. If you add a new asset root, update all three, or nginx will serve it through <code>/</code> to Next.js, which rewrites it back to FastAPI with different auth behavior.</p>
+</div>
+<p>How these processes are started and supervised is covered in <a href="../presenton/26-docker-and-deployment/">Docker build and deployment</a> and <a href="../presenton/03-runtime-topology/">Runtime topology</a>.</p>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The snapshot declares exactly 102 FastAPI routes: 101 decorated handlers plus <code>POST /api/v1/ppt/fonts/check</code>, registered imperatively. The committed <code>openai_spec.json</code> lists 100 of them.</li>
+<li>Every full path is the concatenation of at most three router prefixes, all listed in Step 1. Five <code>/auth</code> paths are public, a fixed set of paths and prefixes is admin-only with a browser session, and everything else under <code>/api/</code> accepts any session or user API key.</li>
+<li>Webhooks fire for every <code>/generate</code> call regardless of <code>trigger_webhook</code>. Several Presenton Cloud proxy paths have no local handler.</li>
+<li>Next.js adds 11 API route files of its own (12 handlers), guarded by <code>proxy.ts</code>. Four paths are exempt from the session check there.</li>
+<li>MCP exposes at most seven tools, renamed from OpenAPI operation ids and filtered by <code>PRESENTATION_GENERATION_MODE</code>. It authenticates with <code>sk-presenton-</code> keys and calls FastAPI with a short-lived session cookie.</li>
+<li>nginx routes <code>/api/v1/</code> and <code>/api/v2/</code> to FastAPI, <code>/mcp</code> to the MCP server, <code>/static/</code> and <code>/app_data/</code> straight from disk (private roots gated by <code>/_auth_check</code>), and everything else to Next.js.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Use the <a href="../appendix-files/">File index</a> to find the source file behind any handler listed here.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../appendix-glossary/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Glossary">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Glossary
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../appendix-files/" class="md-footer__link md-footer__link--next" aria-label="Next: File index">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                File index
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

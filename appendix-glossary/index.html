@@ -1,0 +1,3020 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/appendix-glossary/">
+      
+      
+        <link rel="prev" href="../superset/40-roadmap/">
+      
+      
+        <link rel="next" href="../appendix-endpoints/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Glossary - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#glossary" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Glossary
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../presenton/25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../presenton/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../presenton/28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-how-the-core-terms-fit-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: How the core terms fit together
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-terms-a-to-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Terms A to C
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-terms-d-to-i" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Terms D to I
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-terms-l-to-o" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Terms L to O
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-terms-p-to-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Terms P to R
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-terms-s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Terms S
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-terms-t-to-z" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Terms T to Z
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gotchas-collected-from-the-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gotchas collected from the glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-how-the-core-terms-fit-together" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: How the core terms fit together
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-terms-a-to-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Terms A to C
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-terms-d-to-i" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Terms D to I
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-terms-l-to-o" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Terms L to O
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-terms-p-to-r" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Terms P to R
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-terms-s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Terms S
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-terms-t-to-z" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Terms T to Z
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gotchas-collected-from-the-glossary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gotchas collected from the glossary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="glossary">Glossary<a class="headerlink" href="#glossary" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/models/sql/*.py</code>, <code>servers/fastapi/templates/v2/**</code>, <code>servers/fastapi/api/middlewares.py</code>, <code>servers/fastapi/api/v1/auth/*.py</code>, <code>servers/fastapi/utils/process_slides.py</code>, <code>servers/fastapi/models/sse_response.py</code>, <code>servers/fastapi/mcp_server.py</code>, <code>servers/nextjs/proxy.ts</code>, <code>start.js</code>  ·  <strong>Builds on:</strong> <a href="../presenton/02-repository-tour/">Repository tour</a>, <a href="../presenton/07-data-model/">Data model</a>  ·  <strong>Time:</strong> reference, skim as needed</p>
+</div>
+<p>This glossary defines every term that has a precise meaning inside the Presenton code base or inside this book: database columns, JSON keys, template concepts, runtime processes, auth concepts, and the names of streamed events and webhook events. Each entry says what the thing is, where it lives (file and line at snapshot <code>571461f</code>), and which chapter explains it in depth. Terms are alphabetical; magic keys that start with underscores are sorted by their first letter.</p>
+<h2 id="step-1-how-the-core-terms-fit-together">Step 1: How the core terms fit together<a class="headerlink" href="#step-1-how-the-core-terms-fit-together" title="Permanent link">&para;</a></h2>
+<p>Most of the vocabulary hangs off one chain: a request produces an <strong>outline</strong>, the outline is matched to <strong>layouts</strong> of a <strong>template</strong> to form a <strong>structure</strong>, each structure entry becomes a <strong>slide</strong> whose <strong>content</strong> is generated against a layout's JSON Schema, and the slide's <strong>ui</strong> is the template layout with that content applied. Smart mode skips the template chain and stores raw HTML in <strong>html_content</strong>.</p>
+<pre class="mermaid"><code>flowchart LR
+    REQ["Request: content, files, n_slides"] --&gt; OUT["Outline (PresentationOutlineModel)"]
+    TPL["Template v2 row (template_v2)"] --&gt; LAY["layouts: SlideLayout list"]
+    LAY --&gt; SCH["json_schema per layout (get_template_schema)"]
+    OUT --&gt; STR["Structure: list of layout indexes"]
+    SCH --&gt; STR
+    STR --&gt; CON["slide.content (LLM fills schema)"]
+    CON --&gt; HYD["Asset hydration (__image_prompt__, __icon_query__)"]
+    HYD --&gt; UI["slide.ui (layout with content applied)"]
+    REQ --&gt; SMART["Smart mode"]
+    SMART --&gt; HTML["slide.html_content (layout_group smart-html)"]
+    UI --&gt; EXP["Export runtime via /pdf-maker"]
+    HTML --&gt; EXP</code></pre>
+<div class="admonition note">
+<p class="admonition-title">How to read an entry</p>
+<p>The bold-free first line is the term exactly as it appears in code or in this book. The definition gives the meaning, then the source location in inline code, then the chapter. Where two names exist for one thing (for example "block" in the UI and "merged component" in the code), both are listed and cross-referenced.</p>
+</div>
+<h2 id="step-2-terms-a-to-c">Step 2: Terms A to C<a class="headerlink" href="#step-2-terms-a-to-c" title="Permanent link">&para;</a></h2>
+<dl>
+<dt>Admin</dt>
+<dd>A user whose <code>is_superuser</code> is true. Admin-only routes are decided in <code>SessionAuthMiddleware</code> (<code>servers/fastapi/api/middlewares.py:100</code> to <code>servers/fastapi/api/middlewares.py:114</code>): everything under <code>/api/v1/admin/</code> and <code>/api/v1/ppt/codex/auth/</code>, <code>POST</code> and <code>DELETE</code> on <code>/api/v1/ppt/fonts/</code>, and five discovery or test paths. An admin must also be using a browser session (<code>method == "jwt"</code>); an admin's API key gets <code>403 Admin browser session required</code>. See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt><code>admin_slot</code></dt>
+<dd>A unique, nullable <code>String(32)</code> column on <code>user</code> (<code>servers/fastapi/models/sql/user.py:27</code>). The bootstrap and first-run setup write the value <code>"primary"</code> (<code>servers/fastapi/api/v1/auth/bootstrap.py:116</code>, <code>servers/fastapi/api/v1/auth/router.py:132</code>), so the unique constraint guarantees at most one primary admin. See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt>Alembic migration</dt>
+<dd>Schema change scripts in <code>servers/fastapi/alembic/versions/</code>, driven by <code>servers/fastapi/migrations.py</code>. They run at startup unless <code>MIGRATE_DATABASE_ON_STARTUP</code> is set to something other than <code>true</code> or <code>True</code>; the default is <code>"true"</code> (<code>servers/fastapi/migrations.py:41</code>, <code>servers/fastapi/utils/get_env.py:454</code>). Right after <code>migrate_database_on_startup</code>, <code>create_db_and_tables</code> always creates any missing tables (<code>servers/fastapi/api/lifespan.py:57</code>, <code>servers/fastapi/services/database.py:117</code>). See <a href="../presenton/07-data-model/">Data model</a>.</dd>
+<dt>API key</dt>
+<dd>A user-scoped bearer token of the form <code>sk-presenton-&lt;16 hex id&gt;.&lt;secret&gt;</code> (<code>servers/fastapi/services/api_keys.py:19</code>, <code>servers/fastapi/services/api_keys.py:35</code>). The secret must be at least 32 characters (<code>servers/fastapi/services/api_keys.py:58</code>). Default expiry is 90 days, maximum 365 (<code>servers/fastapi/services/api_keys.py:20</code>, <code>servers/fastapi/services/api_keys.py:21</code>). Rows live in <code>api_keys</code>; the full token is stored Fernet-encrypted with a key derived (SHA-256) from the auth secret so an admin can reveal it (<code>servers/fastapi/services/api_keys.py:39</code>). Next.js forwards <code>Bearer sk-presenton-*</code> requests only to FastAPI paths (<code>servers/nextjs/proxy.ts:147</code>). See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt><code>app_data</code> (APP_DATA_DIRECTORY)</dt>
+<dd>The writable data root. <code>start.js</code> refuses to start without <code>APP_DATA_DIRECTORY</code> (<code>start.js:50</code>); the Docker image sets it to <code>/app_data</code> (<code>Dockerfile:82</code>); Python falls back to <code>/tmp/presenton</code> (<code>servers/fastapi/utils/asset_directory_utils.py:24</code>). It holds <code>fastapi.db</code> (default SQLite database, <code>servers/fastapi/utils/db_utils.py:58</code>), <code>userConfig.json</code>, <code>mem0/</code>, and the asset roots <code>images</code>, <code>exports</code>, <code>uploads</code>, <code>pptx-to-html</code>, <code>pptx-to-json</code> (private, per user under <code>users/&lt;owner_id&gt;/</code>) and <code>fonts</code>, <code>templates</code> (shared) (<code>servers/fastapi/api/v1/auth/assets.py:10</code> to <code>servers/fastapi/api/v1/auth/assets.py:17</code>). URLs under <code>/app_data/</code> map onto it. See <a href="../presenton/03-runtime-topology/">Runtime topology</a>.</dd>
+<dt>Asset hydration</dt>
+<dd>The step that turns placeholder asset keys in generated slide content into real URLs. <code>process_slide_and_fetch_assets</code> (<code>servers/fastapi/utils/process_slides.py:173</code>) walks the content for dicts carrying an image prompt or icon query (keys in <code>servers/fastapi/utils/process_slides.py:22</code> and <code>servers/fastapi/utils/process_slides.py:23</code>), generates or searches the asset, and writes <code>image_url</code>/<code>icon_url</code> (template slides) or <code>__image_url__</code>/<code>__icon_url__</code> (legacy slides) back (<code>servers/fastapi/utils/process_slides.py:110</code>). <code>process_slide_add_placeholder_assets</code> (<code>servers/fastapi/utils/process_slides.py:427</code>) fills placeholders first so the UI can render before assets arrive. The result is streamed as <code>slide_assets</code> events. See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Async task</dt>
+<dd>A row in <code>async_tasks</code> (<code>servers/fastapi/models/sql/async_task.py:16</code>) that tracks background work started by an <code>/async</code> endpoint. Id format <code>task-&lt;64 hex&gt;</code>; <code>status</code> is <code>pending</code>, <code>completed</code> or <code>error</code> (<code>servers/fastapi/enums/async_task_status.py:4</code>); <code>data</code> carries progress and results; <code>payload</code> is hidden from responses (<code>exclude=True</code>). Known <code>type</code> values: <code>presentation.generate</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:137</code>), <code>presentation.smart.generate</code> (<code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:39</code>), <code>template.create</code> (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:100</code>). Polled at <code>GET /api/v1/async-tasks/status/{id}</code>. Tasks left <code>pending</code> by a restart are failed at startup by <code>fail_interrupted_async_tasks</code>. See <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</dd>
+<dt><code>async_presentation_generation_tasks</code></dt>
+<dd>The older task table (<code>servers/fastapi/models/sql/async_presentation_generation_status.py:13</code>), still created and owner-scoped (<code>servers/fastapi/services/database.py:62</code>). New code writes <code>async_tasks</code>. See <a href="../presenton/07-data-model/">Data model</a>.</dd>
+<dt><code>auth_version</code> (<code>av</code> claim)</dt>
+<dd>Integer column on <code>user</code>, default 1 (<code>servers/fastapi/models/sql/user.py:43</code>). It is written into every session JWT as the <code>av</code> claim (<code>servers/fastapi/api/v1/auth/users.py:167</code>) and compared on read by <code>VersionedJWTStrategy</code> (<code>servers/fastapi/api/v1/auth/users.py:136</code>), so bumping it (password reset, for example) invalidates all existing sessions of that user. See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt><code>AuthPrincipal</code> (principal)</dt>
+<dd>The frozen dataclass describing who is calling: <code>user_id</code>, <code>username</code>, <code>is_admin</code>, and <code>method</code> (<code>"jwt"</code> or <code>"api_key"</code>) (<code>servers/fastapi/api/v1/auth/principal.py:15</code>). <code>resolve_request_principal</code> tries the <code>presenton_session</code> cookie first, then an <code>Authorization: Bearer</code> API key (<code>servers/fastapi/api/v1/auth/principal.py:22</code>). The middleware stores it at <code>request.state.auth_principal</code> (<code>servers/fastapi/api/middlewares.py:120</code>). See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt>Blank presentation</dt>
+<dd>A deck created by <code>POST /api/v1/ppt/presentation/create/blank</code> with one empty slide. Its slides use <code>layout_group</code> <code>"blank"</code> (no template) and layout id <code>__blank_slide__</code>, and the <code>ui</code> is a single decorative white 1280 by 720 polygon (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:138</code> to <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:160</code>). See <a href="../presenton/21-user-journey/">User journey</a>.</dd>
+<dt>Block</dt>
+<dd>The UI and chat-tool word for a <strong>merged component</strong>. <code>POST /api/v1/ppt/template/generate-blocks</code> writes <code>template.merged_components</code> (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:1906</code>), and the chat tool <code>getAvailableBlocks</code> lists them (<code>servers/fastapi/services/chat/tools.py:186</code>). See <a href="../presenton/18-custom-templates/">Custom templates from PPTX</a>.</dd>
+<dt>Chat assistant</dt>
+<dd>The in-editor assistant implemented by <code>PresentationChatService</code> (<code>servers/fastapi/services/chat/service.py:74</code>). It runs an LLM tool loop of at most <code>MAX_TOOL_ROUNDS = 40</code> rounds (<code>servers/fastapi/services/chat/service.py:45</code>), persists turns in <code>chat_history_messages</code>, and streams <code>chunk</code>, <code>status</code>, <code>trace</code> and <code>complete</code> events from <code>POST /api/v1/ppt/chat/message/stream</code> (<code>servers/fastapi/api/v1/ppt/endpoints/chat.py:124</code>). See <a href="../presenton/14-editing-and-chat/">Editing and chat assistant</a>.</dd>
+<dt>Chat tools</dt>
+<dd>The camelCase function tools the chat model may call, defined in <code>ChatTools</code> (<code>servers/fastapi/services/chat/tools.py:84</code>): for example <code>addOutline</code>, <code>addNewSlide</code>, <code>getAvailableLayouts</code>, <code>getContentSchemaFromLayoutId</code>, <code>searchSlide</code>, <code>saveSlide</code>, <code>addElement</code>, <code>addInfographic</code>, <code>addComponent</code>, <code>generateAssets</code>, and for Smart decks <code>getSmartPresentationContext</code>. Their strict input schemas live in <code>servers/fastapi/services/chat/schemas.py</code>. See <a href="../presenton/14-editing-and-chat/">Editing and chat assistant</a>.</dd>
+<dt>Codex (ChatGPT sign-in)</dt>
+<dd>The <code>codex</code> LLM provider (<code>servers/fastapi/enums/llm_provider.py:20</code>), which uses a ChatGPT account through an OAuth PKCE flow instead of an API key. The Python port listens for the callback on <code>http://localhost:1455/auth/callback</code> (<code>servers/fastapi/utils/oauth/openai_codex.py:25</code>). Its routes under <code>/api/v1/ppt/codex/auth/</code> are admin-only. Token fields such as <code>CODEX_ACCESS_TOKEN</code> are "OAuth managed" and protected from ordinary settings saves (<code>servers/fastapi/services/provider_settings.py:17</code>). See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt>Community designs (<code>community_design_ids</code>)</dt>
+<dd>Presentations published to the Presenton community catalog, fetched from <code>https://api.presenton.ai/api/v3/community/presentations</code> (<code>servers/fastapi/services/community_presentations.py:15</code>). A Smart request can name up to 3 of them (<code>MAX_COMMUNITY_REFERENCES</code>), of which at most 6 slides and 90,000 characters are loaded as design references (<code>servers/fastapi/services/community_presentations.py:18</code> to <code>servers/fastapi/services/community_presentations.py:20</code>). The chosen ids are stored in <code>presentations.community_design_ids</code> (<code>servers/fastapi/models/sql/presentation.py:79</code>). Enabled by default; disabled when <code>PRESENTON_COMMUNITY_ENABLED</code> is <code>0</code>, <code>false</code>, <code>no</code> or <code>off</code> (<code>servers/fastapi/utils/get_env.py:32</code>). See <a href="../presenton/13-smart-mode/">Smart mode</a>.</dd>
+<dt>Component</dt>
+<dd>In Template v2, a named, positioned group of elements inside a slide layout: <code>Component(id, description, position, elements)</code> with at least one element (<code>servers/fastapi/templates/v2/models/layouts.py:54</code>). Component ids must be unique within a layout (<code>servers/fastapi/templates/v2/models/layouts.py:104</code>). A built-in layout such as the first layout of <code>templates/general/template.json</code> is just an id, a description and a list of components (for example <code>background_canvas</code>, <code>image_showcase_card</code>, <code>right_text_panel</code>). See <a href="../presenton/16-template-v2-format/">Template v2 format</a>.</dd>
+<dt><code>CONCURRENT_SERVICE</code></dt>
+<dd>A tiny fire-and-forget scheduler around <code>asyncio</code> tasks with an optional delay (<code>servers/fastapi/services/concurrent_service.py:40</code>). Used, for example, to send webhooks without blocking the response (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3133</code>). See <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</dd>
+<dt><code>ConfigurationInitializer</code></dt>
+<dd>The Next.js client component that loads auth status, runtime config, <code>/api/user-config</code> and the Presenton account status into Redux and routes to setup when no provider is configured (<code>servers/nextjs/app/ConfigurationInitializer.tsx</code>). See <a href="../presenton/23-settings-and-auth-ui/">Settings, onboarding, auth UI</a>.</dd>
+<dt><code>content</code> (presentation)</dt>
+<dd>The user's prompt text, a required <code>str</code> column on <code>presentations</code> (<code>servers/fastapi/models/sql/presentation.py:46</code>), and the <code>content</code> field of <code>GeneratePresentationRequest</code> (<code>servers/fastapi/models/generate_presentation_request.py:9</code>). Not to be confused with slide content. See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+</dl>
+<h2 id="step-3-terms-d-to-i">Step 3: Terms D to I<a class="headerlink" href="#step-3-terms-d-to-i" title="Permanent link">&para;</a></h2>
+<dl>
+<dt>Decompose</dt>
+<dd>Turning uploaded documents into plain text files before generation. <code>POST /api/v1/ppt/files/decompose</code> (<code>servers/fastapi/api/v1/ppt/endpoints/files.py:133</code>) runs <code>DocumentsLoader</code> (<code>servers/fastapi/services/documents_loader.py:163</code>) over the temp files and returns <code>DecomposedFileInfo</code> items (<code>name</code>, <code>file_path</code>). See <a href="../presenton/11-document-ingestion/">Document ingestion</a>.</dd>
+<dt><code>decorative</code></dt>
+<dd>A required boolean on the Template v2 element models that carry content (text, image, text-list, table, chart, infographic; for example <code>servers/fastapi/templates/v2/models/elements.py:218</code>). Only elements with <code>decorative: false</code> become fields in the layout's content schema (<code>_is_editable_element</code>, <code>servers/fastapi/templates/v2/schema.py:53</code>); decorative elements are drawn as-is and never rewritten by the LLM. See <a href="../presenton/17-template-to-slide/">From template to schema to slide</a>.</dd>
+<dt>Default template (built-in template)</dt>
+<dd>One of the 16 folders under <code>templates/</code> (<code>civic</code> to <code>verdant</code>) with a <code>template.json</code>. They are discovered at import time and ordered <code>momentum, dynamic, executive, general, modern, standard, swift</code> first (<code>servers/fastapi/constants/presentation.py:25</code>), then imported into <code>template_v2</code> with <code>is_default=True</code> on every startup by <code>import_default_templates_on_startup</code> (<code>servers/fastapi/templates/default_templates.py:22</code>). Default rows have <code>owner_id</code> null and are visible to everyone (<code>servers/fastapi/services/database.py:88</code>). The REST default template name is <code>general</code> (<code>servers/fastapi/models/generate_presentation_request.py:30</code>). See <a href="../presenton/16-template-v2-format/">Template v2 format</a>.</dd>
+<dt>Derive / Edit (presentation)</dt>
+<dd>Two one-shot API operations: <code>POST /api/v1/ppt/presentation/edit</code> replaces slide content in an existing deck and re-exports it, and <code>POST /api/v1/ppt/presentation/derive</code> copies a deck first and then applies the changes (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3301</code>, <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3352</code>). Request models are in <code>servers/fastapi/models/presentation_from_template.py</code>. See <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</dd>
+<dt>Desktop guard</dt>
+<dd>The Electron-only transport check applied before any auth logic. When <code>PRESENTON_ELECTRON=true</code>, every request must arrive with a <code>Host</code> among <code>PRESENTON_DESKTOP_ORIGINS</code>, a matching <code>Origin</code> if present, and the <code>x-presenton-desktop-token</code> header or <code>presenton_desktop_session</code> cookie equal to <code>PRESENTON_DESKTOP_TOKEN</code> (compared with <code>hmac.compare_digest</code>) (<code>servers/fastapi/api/v1/auth/desktop.py:25</code>). A token shorter than 32 characters, or no configured origins, yields <code>503 Desktop session unavailable</code>; a wrong <code>Host</code> or <code>Origin</code> yields <code>403 Forbidden desktop origin</code>, and a wrong token <code>401</code>. The same guard exists in <code>servers/nextjs/lib/desktop-auth.ts</code> and the token is minted per launch with 32 random bytes in <code>electron/app/utils/desktop-auth.ts</code>. See <a href="../presenton/27-electron/">Electron desktop app</a>.</dd>
+<dt><code>DISABLE_AUTH</code></dt>
+<dd>Environment flag that turns off login. <code>SessionAuthMiddleware</code> then skips all principal checks and only consults the Presenton Cloud proxy (<code>servers/fastapi/api/middlewares.py:59</code>). Electron runs in this mode, so desktop rows keep <code>owner_id</code> null. See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt>Element</dt>
+<dd>The smallest Template v2 drawing unit, a Pydantic model discriminated by <code>type</code>: <code>text</code>, <code>container</code>, <code>image</code>, <code>text-list</code>, <code>table</code>, <code>vector</code>, <code>chart</code>, <code>infographic</code>, <code>flex</code>, <code>grid</code>, <code>group</code> (union <code>SlideElement</code> at <code>servers/fastapi/templates/v2/models/elements.py:624</code>). Most carry <code>position</code>, <code>size</code>, rotation and styling; content-bearing ones also carry the schema fields <code>decorative</code>, <code>name</code>, and limits such as <code>max_length</code>/<code>min_length</code> for text (<code>servers/fastapi/templates/v2/models/elements.py:217</code> to <code>servers/fastapi/templates/v2/models/elements.py:221</code>). The frontend draws them with Konva. See <a href="../presenton/16-template-v2-format/">Template v2 format</a>.</dd>
+<dt>export-core (<code>@presenton/export-core</code>)</dt>
+<dd>The npm package that actually renders exports. Its version is pinned by <code>presentationExportVersion</code> (<code>v1.0.51</code>) in the root <code>package.json:4</code>, installed into <code>presentation-export/</code> by <code>scripts/sync-presentation-export.cjs</code>, and invoked through <code>runTask</code> by <code>scripts/run-presentation-export.mjs:116</code>. See <a href="../presenton/24-export-pipeline/">PPTX and PDF export</a>.</dd>
+<dt>Export runtime</dt>
+<dd>The Node child process FastAPI launches for any headless-browser task. <code>ExportTaskService</code> (<code>servers/fastapi/services/export_task_service.py:121</code>) writes a task JSON and runs the runner with task <code>type</code> values <code>export</code>, <code>pptx-to-html</code>, <code>pptx-to-json</code>, <code>html-to-image</code>, <code>html-to-images</code>, <code>json-to-image</code>, <code>json-to-images</code> (<code>servers/fastapi/services/export_task_service.py:439</code> to <code>servers/fastapi/services/export_task_service.py:692</code>). In Docker the package lives at <code>EXPORT_PACKAGE_ROOT=/app/presentation-export</code> (<code>Dockerfile:84</code>). See <a href="../presenton/24-export-pipeline/">PPTX and PDF export</a>.</dd>
+<dt><code>exportCookie</code> / <code>x-export-cookie</code></dt>
+<dd>How the headless export browser authenticates. <code>_build_presentation_export_url</code> puts the caller's cookie header in the URL fragment as <code>exportCookie</code> (<code>servers/fastapi/utils/export_utils.py:36</code>), so it never reaches a server log. The <code>/pdf-maker</code> page reads it and sends it as the <code>x-export-cookie</code> header to <code>/api/export-presentation-data/{id}</code> (<code>servers/nextjs/app/api/export-presentation-data/[id]/route.ts:29</code>). See <a href="../presenton/24-export-pipeline/">PPTX and PDF export</a>.</dd>
+<dt>FastEmbed</dt>
+<dd>The local ONNX embedding library used twice: the icon search vector store (<code>FastembedEmbeddingModel.AllMiniLML6V2</code> in <code>servers/fastapi/services/icon_finder_service.py:28</code>, cache dir overridable with <code>PRESENTON_FASTEMBED_ICON_CACHE_DIR</code>) and Mem0's default embedder (<code>BAAI/bge-small-en-v1.5</code>, 384 dims, <code>servers/fastapi/services/mem0_oss_memory.py:105</code> to <code>servers/fastapi/services/mem0_oss_memory.py:109</code>). Weights are pre-downloaded at image build by <code>servers/fastapi/scripts/warm_fastembed_cache.py</code>. See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>FastMCP</dt>
+<dd>The Python framework that turns the committed OpenAPI document into an MCP server (<code>servers/fastapi/mcp_server.py</code>). See <strong>MCP</strong>.</dd>
+<dt>Fonts (presentation <code>fonts</code>, font uploads)</dt>
+<dd>Two things. The <code>presentations.fonts</code> JSON column (<code>servers/fastapi/models/sql/presentation.py:74</code>) maps font family names to stylesheet URLs, for example <code>{"Poppins": "https://fonts.googleapis.com/css2?family=Poppins..."}</code> as in <code>templates/general/template.json</code>; Smart streams send it as a <code>fonts</code> event. Separately, user-uploaded font files are stored in <code>font_uploads</code> with parsed family, weight and width (<code>servers/fastapi/models/sql/font_upload.py:12</code>), and only admins may upload or delete them. See <a href="../presenton/19-themes-and-fonts/">Themes and fonts</a>.</dd>
+<dt>Generation mode (presentation)</dt>
+<dd><code>presentations.generation_mode</code>, either <code>standard</code> or <code>smart</code> (<code>servers/fastapi/models/sql/presentation.py:75</code>). It decides whether <code>GET /presentation/stream/{id}</code> runs the template pipeline or delegates to <code>stream_smart_presentation</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2289</code>). See <a href="../presenton/13-smart-mode/">Smart mode</a>.</dd>
+<dt>Generation mode (deployment, <code>PRESENTATION_GENERATION_MODE</code>)</dt>
+<dd>Deployment switch with values <code>both</code> (default), <code>standard</code> or <code>smart</code> (<code>servers/fastapi/utils/get_env.py:24</code>). It hides UI entry points and decides which MCP tools are exposed (<code>servers/fastapi/mcp_server.py:113</code>). See <a href="../presenton/13-smart-mode/">Smart mode</a>.</dd>
+<dt>Generation profile</dt>
+<dd>An <code>llmai</code> <code>GenerationProfile</code> that sets default output-token budgets. Presenton reads <code>LLM_GENERATION_PROFILE</code> (default <code>balanced</code>) in <code>get_generation_defaults</code> (<code>servers/fastapi/utils/llm_config.py:189</code>) together with <code>LLM_MAX_OUTPUT_TOKENS</code> and the <code>LLM_REASONING_*</code> settings. <code>POST /api/v1/ppt/generation/defaults</code> reports the token limits that the profiles <code>BALANCED</code> and <code>MODEL_MAX</code> would produce for a provider and model (<code>servers/fastapi/api/v1/ppt/endpoints/generation.py:27</code>). See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt><code>generation_metrics</code> (SSE)</dt>
+<dd>A Smart-stream event carrying text generation metrics, emitted periodically (<code>SMART_GENERATION_METRICS_INTERVAL_SECONDS = 5.0</code>, <code>servers/fastapi/utils/llm_calls/generate_smart_presentation.py:50</code>) as <code>{"type": "generation_metrics", ...}</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2169</code>). See <a href="../presenton/10-streaming/">Streaming (SSE)</a>.</dd>
+<dt><code>html_content</code></dt>
+<dd>Optional text column on <code>slides</code> (<code>servers/fastapi/models/sql/slide.py:27</code>) holding a Smart slide's full HTML section. It is rendered in the browser with the pinned Tailwind and Chart.js runtimes (<code>servers/nextjs/app/(presentation-generator)/components/SmartHtmlSlide.tsx</code>). Standard slides leave it null. See <a href="../presenton/13-smart-mode/">Smart mode</a>.</dd>
+<dt>Icon query (<code>__icon_query__</code>)</dt>
+<dd>The key the slide-content schema uses to ask for an icon by meaning. Accepted spellings are <code>__icon_query__</code>, <code>icon_query</code> and <code>query</code> (<code>servers/fastapi/utils/process_slides.py:23</code>). Asset hydration resolves it with <code>ICON_FINDER_SERVICE.search_icons</code> (<code>servers/fastapi/services/icon_finder_service.py:179</code>) to a static SVG in the requested icon weight. See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Icon weight (<code>icon_type</code>)</dt>
+<dd>The Phosphor style used for icons: <code>bold</code> (default), <code>duotone</code>, <code>fill</code>, <code>light</code>, <code>regular</code>, <code>thin</code> (<code>servers/fastapi/utils/icon_weights.py:5</code> to <code>servers/fastapi/utils/icon_weights.py:10</code>). Stored on the layout model as both <code>icon_type</code> and <code>icon_weight</code> (<code>servers/fastapi/templates/presentation_layout.py:21</code>) and resolved per template by <code>_template_icon_type</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:250</code>). See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Image prompt (<code>__image_prompt__</code>)</dt>
+<dd>The key the slide-content schema uses to ask for an image. Accepted spellings are <code>__image_prompt__</code>, <code>image_prompt</code> and <code>prompt</code> (<code>servers/fastapi/utils/process_slides.py:22</code>). The value becomes an <code>ImagePrompt</code> (<code>servers/fastapi/models/image_prompt.py</code>) with optional target width and height taken from the template element (<code>image_target_sizes_from_template</code>, <code>servers/fastapi/utils/process_slides.py:35</code>). See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Image provider</dt>
+<dd>Where images come from: <code>pexels</code>, <code>pixabay</code> (stock search), <code>gemini_flash</code>, <code>nanobanana_pro</code>, <code>gpt-image-2</code>, <code>gpt-image-1.5</code> (hosted generation), <code>comfyui</code>, <code>open_webui</code>, <code>openai_compatible</code> (self-hosted) (<code>servers/fastapi/enums/image_provider.py:4</code>). Dispatch is in <code>ImageGenerationService</code> (<code>servers/fastapi/services/image_generation_service.py:132</code>). See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt><code>ImageAsset</code> (image library)</dt>
+<dd>Table of generated or uploaded images with <code>path</code>, <code>is_uploaded</code> and <code>extras</code> (<code>servers/fastapi/models/sql/image_asset.py:12</code>). There is no explicit <code>__tablename__</code>, so the table is SQLModel's default <code>imageasset</code> (created in <code>servers/fastapi/alembic/versions/00b3c27a13bc_init.py:34</code>). It is read and written by the image endpoints in <code>servers/fastapi/api/v1/ppt/endpoints/images.py</code>. See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Infographic</dt>
+<dd>A Template v2 element type (<code>type: "infographic"</code>) with 27 kinds from <code>progress_bar</code> and <code>gauge</code> to <code>org_chart</code>, <code>decision_tree</code> and <code>mind_map</code> (<code>InfographicType</code>, <code>servers/fastapi/templates/v2/models/elements.py:427</code>). Defaults and data normalization per kind are in <code>servers/fastapi/utils/infographic_catalog.py</code>. See <a href="../presenton/14-editing-and-chat/">Editing and chat assistant</a>.</dd>
+<dt><code>instructions</code></dt>
+<dd>Free-text extra guidance from the user, stored on <code>presentations.instructions</code> (<code>servers/fastapi/models/sql/presentation.py:67</code>) and injected into outline and slide prompts. See <a href="../presenton/09-prompts-and-schemas/">Prompts and schemas</a>.</dd>
+<dt><code>is_active</code> / <code>is_superuser</code> (user flags)</dt>
+<dd>Boolean columns on the <code>user</code> table (<code>servers/fastapi/models/sql/user.py:31</code> to <code>servers/fastapi/models/sql/user.py:39</code>). <code>is_superuser</code> is what the rest of the code calls "admin": <code>AuthPrincipal.is_admin</code> is copied from it (<code>servers/fastapi/api/v1/auth/principal.py:34</code>). See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+</dl>
+<h2 id="step-4-terms-l-to-o">Step 4: Terms L to O<a class="headerlink" href="#step-4-terms-l-to-o" title="Permanent link">&para;</a></h2>
+<dl>
+<dt>Layout (slide layout)</dt>
+<dd>One slide design inside a template. In the stored template it is a <code>SlideLayout(id, description, components)</code> (<code>servers/fastapi/templates/v2/models/layouts.py:98</code>). For generation it is reduced to a <code>SlideLayoutModel(id, name, description, json_schema)</code> (<code>servers/fastapi/templates/presentation_layout.py:11</code>) by <code>_build_template_layout_model</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:410</code>). On a slide row, <code>slides.layout</code> holds the layout id (<code>servers/fastapi/models/sql/slide.py:24</code>). See <a href="../presenton/17-template-to-slide/">From template to schema to slide</a>.</dd>
+<dt>Layout (presentation <code>layout</code> column)</dt>
+<dd><code>presentations.layout</code> (<code>servers/fastapi/models/sql/presentation.py:65</code>) stores a copy of the template's <code>layouts</code> JSON with <code>name</code>, <code>template_id</code>, <code>icon_type</code> and <code>icon_weight</code> added (<code>_copy_template_layout_payload</code>, <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:232</code>). Copying it decouples a deck from later edits to its template. See <a href="../presenton/07-data-model/">Data model</a>.</dd>
+<dt>Layout group (<code>layout_group</code>)</dt>
+<dd>Required string on <code>slides</code> (<code>servers/fastapi/models/sql/slide.py:23</code>) naming the family a slide's layout belongs to. Values in this snapshot: the template id for template slides (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1815</code>), <code>"blank"</code> for blank decks, and <code>"smart-html"</code> for Smart slides (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2062</code>). See <a href="../presenton/07-data-model/">Data model</a>.</dd>
+<dt>LiteParse</dt>
+<dd><code>@llamaindex/liteparse</code>, the Node document parser used for PDFs and other documents. <code>LiteParseService</code> (<code>servers/fastapi/services/liteparse_service.py:67</code>) runs <code>liteparse_runner.mjs</code> with <code>node</code> as a subprocess, with a 600-second default timeout and <code>LITEPARSE_DPI</code> (clamped 72 to 600) and <code>LITEPARSE_NUM_WORKERS</code> settings (<code>servers/fastapi/services/liteparse_service.py:68</code> to <code>servers/fastapi/services/liteparse_service.py:78</code>). See <a href="../presenton/11-document-ingestion/">Document ingestion</a>.</dd>
+<dt><code>llmai</code></dt>
+<dd>The provider-agnostic LLM client library Presenton depends on (<code>llmai==0.3.15</code> in <code>servers/fastapi/pyproject.toml</code>). It supplies <code>GenerationDefaults</code>, <code>GenerationProfile</code>, <code>prepare_generation</code> and model capabilities (<code>servers/fastapi/api/v1/ppt/endpoints/generation.py:2</code>). Per-provider client configuration is built in <code>servers/fastapi/utils/llm_config.py</code>. The library source is not part of this repository; its internals are not covered here. See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt>LLM provider</dt>
+<dd>The selected text model backend, stored in config key <code>LLM</code>. The enum lists 16: <code>ollama</code>, <code>deepseek</code>, <code>openai</code>, <code>google</code>, <code>vertex</code>, <code>azure</code>, <code>bedrock</code>, <code>openrouter</code>, <code>fireworks</code>, <code>together</code>, <code>cerebras</code>, <code>anthropic</code>, <code>litellm</code>, <code>lmstudio</code>, <code>custom</code>, <code>codex</code> (<code>servers/fastapi/enums/llm_provider.py:4</code>). The value <code>presenton</code> (Presenton Cloud) is handled outside this enum by the cloud proxy (<code>servers/fastapi/services/presenton_cloud_proxy.py:439</code>). See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt><code>MAX_NUMBER_OF_SLIDES</code></dt>
+<dd>Hard cap of 50 slides (<code>servers/fastapi/constants/presentation.py:4</code>), enforced on outlines (<code>max_length</code> in <code>servers/fastapi/models/presentation_outline_model.py:27</code>) and on Smart decks (<code>MAX_SMART_SLIDE_COUNT</code>). See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+<dt><code>MAX_OUTLINE_WORDS</code></dt>
+<dd>Word limit per outline slide, default 100, read once from the environment at import (<code>servers/fastapi/constants/presentation.py:5</code> to <code>servers/fastapi/constants/presentation.py:23</code>) and enforced by <code>normalize_outline_content</code>. See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+<dt>MCP (Model Context Protocol server)</dt>
+<dd>A separate process on port 8001 (<code>servers/fastapi/mcp_server.py:431</code>) that exposes a small allowlist of REST routes as tools, renamed to <code>start_standard_presentation</code>, <code>start_smart_presentation</code>, <code>list_templates</code>, <code>upload_template_assets</code>, <code>start_template_generation</code>, <code>upload_files</code>, <code>get_job_status</code> (<code>servers/fastapi/mcp_server.py:101</code>). It is built from the committed <code>openai_spec.json</code>, authenticates with the same API keys (<code>PresentonTokenVerifier</code>, <code>servers/fastapi/mcp_server.py:285</code>), mints a one-hour internal session for upstream calls (<code>servers/fastapi/mcp_server.py:39</code>), and is disabled in Electron (<code>servers/fastapi/mcp_server.py:319</code>). nginx proxies <code>/mcp</code>. See <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</dd>
+<dt>Mem0</dt>
+<dd>The open-source memory layer used to give the chat assistant per-presentation context. <code>Mem0PresentationMemoryService</code> (<code>servers/fastapi/services/mem0_presentation_memory_service.py:18</code>) stores generation context, outlines and slide edits and retrieves at most <code>MEM0_TOP_K</code> (8) memories truncated to <code>MEM0_MAX_CONTEXT_CHARS</code> (6000). Storage defaults to <code>&lt;app_data&gt;/mem0</code> with a local Qdrant path and <code>history.db</code> (<code>servers/fastapi/services/mem0_oss_memory.py:94</code> to <code>servers/fastapi/services/mem0_oss_memory.py:103</code>). Turned off with <code>MEM0_ENABLED=false</code>, and disabled automatically if the spaCy model (<code>MEM0_SPACY_MODEL</code>, default <code>en_core_web_sm</code>) cannot be loaded, unless <code>MEM0_REQUIRE_SPACY_MODEL=false</code> (<code>servers/fastapi/services/mem0_oss_memory.py:63</code>). See <a href="../presenton/14-editing-and-chat/">Editing and chat assistant</a>.</dd>
+<dt>Merged component</dt>
+<dd>A deduplicated component shared across layouts: <code>MergedComponent(id, description, variants)</code> where each variant is a <code>Component</code> (<code>servers/fastapi/templates/v2/models/layouts.py:81</code>). Ids must be unique (<code>servers/fastapi/templates/v2/models/layouts.py:91</code>). Stored in <code>template_v2.merged_components</code>; the general template has 15. Called "blocks" in the UI. See <a href="../presenton/16-template-v2-format/">Template v2 format</a>.</dd>
+<dt>nginx <code>auth_request</code></dt>
+<dd>The mechanism that protects files nginx serves directly from disk. Private <code>/app_data/</code> locations call the internal <code>/_auth_check</code> location, which proxies to FastAPI <code>GET /api/v1/auth/verify</code> with the original cookie and Authorization header (<code>nginx.conf:133</code> to <code>nginx.conf:142</code>). <code>/app_data/fonts/</code> and <code>/app_data/templates/</code> are public. See <a href="../presenton/03-runtime-topology/">Runtime topology</a>.</dd>
+<dt>Ollama</dt>
+<dd>Local model server and LLM provider. <code>start.js</code> can start <code>ollama serve</code> inside the container (<code>start.js:662</code>); <code>/api/v1/ppt/ollama/*</code> lists curated and pulled models and streams pulls, and the pull and "available" routes are admin-only. See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt><code>openai_spec.json</code></dt>
+<dd>A committed, minified OpenAPI document of the FastAPI app (<code>servers/fastapi/openai_spec.json</code>), written by <code>servers/fastapi/scripts/generate_openapi_spec.py</code> and loaded by the MCP server at import (<code>servers/fastapi/mcp_server.py:281</code>). It is not regenerated at runtime. See <a href="../appendix-endpoints/">Endpoint index</a>.</dd>
+<dt>Outline</dt>
+<dd>The first generation artifact: an ordered list of slide outlines, each a Markdown <code>content</code> string limited to <code>MAX_OUTLINE_WORDS</code> words (<code>SlideOutlineModel</code>, <code>servers/fastapi/models/presentation_outline_model.py:8</code>; <code>PresentationOutlineModel</code>, <code>servers/fastapi/models/presentation_outline_model.py:24</code>). Stored as JSON in <code>presentations.outlines</code> (<code>servers/fastapi/models/sql/presentation.py:51</code>) and streamed from <code>GET /api/v1/ppt/outlines/stream/{id}</code> (<code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:84</code>). See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+<dt><code>owner_id</code> (owner scoping)</dt>
+<dd>Nullable foreign key to <code>user.id</code> with <code>ON DELETE CASCADE</code> on every user-owned table (for example <code>servers/fastapi/models/sql/presentation.py:25</code>). It defaults to <code>get_current_owner_id()</code>, a <code>ContextVar</code> set by the middleware for the duration of a request (<code>servers/fastapi/api/v1/auth/context.py:5</code>, <code>servers/fastapi/api/middlewares.py:127</code>). Two SQLAlchemy events enforce isolation: <code>do_orm_execute</code> adds <code>owner_id == current</code> to every SELECT on the strict models, and lets <code>template_v2</code> also match default rows (<code>servers/fastapi/services/database.py:67</code>); <code>before_flush</code> stamps new rows (<code>servers/fastapi/services/database.py:100</code>). The field is excluded from API responses (<code>exclude=True</code>). See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+</dl>
+<h2 id="step-5-terms-p-to-r">Step 5: Terms P to R<a class="headerlink" href="#step-5-terms-p-to-r" title="Permanent link">&para;</a></h2>
+<dl>
+<dt><code>pdf-maker</code></dt>
+<dd>The Next.js page <code>/pdf-maker?id=&lt;presentation id&gt;</code> (<code>servers/nextjs/app/(export)/pdf-maker/page.tsx</code>) that the export runtime opens in a headless browser. It renders every slide at print size; the export runtime then produces the PDF or PPTX from it. The proxy treats <code>/pdf-maker</code> specially: an <code>exportSession</code> query parameter is turned into a <code>presenton_session</code> cookie and stripped by redirect (<code>servers/nextjs/proxy.ts:114</code>). See <a href="../presenton/24-export-pipeline/">PPTX and PDF export</a>.</dd>
+<dt>Phosphor icons</dt>
+<dd>The icon set bundled with Presenton: <code>servers/fastapi/assets/icons.json</code> declares the set label "Phosphor Icons", and <code>servers/fastapi/static/icons/&lt;weight&gt;/</code> holds the SVGs (1,512 files in <code>bold/</code> alone, named like <code>acorn-bold.svg</code>). A missing icon path returns <code>static/icons/placeholder.svg</code> instead of 404 (<code>servers/fastapi/api/main.py:107</code>). See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Prepare (presentation)</dt>
+<dd><code>POST /api/v1/ppt/presentation/prepare</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1840</code>): the step after outline editing that resolves the chosen template layout, computes the structure (including TOC slides) and saves both on the presentation, returning only <code>presentation_id</code>. The UI then opens <code>/presentation?id=...&amp;stream=true</code>. See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+<dt>Presentation version (<code>v1-standard</code>, <code>v2-standard</code>)</dt>
+<dd><code>PresentationVersion</code> enum stored in <code>presentations.version</code> (<code>servers/fastapi/models/sql/presentation.py:16</code>). <code>v2-standard</code> is every deck created by this snapshot, Standard and Smart alike (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1747</code>). <code>v1-standard</code> is the value the migration back-fills for decks made before Template v2 (<code>servers/fastapi/alembic/versions/6e4a1b2c3d5f_add_template_v2_and_presentation_version.py:22</code>). The UI refuses to open v1 decks ("This deck was created in an older Presenton version", <code>servers/nextjs/app/(presentation-generator)/presentation/hooks/usePresentationData.ts:33</code>). See <a href="../presenton/07-data-model/">Data model</a>.</dd>
+<dt>Presenton Cloud (<code>presenton</code> provider)</dt>
+<dd>Optional hosted service at <code>https://api.presenton.ai</code> (<code>servers/fastapi/utils/get_env.py:7</code>). An admin links an account through an OAuth device flow under <code>/api/v1/auth/presenton/*</code>; the encrypted token sits in the <code>presenton_cloud_provider</code> singleton. When provider settings have <code>LLM == "presenton"</code>, <code>maybe_proxy_presenton_cloud_request</code> forwards selected generation, edit, Smart and asset paths to the cloud and persists results locally (<code>servers/fastapi/services/presenton_cloud_proxy.py:407</code>). See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt><code>presenton_session</code></dt>
+<dd>The browser session cookie (<code>SESSION_COOKIE_NAME</code>, <code>servers/fastapi/api/v1/auth/config.py:11</code>) holding a JWT with a 30-day lifetime (<code>SESSION_TTL_SECONDS</code>, <code>servers/fastapi/api/v1/auth/config.py:12</code>). Set by <code>POST /api/v1/auth/login</code> and setup, removed by logout. See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt><code>properties</code> (slide)</dt>
+<dd>Nullable JSON column on <code>slides</code> (<code>servers/fastapi/models/sql/slide.py:29</code>) used by the frontend as a per-item map of image display properties keyed by item index; the <code>updateImageProperties</code> reducer writes <code>slide.properties[itemIndex]</code> (<code>servers/nextjs/store/slices/presentationGeneration.ts:473</code>). The backend copies it but does not interpret it. See <a href="../presenton/22-slide-editor/">Slide editor</a>.</dd>
+<dt>Provider settings</dt>
+<dd>The <code>provider_settings</code> table, a singleton row with <code>id = 1</code> and a <code>config</code> JSON blob holding the text, image and web-search provider configuration (<code>servers/fastapi/models/sql/provider_settings.py:10</code>). <code>servers/fastapi/services/provider_settings.py</code> sanitizes, merges and saves it, mirrors it to <code>userConfig.json</code>, and migrates from the file at startup (<code>migrate_provider_settings_from_file</code>, <code>servers/fastapi/services/provider_settings.py:103</code>). Admins edit it through <code>/api/v1/admin/</code>. See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt><code>raw_layouts</code></dt>
+<dd>The intermediate template form produced when a PPTX is converted to JSON by the export runtime: <code>RawSlideLayouts(layouts=[RawSlideLayout(id, description, elements)])</code> (<code>servers/fastapi/templates/v2/models/layouts.py:44</code>, <code>servers/fastapi/api/v1/ppt/endpoints/template.py:964</code>). Flat element lists, before component grouping. Stored in <code>template_v2.raw_layouts</code>; null for built-in templates. See <a href="../presenton/18-custom-templates/">Custom templates from PPTX</a>.</dd>
+<dt>Redux store</dt>
+<dd>The Next.js client state with four reducers: <code>presentationGeneration</code>, <code>pptGenUpload</code>, <code>userConfig</code>, <code>undoRedo</code> (<code>servers/nextjs/store/store.ts:8</code>). See <a href="../presenton/20-nextjs-architecture/">Next.js architecture</a>.</dd>
+<dt>Regenerate (Smart)</dt>
+<dd><code>POST /api/v1/ppt/presentation/{id}/regenerate</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1615</code>) deletes all slides of a generated Smart deck so that the next stream generates it from scratch. It refuses non-Smart decks, decks whose <code>can_regenerate</code> is false, and Presenton Cloud (<code>400 Presenton Cloud does not support regeneration</code>). Ordinary SSE reconnects do not reset; they resume from saved slide checkpoints. See <a href="../presenton/13-smart-mode/">Smart mode</a>.</dd>
+</dl>
+<h2 id="step-6-terms-s">Step 6: Terms S<a class="headerlink" href="#step-6-terms-s" title="Permanent link">&para;</a></h2>
+<dl>
+<dt><code>SessionAuthMiddleware</code></dt>
+<dd>The FastAPI middleware that owns authentication (<code>servers/fastapi/api/middlewares.py:29</code>). Order of checks: desktop guard, <code>DISABLE_AUTH</code> short circuit, public paths (<code>/api/v1/auth/status</code>, <code>verify</code>, <code>setup</code>, <code>login</code>, <code>logout</code>, plus <code>/app_data/fonts/</code> and <code>/app_data/templates/</code>), <code>428 Login setup is required</code> when no user exists, principal resolution, admin-only rules, owner context, Presenton Cloud proxy, and <code>/app_data</code> ownership. See <a href="../presenton/25-auth-and-multiuser/">Auth and multi-user</a>.</dd>
+<dt>Slide</dt>
+<dd>A row in <code>slides</code> (<code>servers/fastapi/models/sql/slide.py:9</code>): <code>presentation</code> (FK, cascade), <code>layout_group</code>, <code>layout</code>, <code>index</code>, <code>content</code>, <code>html_content</code>, <code>speaker_note</code>, <code>properties</code>, <code>ui</code>, <code>owner_id</code>. See <a href="../presenton/07-data-model/">Data model</a>.</dd>
+<dt>Slide content (<code>content</code>)</dt>
+<dd>The JSON object the LLM produces for one slide by filling the layout's JSON Schema (<code>slides.content</code>, <code>servers/fastapi/models/sql/slide.py:26</code>). It may contain image prompts and icon queries for hydration and the reserved <code>__speaker_note__</code> key, which is moved to <code>speaker_note</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2388</code>). For Smart slides it is just <code>{"title": ...}</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2064</code>). See <a href="../presenton/09-prompts-and-schemas/">Prompts and schemas</a>.</dd>
+<dt><code>slides_markdown</code></dt>
+<dd>Optional list on <code>GeneratePresentationRequest</code> (<code>servers/fastapi/models/generate_presentation_request.py:10</code>): one Markdown string per slide, used instead of LLM outline generation. When present it also fixes the slide count (<code>_requested_slide_count</code>, <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:190</code>). See <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</dd>
+<dt>Smart mode / Smart slide</dt>
+<dd>The template-free generation path. The LLM writes each slide directly as a 1280 by 720 HTML <code>&lt;section&gt;</code> that is sanitized (no scripts other than vetted Chart.js initializers, no event handlers or <code>javascript:</code> URLs) and stored in <code>html_content</code> with <code>layout_group</code> and <code>layout</code> both <code>"smart-html"</code>. Defaults: 8 slides, maximum 50, up to 8 generation attempts (<code>servers/fastapi/utils/llm_calls/generate_smart_presentation.py:45</code> to <code>servers/fastapi/utils/llm_calls/generate_smart_presentation.py:49</code>). REST entry points are <code>POST /api/v2/ppt/presentation/generate/smart</code> and <code>.../generate/smart/async</code>. See <a href="../presenton/13-smart-mode/">Smart mode</a>.</dd>
+<dt><code>speaker_note</code></dt>
+<dd>Optional text column on <code>slides</code> (<code>servers/fastapi/models/sql/slide.py:28</code>), filled from the <code>__speaker_note__</code> property that <code>generate_slide_content</code> adds to every slide schema (<code>servers/fastapi/utils/llm_calls/generate_slide_content.py:217</code>). See <a href="../presenton/09-prompts-and-schemas/">Prompts and schemas</a>.</dd>
+<dt>SSE event names</dt>
+<dd>
+<p>Every Presenton stream uses the single SSE event name <code>response</code> (<code>servers/fastapi/models/sse_response.py:19</code>); the kind of message is the <code>type</code> field inside the JSON <code>data</code>. The types are listed below.</p>
+<table>
+<thead>
+<tr>
+<th><code>type</code></th>
+<th>Emitted by</th>
+<th>Payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chunk</code></td>
+<td>outlines, Standard stream, chat</td>
+<td><code>chunk</code>: text fragment of a JSON document or reply</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>outlines, Smart stream, chat</td>
+<td><code>status</code>: human-readable progress</td>
+</tr>
+<tr>
+<td><code>trace</code></td>
+<td>chat</td>
+<td><code>trace</code>: tool activity object</td>
+</tr>
+<tr>
+<td><code>slide_assets</code></td>
+<td>Standard stream</td>
+<td><code>slide_index</code>, <code>slide</code>, <code>warnings</code> (for example <code>asset_generation_failed</code>)</td>
+</tr>
+<tr>
+<td><code>slide_html</code></td>
+<td>Smart stream</td>
+<td><code>index</code>, <code>slide_id</code>, <code>html</code>, <code>slide</code></td>
+</tr>
+<tr>
+<td><code>fonts</code></td>
+<td>Smart stream</td>
+<td><code>fonts</code> map</td>
+</tr>
+<tr>
+<td><code>generation_metrics</code></td>
+<td>Smart stream</td>
+<td>metrics fields</td>
+</tr>
+<tr>
+<td><code>complete</code></td>
+<td>all</td>
+<td>one key: <code>presentation</code> or <code>chat</code></td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>all, via <code>SSEErrorResponse</code> or <code>safe_sse_stream</code></td>
+<td><code>detail</code>, optional <code>source</code>, <code>status_code</code>, <code>error_type</code>, <code>retryable</code>, <code>completed_slides</code>, <code>total_slides</code> (<code>servers/fastapi/models/sse_response.py:32</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Sources: <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2362</code> to <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2464</code>, <code>servers/fastapi/api/v1/ppt/endpoints/chat.py:142</code> to <code>servers/fastapi/api/v1/ppt/endpoints/chat.py:161</code>, <code>servers/fastapi/utils/sse.py:10</code>. See <a href="../presenton/10-streaming/">Streaming (SSE)</a>.</p>
+</dd>
+<dt>Standard mode</dt>
+<dd>The template-based pipeline: outline, prepare (layout and structure), per-slide content generation, asset hydration, <code>ui</code> hydration, then optional export. See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+<dt><code>start.js</code></dt>
+<dd>The container supervisor (<code>start.js</code>). It requires <code>APP_DATA_DIRECTORY</code>, derives <code>userConfig.json</code> from it (<code>start.js:56</code>) and exports <code>USER_CONFIG_PATH</code> (<code>start.js:481</code>), then starts nginx with <code>service nginx start</code> (<code>start.js:698</code>, called at <code>start.js:733</code>) and, alongside it, FastAPI on 8000, Next.js on 3000, the MCP server on 8001 (<code>start.js:46</code> to <code>start.js:48</code>) and optionally Ollama (<code>start.js:662</code>), waiting until FastAPI, Next.js and nginx are ready (<code>start.js:682</code>). See <a href="../presenton/03-runtime-topology/">Runtime topology</a>.</dd>
+<dt>Structure</dt>
+<dd>The mapping from outline slides to template layouts: <code>PresentationStructureModel(slides: List[int])</code>, a list of layout indexes into the presentation's layout model (<code>servers/fastapi/models/presentation_structure_model.py:5</code>). Chosen by the LLM in <code>generate_presentation_structure</code> unless the layout is <code>ordered</code>, normalized and extended with TOC layouts, and stored in <code>presentations.structure</code> (<code>servers/fastapi/models/sql/presentation.py:66</code>). See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+</dl>
+<h2 id="step-7-terms-t-to-z">Step 7: Terms T to Z<a class="headerlink" href="#step-7-terms-t-to-z" title="Permanent link">&para;</a></h2>
+<dl>
+<dt>Table of contents (TOC)</dt>
+<dd>Optional generated slides listing the deck's sections, enabled by <code>include_table_of_contents</code> (<code>servers/fastapi/models/sql/presentation.py:70</code>). The number of TOC slides depends on the total (<code>get_no_of_toc_required_for_n_outlines</code>, <code>servers/fastapi/utils/outline_utils.py:52</code>), and the layout is found by regex over layout names (<code>select_toc_or_list_slide_layout_index</code>, <code>servers/fastapi/utils/ppt_utils.py:59</code>). See <a href="../presenton/08-standard-pipeline/">Standard generation pipeline</a>.</dd>
+<dt>Template v2</dt>
+<dd>The current template format and its table <code>template_v2</code> (<code>servers/fastapi/models/sql/template_v2.py:16</code>): string UUID <code>id</code>, <code>name</code>, <code>description</code>, <code>raw_layouts</code>, <code>components</code>, <code>merged_components</code>, <code>layouts</code>, <code>theme</code>, <code>assets</code>, <code>is_default</code>, <code>owner_id</code>. Built-in <code>template.json</code> files carry <code>id</code>, <code>name</code>, <code>description</code>, <code>thumbnail</code>, <code>merged_components</code>, <code>layouts</code>, <code>fonts</code>, <code>theme</code>. Custom templates are produced from a PPTX by the multi-pass generator in <code>servers/fastapi/templates/v2/generation.py</code> and <code>servers/fastapi/templates/v2/certified_generation.py</code>. A template name of the form <code>custom-&lt;id&gt;</code> is accepted and stripped to <code>&lt;id&gt;</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:200</code>). See <a href="../presenton/16-template-v2-format/">Template v2 format</a>.</dd>
+<dt>Template schema (<code>get_template_schema</code>)</dt>
+<dd>The JSON Schema derived from a template layout that the LLM must fill, built by <code>get_template_schema</code> (<code>servers/fastapi/templates/v2/schema.py:257</code>) from the non-decorative elements of each component, with table text capacity and repeated-group arrays handled specially. See <a href="../presenton/17-template-to-slide/">From template to schema to slide</a>.</dd>
+<dt>Temp files</dt>
+<dd>Uploaded documents live in owner-scoped temporary directories managed by <code>TEMP_FILE_SERVICE</code> (<code>servers/fastapi/services/temp_file_service.py:191</code>), rooted at <code>TEMP_DIRECTORY</code> or, when unset, <code>/tmp/presenton</code> (<code>servers/fastapi/services/temp_file_service.py:14</code>); the Docker image sets <code>TEMP_DIRECTORY=/tmp/presenton</code> (<code>Dockerfile:83</code>). See <a href="../presenton/11-document-ingestion/">Document ingestion</a>.</dd>
+<dt>Theme</dt>
+<dd>Colors and fonts for a presentation: <code>PresentationThemeData</code> with <code>colors</code> (<code>PresentationThemeColors</code>: roles <code>primary</code>, <code>background</code>, <code>card</code>, <code>stroke</code>, <code>background_text</code>, <code>primary_text</code>, <code>graph_0</code> to <code>graph_9</code>) and <code>fonts.textFont</code> (<code>name</code>, <code>url</code>) (<code>servers/fastapi/models/theme_data.py:4</code>, <code>servers/fastapi/models/theme_data.py:31</code>). Template themes are derived from layout colors by <code>servers/fastapi/templates/v2/theme.py</code> (LLM or deterministic role selection with contrast repair). Stored in <code>presentations.theme</code> and <code>template_v2.theme</code>. See <a href="../presenton/19-themes-and-fonts/">Themes and fonts</a>.</dd>
+<dt>Tone and verbosity</dt>
+<dd>Writing-style knobs on generation requests. Tone: <code>default</code>, <code>casual</code>, <code>professional</code>, <code>funny</code>, <code>educational</code>, <code>sales_pitch</code> (<code>servers/fastapi/enums/tone.py</code>). Verbosity: <code>concise</code>, <code>standard</code>, <code>text-heavy</code> (<code>servers/fastapi/enums/verbosity.py</code>). See <a href="../presenton/09-prompts-and-schemas/">Prompts and schemas</a>.</dd>
+<dt><code>ui</code> (slide)</dt>
+<dd>Nullable JSON column on <code>slides</code> (<code>servers/fastapi/models/sql/slide.py:30</code>): the fully materialized Template v2 layout for this slide, that is the layout object (<code>id</code>, <code>description</code>, <code>components</code>, optionally <code>background</code> and <code>elements</code>) with the slide content applied to its non-decorative elements. Built by <code>_template_slide_ui</code> plus <code>_apply_template_content_to_ui</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:490</code>, <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:575</code>) and edited directly by the Konva editor. <code>templateV2UiToHtml</code> turns it into 1280 by 720 HTML (<code>servers/nextjs/lib/template-v2-json-to-html.ts:156</code>). See <a href="../presenton/17-template-to-slide/">From template to schema to slide</a>.</dd>
+<dt>Undo history</dt>
+<dd>The editor keeps at most <code>MAX_HISTORY_ENTRIES = 50</code> states (<code>servers/nextjs/components/slide-editor/model/core.ts:20</code>) in the <code>undoRedo</code> slice. See <a href="../presenton/22-slide-editor/">Slide editor</a>.</dd>
+<dt><code>userConfig.json</code></dt>
+<dd>The JSON configuration file at <code>USER_CONFIG_PATH</code> (in Docker, <code>&lt;APP_DATA_DIRECTORY&gt;/userConfig.json</code>, <code>start.js:56</code>). It is seeded from environment variables by <code>start.js</code> and <code>scripts/user-config-env.cjs</code>, read into the process environment on every request by <code>UserConfigEnvUpdateMiddleware</code> (<code>servers/fastapi/api/middlewares.py:23</code>), and written with a <code>.lock</code> file and a <code>.bak</code> backup (<code>servers/fastapi/utils/user_config_store.py:17</code> to <code>servers/fastapi/utils/user_config_store.py:22</code>). Identical locking code exists in Next.js and Electron. When Next.js returns it to the browser, secrets are replaced by <code>__configured__</code> (<code>servers/nextjs/lib/runtime-provider-config.ts:6</code>). See <a href="../presenton/06-configuration-and-providers/">Configuration and LLM providers</a>.</dd>
+<dt>Web search provider</dt>
+<dd>How outlines get fresh facts: <code>auto</code>, <code>native</code> (the LLM provider's built-in search), <code>searxng</code>, <code>tavily</code>, <code>exa</code>, <code>brave</code>, <code>serper</code> (<code>servers/fastapi/enums/web_search_provider.py:4</code>). Routing is in <code>servers/fastapi/utils/web_search.py</code>. Enabled per request by <code>web_search</code>. See <a href="../presenton/12-images-icons-search/">Images, icons, web search</a>.</dd>
+<dt>Webhook / webhook events</dt>
+<dd>Subscriptions in <code>webhook_subscriptions</code> (<code>webhook-&lt;hex&gt;</code> id, <code>url</code>, <code>secret</code>, <code>event</code>) created by <code>POST /api/v1/webhook/subscribe</code>. Two events exist: <code>presentation.generation.completed</code> and <code>presentation.generation.failed</code> (<code>servers/fastapi/enums/webhook_event.py:5</code>). <code>WebhookService.send_webhook</code> POSTs the JSON body (the <code>PresentationPathAndEditPath</code> on success, an <code>APIErrorModel</code> on failure) to every matching subscription with <code>Authorization: Bearer &lt;secret&gt;</code> when a secret is set, and only prints errors (<code>servers/fastapi/services/webhook_service.py:12</code>). See <a href="../presenton/15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</dd>
+</dl>
+<h2 id="gotchas-collected-from-the-glossary">Gotchas collected from the glossary<a class="headerlink" href="#gotchas-collected-from-the-glossary" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>trigger_webhook</code> exists on <code>GeneratePresentationRequest</code> (<code>servers/fastapi/models/generate_presentation_request.py:44</code>) but nothing in the FastAPI code reads it. The success and failure webhooks are scheduled unconditionally in <code>generate_presentation_handler</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3133</code>, <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:3150</code>); filtering happens only by subscription event.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>"Layout" means three different things: a template <code>SlideLayout</code> (components), a generation <code>SlideLayoutModel</code> (id plus JSON Schema), and the <code>presentations.layout</code> column (a copied template payload). The <code>slides.layout</code> column is only the layout id string. Read the type, not the name.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>presenton</code> is a valid value of the <code>LLM</code> setting but not a member of <code>LLMProvider</code> (<code>servers/fastapi/enums/llm_provider.py:4</code>). <code>get_llm_provider</code> answers <code>500 Invalid LLM provider</code> for it (<code>servers/fastapi/utils/llm_provider.py:47</code>), so any request that reaches local LLM code instead of being intercepted by the cloud proxy fails. When you add a route that calls the LLM, check whether it also needs a cloud proxy rule.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>owner_id</code> is null in two very different situations: built-in templates (shared with everyone because <code>is_default</code> is true) and every row created in auth-disabled mode, including Electron. If you turn auth on for a database created with <code>DISABLE_AUTH</code>, those rows are not visible to any user until ownership is backfilled (the bootstrap's legacy backfill in <code>servers/fastapi/api/v1/auth/bootstrap.py</code> exists for this reason).</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>All SSE messages share the event name <code>response</code>. A client that registers <code>addEventListener("chunk", ...)</code> receives nothing; it must listen for <code>response</code> and switch on <code>data.type</code>.</p>
+</div>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The vocabulary of the data model: presentation, slide, <code>content</code>, <code>ui</code>, <code>html_content</code>, <code>properties</code>, <code>layout_group</code>, <code>version</code>, <code>owner_id</code>.</li>
+<li>The Template v2 hierarchy from element to component to layout to template, and where <code>decorative</code>, merged components ("blocks") and raw layouts fit.</li>
+<li>The runtime pieces by name: <code>start.js</code>, the export runtime and export-core, <code>/pdf-maker</code>, the MCP server, LiteParse, FastEmbed, Mem0, <code>llmai</code>.</li>
+<li>The auth terms: principal, API key format, <code>presenton_session</code>, <code>auth_version</code>, admin, desktop guard, <code>DISABLE_AUTH</code>.</li>
+<li>The names of every SSE message type, async task type and webhook event.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Use the <a href="../appendix-endpoints/">Endpoint index</a> to find the HTTP route behind any term defined here.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../superset/40-roadmap/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Roadmap">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Roadmap
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../appendix-endpoints/" class="md-footer__link md-footer__link--next" aria-label="Next: Endpoint index">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Endpoint index
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

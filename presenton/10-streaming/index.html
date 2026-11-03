@@ -1,0 +1,3439 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/10-streaming/">
+      
+      
+        <link rel="prev" href="../09-prompts-and-schemas/">
+      
+      
+        <link rel="next" href="../11-document-ingestion/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Streaming (SSE) - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#streaming-sse" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Streaming (SSE)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#where-sse-is-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where SSE is used
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-wire-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The wire format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-safe_sse_stream-the-error-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: safe_sse_stream, the error boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-from-a-blocking-sdk-to-an-async-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: From a blocking SDK to an async generator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-outline-stream-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Outline stream events
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Outline stream events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-partial-outline-json-is-streamed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How partial outline JSON is streamed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-presentation-stream-events-standard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Presentation stream events (Standard)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-smart-stream-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Smart stream events
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-error-frames-all-of-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Error frames, all of them
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-client-disconnects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Client disconnects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-keepalive-proxies-and-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Keepalive, proxies and nginx
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-consuming-the-stream-inside-the-server-v2-smart-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Consuming the stream inside the server (v2 Smart routes)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-how-the-browser-consumes-the-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: How the browser consumes the streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#where-sse-is-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where SSE is used
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-wire-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The wire format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-safe_sse_stream-the-error-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: safe_sse_stream, the error boundary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-from-a-blocking-sdk-to-an-async-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: From a blocking SDK to an async generator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-outline-stream-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Outline stream events
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Outline stream events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-partial-outline-json-is-streamed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How partial outline JSON is streamed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-presentation-stream-events-standard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Presentation stream events (Standard)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-smart-stream-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Smart stream events
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-error-frames-all-of-them" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Error frames, all of them
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-client-disconnects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Client disconnects
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-keepalive-proxies-and-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Keepalive, proxies and nginx
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-consuming-the-stream-inside-the-server-v2-smart-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Consuming the stream inside the server (v2 Smart routes)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-how-the-browser-consumes-the-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: How the browser consumes the streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="streaming-sse">Streaming (SSE)<a class="headerlink" href="#streaming-sse" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/utils/sse.py</code>, <code>servers/fastapi/models/sse_response.py</code>, <code>servers/fastapi/utils/llm_utils.py</code>, <code>servers/fastapi/api/v1/ppt/endpoints/outlines.py</code>, <code>servers/fastapi/api/v2/ppt/endpoints/presentation.py</code>, <code>servers/nextjs/app/(presentation-generator)/outline/hooks/useOutlineStreaming.ts</code>, <code>servers/nextjs/app/(presentation-generator)/presentation/hooks/usePresentationStreaming.ts</code>, <code>nginx.conf</code>  ·  <strong>Builds on:</strong> <a href="../08-standard-pipeline/">Standard generation pipeline</a>  ·  <strong>Time:</strong> ~35 min</p>
+</div>
+<p>Presenton shows outlines and slides while they are being generated by streaming server-sent events (SSE) from FastAPI to the browser. This chapter covers the whole path: how a blocking provider SDK is turned into an async generator, how frames are formatted, every event type and payload for outline, Standard and Smart streams, how errors and client disconnects are handled, what the bundled nginx does and does not do for long-lived streams, how the v2 Smart API consumes the same stream inside the server, and how the browser hooks read it.</p>
+<h2 id="where-sse-is-used">Where SSE is used<a class="headerlink" href="#where-sse-is-used" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Generator</th>
+<th>Wrapped in <code>safe_sse_stream</code></th>
+<th>Covered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/v1/ppt/outlines/stream/{id}</code></td>
+<td><code>stream_outlines.inner</code> (<code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:112-263</code>)</td>
+<td>yes (<code>outlines.py:268-276</code>)</td>
+<td>here</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/ppt/presentation/stream/{id}</code>, Standard</td>
+<td><code>stream_presentation.inner</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:2333-2511</code>)</td>
+<td>yes (<code>presentation.py:2516-2524</code>)</td>
+<td>here</td>
+</tr>
+<tr>
+<td><code>GET /api/v1/ppt/presentation/stream/{id}</code>, Smart</td>
+<td><code>stream_smart_presentation.inner</code> (<code>presentation.py:1938-2241</code>)</td>
+<td>yes, with error metadata (<code>presentation.py:2269-2278</code>)</td>
+<td>here and <a href="../13-smart-mode/">Smart mode</a></td>
+</tr>
+<tr>
+<td><code>POST /api/v1/ppt/chat/message/stream</code></td>
+<td><code>chat_message_stream.inner</code> (<code>servers/fastapi/api/v1/ppt/endpoints/chat.py:124-165</code>)</td>
+<td>no, catches <code>HTTPException</code> itself</td>
+<td><a href="../14-editing-and-chat/">Editing and chat assistant</a></td>
+</tr>
+<tr>
+<td><code>POST /api/v1/ppt/ollama/models/pull</code></td>
+<td><code>pull_ollama_model</code> (<code>servers/fastapi/utils/ollama.py:174</code>)</td>
+<td>no, emits its own <code>event: error</code> frames</td>
+<td><a href="../06-configuration-and-providers/">Configuration and LLM providers</a></td>
+</tr>
+</tbody>
+</table>
+<p>All of them return <code>StreamingResponse(..., media_type="text/event-stream")</code> and set no other headers.</p>
+<h2 id="step-1-the-wire-format">Step 1: The wire format<a class="headerlink" href="#step-1-the-wire-format" title="Permanent link">&para;</a></h2>
+<p>Every frame is produced by <code>SSEResponse.to_string()</code>:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/models/sse_response.py (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">SSEResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">event</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">data</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">"event: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="se">\n</span><span class="s2">data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">"</span>
+</span></code></pre></div>
+<p>The generation endpoints always use the event name <code>response</code> and put a JSON object with a <code>type</code> discriminator in <code>data</code>. Helper classes build the common shapes:</p>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th><code>data</code> JSON</th>
+<th>Defined at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SSEStatusResponse(status)</code></td>
+<td><code>{"type": "status", "status": "..."}</code></td>
+<td><code>sse_response.py:14-20</code></td>
+</tr>
+<tr>
+<td><code>SSETraceResponse(trace)</code></td>
+<td><code>{"type": "trace", "trace": {...}}</code> (chat only)</td>
+<td><code>sse_response.py:23-29</code></td>
+</tr>
+<tr>
+<td><code>SSEErrorResponse(detail, ...)</code></td>
+<td><code>{"type": "error", "detail": "...", ...optional metadata}</code></td>
+<td><code>sse_response.py:32-45</code></td>
+</tr>
+<tr>
+<td><code>SSECompleteResponse(key, value)</code></td>
+<td><code>{"type": "complete", "&lt;key&gt;": value}</code></td>
+<td><code>sse_response.py:48-56</code></td>
+</tr>
+<tr>
+<td>raw <code>SSEResponse(event="response", data=json.dumps({...}))</code></td>
+<td><code>chunk</code>, <code>slide_assets</code>, <code>fonts</code>, <code>slide_html</code>, <code>generation_metrics</code></td>
+<td>in the endpoints</td>
+</tr>
+</tbody>
+</table>
+<p><code>json.dumps</code> is called with default arguments, so <code>data</code> is always a single line. That matters: the SSE format allows multi-line data only with repeated <code>data:</code> prefixes, and the v2 server-side consumer in Step 9 parses line by line.</p>
+<p>A real outline frame on the wire:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>event: response
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>data: {"type": "status", "status": "Preparing your presentation outline"}
+</span></code></pre></div>
+<p><code>SSEErrorResponse.to_string()</code> uses <code>model_dump(exclude_none=True)</code>, so metadata fields appear only when set (<code>sse_response.py:41-45</code>). The optional fields are <code>source</code>, <code>status_code</code>, <code>error_type</code>, <code>retryable</code>, <code>completed_slides</code> and <code>total_slides</code> (<code>sse_response.py:32-39</code>).</p>
+<h2 id="step-2-safe_sse_stream-the-error-boundary">Step 2: <code>safe_sse_stream</code>, the error boundary<a class="headerlink" href="#step-2-safe_sse_stream-the-error-boundary" title="Permanent link">&para;</a></h2>
+<p>Once a streaming response has started, FastAPI can no longer send an HTTP error status. <code>safe_sse_stream</code> converts late failures into a final error frame instead of a truncated stream:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/sse.py (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>        <span class="k">async</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>            <span class="k">yield</span> <span class="n">chunk</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"SSE stream cancelled by client"</span><span class="p">)</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="k">return</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">"SSE stream failed after response started"</span><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="k">if</span> <span class="n">on_error</span><span class="p">:</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>                <span class="k">await</span> <span class="n">on_error</span><span class="p">()</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">"SSE stream error cleanup failed"</span><span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>        <span class="n">detail</span> <span class="o">=</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">)</span> <span class="k">else</span> <span class="n">error_detail</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>        <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>        <span class="k">if</span> <span class="n">error_metadata</span><span class="p">:</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>                <span class="n">metadata</span> <span class="o">=</span> <span class="k">await</span> <span class="n">error_metadata</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">"SSE stream error metadata lookup failed"</span><span class="p">)</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="k">yield</span> <span class="n">SSEErrorResponse</span><span class="p">(</span><span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">detail</span><span class="p">),</span> <span class="o">**</span><span class="n">metadata</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+</span></code></pre></div>
+<ul>
+<li><code>asyncio.CancelledError</code> ends the stream silently. Note that <code>return</code> inside the <code>except</code> swallows the cancellation instead of re-raising it.</li>
+<li>Any other exception runs <code>on_error</code> (every caller passes a function that rolls back the request's SQL session), then emits one error frame. An <code>HTTPException</code> keeps its own <code>detail</code>; anything else gets the caller's generic <code>error_detail</code>. The HTTP status code of the exception is not sent unless <code>error_metadata</code> adds it.</li>
+<li>Smart streams pass <code>smart_error_metadata</code>, which opens a separate session to count saved slides and reports <code>retryable</code> as true for 408, 429 and any status of 500 or more (<code>presentation.py:2246-2267</code>).</li>
+</ul>
+<p>Tests: <code>test_safe_sse_stream_converts_late_exception_to_error_frame</code> and <code>test_safe_sse_stream_includes_structured_progress_metadata</code> (<code>servers/fastapi/tests/unit/test_small_surfaces_coverage.py:186-249</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Errors raised before <code>StreamingResponse</code> is returned are ordinary HTTP errors, not SSE frames. For example <code>stream_presentation</code> raises 404 for an unknown id and 400 for "Presentation not prepared for stream" before streaming (<code>presentation.py:2285-2312</code>). A browser <code>EventSource</code> cannot read the body of a non-200 response; it only fires <code>onerror</code>, so the user sees the hook's generic "Failed to connect to the server" message after the retries are exhausted.</p>
+</div>
+<h2 id="step-3-from-a-blocking-sdk-to-an-async-generator">Step 3: From a blocking SDK to an async generator<a class="headerlink" href="#step-3-from-a-blocking-sdk-to-an-async-generator" title="Permanent link">&para;</a></h2>
+<p>The <code>llmai</code> client's <code>generate(**kwargs)</code> returns a synchronous iterator. <code>stream_generate_events</code> (<code>servers/fastapi/utils/llm_utils.py:458-535</code>) runs that iterator on a worker thread and hands events back to the event loop through an <code>asyncio.Queue</code>.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant E as Endpoint generator
+    participant S as stream_generate_events
+    participant Q as asyncio.Queue
+    participant W as Worker thread
+    participant P as Provider SDK iterator
+
+    E-&gt;&gt;S: async for event in stream_generate_events(client, disconnect_checker, kwargs)
+    S-&gt;&gt;W: asyncio.create_task(asyncio.to_thread(worker))
+    W-&gt;&gt;P: iter(client.generate(kwargs))
+    loop until StopIteration or stop requested
+        P--&gt;&gt;W: next event
+        W-&gt;&gt;Q: loop.call_soon_threadsafe(queue.put_nowait, event)
+        S-&gt;&gt;S: await disconnect_checker(), raise CancelledError if gone
+        S-&gt;&gt;Q: wait_for(queue.get(), timeout 0.1 s)
+        Q--&gt;&gt;S: event
+        S--&gt;&gt;E: yield event
+    end
+    W-&gt;&gt;Q: sentinel (always, in finally)
+    Q--&gt;&gt;S: sentinel
+    S-&gt;&gt;S: completed, await worker task</code></pre>
+<p>Details that matter when you modify it:</p>
+<ol>
+<li><strong>Worker.</strong> <code>worker()</code> loops on <code>next(events)</code> until <code>StopIteration</code> or until <code>stop_requested</code> (a <code>threading.Event</code>) is set. Exceptions are enqueued as values, unless a stop was requested. In <code>finally</code>, if a stop was requested the iterator's <code>close()</code> is called (closing the provider stream), and a sentinel is always enqueued (<code>llm_utils.py:475-501</code>).</li>
+<li><strong>Thread-safe handoff.</strong> <code>enqueue</code> uses <code>loop.call_soon_threadsafe(queue.put_nowait, item)</code> and ignores <code>RuntimeError</code> from a closed loop (<code>llm_utils.py:469-473</code>).</li>
+<li><strong>Consumer loop.</strong> Each iteration first awaits <code>_raise_if_client_disconnected(disconnect_checker)</code>, which raises <code>asyncio.CancelledError</code> when the checker returns true (<code>llm_utils.py:61-65</code>). The queue wait uses <code>CLIENT_DISCONNECT_POLL_SECONDS = 0.1</code> as a timeout only when a checker is present (<code>llm_utils.py:27</code>, <code>llm_utils.py:509-518</code>), so a silent provider does not stop disconnect polling. An exception item is re-raised, the sentinel ends the loop.</li>
+<li><strong>Cleanup.</strong> <code>finally</code> sets <code>stop_requested</code>. If the worker already finished, it is awaited; otherwise a done-callback retrieves its exception later so asyncio does not log "exception was never retrieved" (<code>llm_utils.py:528-535</code>).</li>
+</ol>
+<p><code>DisconnectChecker</code> is simply <code>Callable[[], Awaitable[bool]]</code> (<code>llm_utils.py:28</code>). Endpoints pass <code>request.is_disconnected</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The worker thread can only notice <code>stop_requested</code> between provider events. If the provider is silent (for example a reasoning model thinking before its first token), the thread stays blocked in <code>next(events)</code> and the upstream HTTP connection stays open until the next event arrives, even though the endpoint has already stopped. Each concurrent LLM call also holds one thread of the default executor used by <code>asyncio.to_thread</code>.</p>
+</div>
+<p>Structured calls reuse the same bridge: <code>_generate_structured_content</code> always passes <code>stream=True</code> and collects either the final <code>ResponseStreamCompletionChunk</code> content or the concatenated text (<code>llm_utils.py:68-107</code>). Tests: <code>servers/fastapi/tests/unit/test_llm_utils_disconnect.py:69-206</code>, including <code>test_disconnect_cancels_generation_without_retrying</code>.</p>
+<h2 id="step-4-outline-stream-events">Step 4: Outline stream events<a class="headerlink" href="#step-4-outline-stream-events" title="Permanent link">&para;</a></h2>
+<p><code>GET /api/v1/ppt/outlines/stream/{id}</code> emits these frames, in this order:</p>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th><code>type</code></th>
+<th>Payload</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>status</code></td>
+<td><code>"Preparing your presentation outline"</code></td>
+<td><code>outlines.py:116-118</code></td>
+</tr>
+<tr>
+<td>2 (external web search only)</td>
+<td><code>status</code></td>
+<td><code>"Analyzing your topic for web research"</code>, then <code>"Searching with &lt;Provider&gt;: &lt;query&gt;"</code>, then <code>"Web research complete"</code></td>
+<td><code>generate_presentation_outlines.py:313-349</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>status</code></td>
+<td><code>"Searching with model-native web search and drafting outlines"</code> or <code>"Drafting your presentation outline"</code></td>
+<td><code>generate_presentation_outlines.py:355-361</code></td>
+</tr>
+<tr>
+<td>4..n</td>
+<td><code>chunk</code></td>
+<td><code>{"type": "chunk", "chunk": "&lt;raw JSON text delta from the model&gt;"}</code></td>
+<td><code>outlines.py:200-205</code></td>
+</tr>
+<tr>
+<td>last (success)</td>
+<td><code>complete</code></td>
+<td><code>{"type": "complete", "presentation": &lt;PresentationModel as JSON&gt;}</code></td>
+<td><code>outlines.py:261-263</code></td>
+</tr>
+<tr>
+<td>last (failure)</td>
+<td><code>error</code></td>
+<td><code>{"type": "error", "detail": "..."}</code></td>
+<td>see Step 6</td>
+</tr>
+</tbody>
+</table>
+<p>Provider display names in the search status come from <code>_web_search_provider_display_name</code>: SearXNG, Tavily, Exa, Brave, Serper, or "model-native web search" (<code>generate_presentation_outlines.py:56-64</code>). Status messages are only produced because the endpoint passes <code>emit_statuses=True</code> (<code>outlines.py:181</code>); the one-shot API does not.</p>
+<h3 id="how-partial-outline-json-is-streamed">How partial outline JSON is streamed<a class="headerlink" href="#how-partial-outline-json-is-streamed" title="Permanent link">&para;</a></h3>
+<p>The model is asked for structured JSON (<code>{"slides": [{"content": "..."}]}</code>), and the server forwards the provider's text deltas unchanged, without trying to split them into slides. The chunk boundaries are wherever the provider cut its stream. An illustrative transcript:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>event: response
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>data: {"type": "status", "status": "Preparing your presentation outline"}
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>event: response
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>data: {"type": "status", "status": "Drafting your presentation outline"}
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>event: response
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>data: {"type": "chunk", "chunk": "{\"slides\": [{\"content\": \"## Q3 Business"}
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>event: response
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>data: {"type": "chunk", "chunk": " Review\\n\\nPresented by the Finance team\"}, {\"content\": \"## Revenue"}
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>event: response
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>data: {"type": "complete", "presentation": {"id": "8f0c3a52-...", "version": "v2-standard", "n_slides": 8, "outlines": {"slides": [{"content": "## Q3 Business Review\n\nPresented by the Finance team"}]}, "generation_mode": "standard"}}
+</span></code></pre></div>
+<p>(The <code>complete</code> payload is abridged; it is the full row from <code>presentation.model_dump(mode="json")</code>, minus the excluded <code>owner_id</code>.) Because each delta is itself JSON text, its quotes and escapes are escaped a second time by <code>json.dumps</code>. The server also concatenates the deltas and parses the result with <code>dirtyjson</code> only after the stream ends (<code>outlines.py:207-216</code>). If the provider produced no content deltas and only a final completion object, the whole JSON is sent as one chunk (<code>generate_presentation_outlines.py:398-403</code>).</p>
+<h2 id="step-5-presentation-stream-events-standard">Step 5: Presentation stream events (Standard)<a class="headerlink" href="#step-5-presentation-stream-events-standard" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Order</th>
+<th><code>type</code></th>
+<th>Payload</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>chunk</code></td>
+<td><code>"{ \"slides\": [ "</code> (opening text)</td>
+<td><code>presentation.py:2360-2363</code></td>
+</tr>
+<tr>
+<td>per slide</td>
+<td><code>chunk</code></td>
+<td>the slide as compact JSON (<code>slide.model_dump_json()</code>)</td>
+<td><code>presentation.py:2421-2424</code></td>
+</tr>
+<tr>
+<td>interleaved</td>
+<td><code>slide_assets</code></td>
+<td><code>{"type": "slide_assets", "slide_index": i, "slide": {...}, "warnings": [...]}</code></td>
+<td><code>presentation.py:2426-2446</code>, <code>presentation.py:2453-2470</code></td>
+</tr>
+<tr>
+<td>after last slide</td>
+<td><code>chunk</code></td>
+<td><code>" ] }"</code> (closing text)</td>
+<td><code>presentation.py:2448-2451</code></td>
+</tr>
+<tr>
+<td>remaining</td>
+<td><code>slide_assets</code></td>
+<td>one per slide whose assets were not yet reported</td>
+<td><code>presentation.py:2453-2470</code></td>
+</tr>
+<tr>
+<td>last (success)</td>
+<td><code>complete</code></td>
+<td><code>{"type": "complete", "presentation": &lt;PresentationWithSlides&gt;}</code></td>
+<td><code>presentation.py:2503-2511</code></td>
+</tr>
+<tr>
+<td>last (failure)</td>
+<td><code>error</code></td>
+<td><code>{"type": "error", "detail": "..."}</code></td>
+<td><code>presentation.py:2379-2381</code> or <code>safe_sse_stream</code></td>
+</tr>
+</tbody>
+</table>
+<p>Exactly one <code>slide_assets</code> frame is sent per slide, either right after a later slide's <code>chunk</code> (if the assets finished while the next LLM call was running) or after the closing chunk. A slide frame looks like this (abridged; field order follows <code>SlideModel</code>, <code>servers/fastapi/models/sql/slide.py:9-30</code>, and <code>owner_id</code> is excluded):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>event: response
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>data: {"type": "chunk", "chunk": "{\"id\":\"5c1e...\",\"presentation\":\"8f0c...\",\"layout_group\":\"3b6f...\",\"layout\":\"intro-hero\",\"index\":0,\"content\":{\"hero\":{\"headline\":\"Q3 Business Review\"},\"__speaker_note__\":\"...\"},\"html_content\":null,\"speaker_note\":\"...\",\"properties\":null,\"ui\":{...}}"}
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>event: response
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>data: {"type": "slide_assets", "slide_index": 0, "slide": {"id": "5c1e...", "index": 0, "content": {"hero": {"headline": "Q3 Business Review"}, "hero_image": {"image_prompt": "...", "image_url": "/app_data/images/..."}}, "ui": {...}}, "warnings": []}
+</span></code></pre></div>
+<p>Warning objects are either image-provider warnings <code>{"status_code": 502, "detail": "...", "code": null}</code> from <code>image_generation_warning</code> (<code>servers/fastapi/utils/image_generation_error.py:75-86</code>) or <code>{"type": "asset_generation_failed", "message": "Some slide assets could not be generated."}</code> when the whole asset task raised (<code>presentation.py:2350-2355</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The <code>chunk</code> frames concatenate to <code>{ "slides": [ {slide0}{slide1} ] }</code>: there is no comma between slides, so the accumulated text is not valid JSON. The browser copes because it parses each slide chunk on its own and runs <code>jsonrepair</code> over the accumulation (<code>usePresentationStreaming.ts:454-510</code>). If you write a new client, parse each slide chunk individually rather than the concatenation.</p>
+</div>
+<h2 id="step-6-smart-stream-events">Step 6: Smart stream events<a class="headerlink" href="#step-6-smart-stream-events" title="Permanent link">&para;</a></h2>
+<p>Smart presentations stream through the same URL but a different generator, <code>stream_smart_presentation</code> (<a href="../13-smart-mode/">Smart mode</a> covers generation itself).</p>
+<table>
+<thead>
+<tr>
+<th><code>type</code></th>
+<th>Payload</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fonts</code></td>
+<td><code>{"type": "fonts", "fonts": {"Inter": "/vendor/fonts/..."}}</code></td>
+<td><code>presentation.py:1950-1955</code>, <code>presentation.py:2035-2038</code></td>
+</tr>
+<tr>
+<td><code>slide_html</code></td>
+<td><code>{"type": "slide_html", "index": i, "slide_id": "...", "html": "&lt;html...&gt;", "slide": {...}}</code></td>
+<td><code>presentation.py:1957-1968</code>, <code>presentation.py:2176-2187</code></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>for example <code>"Preparing Smart presentation"</code>, <code>"Reading source documents"</code>, <code>"Searching the web"</code>, <code>"Designing the complete presentation"</code>, <code>"Retrying from slide 4 with saved progress"</code></td>
+<td><code>presentation.py:1987-2049</code>, <code>presentation.py:2120-2126</code></td>
+</tr>
+<tr>
+<td><code>generation_metrics</code></td>
+<td><code>{"type": "generation_metrics", "model", "input_tokens", "output_tokens", "total_tokens", "tokens_per_second", "duration_seconds", "estimated", "thinking_tokens", "thinking_tokens_estimated", "supports_thinking"}</code></td>
+<td><code>presentation.py:2162-2172</code>, <code>llm_utils.py:46-58</code></td>
+</tr>
+<tr>
+<td><code>complete</code></td>
+<td><code>{"type": "complete", "presentation": &lt;PresentationWithSlides&gt;}</code></td>
+<td><code>presentation.py:2238-2241</code></td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>detail plus <code>source: "generation"</code>, <code>status_code</code>, <code>error_type</code>, <code>retryable</code>, <code>completed_slides</code>, <code>total_slides</code></td>
+<td><code>presentation.py:2246-2267</code></td>
+</tr>
+</tbody>
+</table>
+<p>On reconnect, already checkpointed slides are replayed as <code>slide_html</code> frames first, so a Smart stream can resume (<code>presentation.py:1941-1985</code>).</p>
+<h2 id="step-7-error-frames-all-of-them">Step 7: Error frames, all of them<a class="headerlink" href="#step-7-error-frames-all-of-them" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th><code>detail</code></th>
+<th>Extra fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Outline: LLM call failed (yielded <code>HTTPException</code>)</td>
+<td>provider-specific text from <code>handle_llm_client_exceptions</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Outline: accumulated text is not JSON</td>
+<td><code>"Failed to generate presentation outlines. Please try again. &lt;exception text&gt;"</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Outline: too few outlines</td>
+<td><code>"Failed to generate presentation outlines with requested number of slides. Please try again."</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Outline: any other exception</td>
+<td><code>"Failed to generate presentation outlines. Please try again."</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Standard slides: slide content <code>HTTPException</code></td>
+<td>its <code>detail</code>, for example <code>"LLM did not return any content"</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Standard slides: any other exception</td>
+<td><code>"Failed to generate presentation slides. Please try again."</code></td>
+<td>none</td>
+</tr>
+<tr>
+<td>Smart</td>
+<td>exception detail or <code>"Failed to generate the Smart presentation. Please try again."</code></td>
+<td><code>source</code>, <code>status_code</code>, <code>error_type</code>, <code>retryable</code>, <code>completed_slides</code>, <code>total_slides</code></td>
+</tr>
+</tbody>
+</table>
+<p>When the configured provider is the ChatGPT (Codex) login and the provider returns 401 or 403, the detail is prefixed with <code>CHATGPT_AUTH_REQUIRED:</code> (<code>servers/fastapi/utils/llm_client_error_handler.py:13-32</code>). Both hooks check for that prefix and open the re-login flow instead of retrying (<code>useOutlineStreaming.ts:211-219</code>, <code>usePresentationStreaming.ts:645-656</code>).</p>
+<h2 id="step-8-client-disconnects">Step 8: Client disconnects<a class="headerlink" href="#step-8-client-disconnects" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Disconnect detection in Presenton code</th>
+<th>What stops</th>
+<th>What is persisted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Outline stream</td>
+<td><code>request.is_disconnected()</code> once before the first frame (<code>outlines.py:113-114</code>) and as <code>disconnect_checker</code> for the outline LLM call and the web query call (<code>outlines.py:182</code>, <code>generate_presentation_outlines.py:319-325</code>)</td>
+<td><code>stream_generate_events</code> raises <code>CancelledError</code> within about 0.1 s, <code>generate_ppt_outline</code> does not catch it (it only catches <code>Exception</code>), <code>safe_sse_stream</code> logs and returns</td>
+<td>nothing; outlines are written only after a complete parse</td>
+</tr>
+<tr>
+<td>Standard slide stream</td>
+<td>none (the endpoint takes no <code>Request</code>)</td>
+<td>relies on the ASGI server cancelling the generator; background asset tasks are not cancelled</td>
+<td>nothing; slides are written only at the end</td>
+</tr>
+<tr>
+<td>Smart stream</td>
+<td>none; <code>finally</code> cancels the generation task if the generator exits early (<code>presentation.py:2189-2192</code>)</td>
+<td>the Smart generation task</td>
+<td>every slide already checkpointed</td>
+</tr>
+<tr>
+<td><code>POST /presentation/generate</code> (sync)</td>
+<td><code>request_http.is_disconnected</code> checked before work, inside each LLM stream and before each batch (<code>presentation.py:2693-2705</code>)</td>
+<td>the handler raises <code>CancelledError</code></td>
+<td>nothing</td>
+</tr>
+<tr>
+<td><code>/generate/async</code>, v2 Smart routes (sync and async)</td>
+<td>none in code</td>
+<td>nothing in Presenton code; the async variants keep running as background tasks after the client leaves</td>
+<td><code>/generate/async</code>: everything at the end; v2 Smart: every checkpointed slide</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Not verified here</p>
+<p>Whether Starlette 1.6.0 (the version pinned in <code>servers/fastapi/uv.lock</code>) cancels a running <code>StreamingResponse</code> generator on <code>http.disconnect</code>, and how the two <code>BaseHTTPMiddleware</code> subclasses registered in <code>servers/fastapi/api/main.py:102-103</code> affect <code>request.is_disconnected()</code>, depends on framework internals that are not part of this repository. Test disconnect behavior against the deployed versions if you depend on it.</p>
+</div>
+<h2 id="step-9-keepalive-proxies-and-nginx">Step 9: Keepalive, proxies and nginx<a class="headerlink" href="#step-9-keepalive-proxies-and-nginx" title="Permanent link">&para;</a></h2>
+<p>No Presenton SSE endpoint sends keepalive comments or heartbeat frames. Between two frames the connection is idle for as long as the work takes: in a Standard slide stream that is one full slide-content call, which can include up to 12 provider requests when parsing and validation retries kick in (<a href="../09-prompts-and-schemas/">Prompts and schemas</a>).</p>
+<p>The Docker image routes browser traffic through nginx (<code>nginx.conf</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th><code>/api/v1/</code> location</th>
+<th><code>/api/v2/</code> location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Upstream</td>
+<td><code>http://localhost:8000</code></td>
+<td><code>http://localhost:8000</code></td>
+</tr>
+<tr>
+<td><code>proxy_read_timeout</code></td>
+<td><code>30m</code></td>
+<td><code>30m</code></td>
+</tr>
+<tr>
+<td><code>proxy_send_timeout</code></td>
+<td><code>30m</code></td>
+<td><code>30m</code></td>
+</tr>
+<tr>
+<td><code>proxy_connect_timeout</code></td>
+<td><code>30m</code></td>
+<td><code>30m</code></td>
+</tr>
+<tr>
+<td><code>client_max_body_size</code></td>
+<td><code>110M</code> (413 handler returns JSON)</td>
+<td>server default <code>100M</code> from the <code>http</code> block</td>
+</tr>
+<tr>
+<td><code>proxy_buffering</code></td>
+<td>not set</td>
+<td>not set</td>
+</tr>
+<tr>
+<td><code>proxy_http_version</code></td>
+<td>not set</td>
+<td>not set</td>
+</tr>
+</tbody>
+</table>
+<p>(<code>nginx.conf:45-69</code>.) The 30-minute read timeout is what keeps silent gaps from killing a stream. FastAPI sends no <code>X-Accel-Buffering</code> header and no <code>Cache-Control</code> header for these responses, and the config does not turn off <code>proxy_buffering</code>, so nginx's default response buffering applies to these locations.</p>
+<p>If events arrive in bursts or only at the end behind your proxy, the usual fixes (not present in this snapshot) are:</p>
+<ul>
+<li>disable proxy buffering for the stream paths (<code>proxy_buffering off;</code> in nginx, or have the endpoint send <code>X-Accel-Buffering: no</code>),</li>
+<li>raise idle and read timeouts on every hop (load balancers often default to 60 seconds) above the longest expected gap, or add a periodic SSE comment line such as <code>: keepalive</code> from the generator,</li>
+<li>exclude <code>text/event-stream</code> from response compression.</li>
+</ul>
+<p>In the Electron app there is no nginx; the renderer talks to FastAPI on a loopback port (<a href="../27-electron/">Electron desktop app</a>).</p>
+<h2 id="step-10-consuming-the-stream-inside-the-server-v2-smart-routes">Step 10: Consuming the stream inside the server (v2 Smart routes)<a class="headerlink" href="#step-10-consuming-the-stream-inside-the-server-v2-smart-routes" title="Permanent link">&para;</a></h2>
+<p><code>POST /api/v2/ppt/presentation/generate/smart</code> and its <code>/async</code> variant do not reimplement Smart generation. They call <code>stream_smart_presentation</code> and read the <code>StreamingResponse</code> body in process:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v2/ppt/endpoints/presentation.py (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>    <span class="k">async</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">stream_response</span><span class="o">.</span><span class="n">body_iterator</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>        <span class="n">text</span> <span class="o">=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"data: "</span><span class="p">):</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>                <span class="k">continue</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>            <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>                <span class="n">event</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">:])</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>                <span class="k">continue</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>            <span class="n">event_type</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>            <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s2">"slide_html"</span><span class="p">:</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>                <span class="n">created_slides</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>                    <span class="n">created_slides</span><span class="p">,</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>                    <span class="nb">int</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"index"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>                <span class="p">)</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>                <span class="k">if</span> <span class="n">task_id</span><span class="p">:</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>                    <span class="k">await</span> <span class="n">_update_smart_task_progress</span><span class="p">(</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>                        <span class="n">task_id</span><span class="p">,</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>                        <span class="n">presentation_id</span><span class="o">=</span><span class="n">presentation</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>                        <span class="n">created_slides</span><span class="o">=</span><span class="n">created_slides</span><span class="p">,</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>                        <span class="n">total_slides</span><span class="o">=</span><span class="n">total_slides</span><span class="p">,</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>                        <span class="n">message</span><span class="o">=</span><span class="s2">"Generating Smart presentation slides"</span><span class="p">,</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>                    <span class="p">)</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>            <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s2">"complete"</span><span class="p">:</span>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>                <span class="n">completed</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>            <span class="k">elif</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s2">"error"</span><span class="p">:</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>                <span class="n">stream_error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"detail"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"Smart generation failed"</span><span class="p">)</span>
+</span></code></pre></div>
+<p>(<code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:101-127</code>.) For each <code>slide_html</code> frame, <code>_update_smart_task_progress</code> opens its own session, sets <code>message</code> and <code>data = {"created_slides", "remaining_slides", "presentation_id"}</code> on the <code>AsyncTaskModel</code> and commits (<code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:43-63</code>). After the loop, a missing <code>complete</code> raises 500 with the last error detail or <code>"Smart generation did not complete"</code> (<code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:129-133</code>). Otherwise the session is rolled back to see checkpointed rows, the deck is exported, and the async task is marked <code>completed</code> with <code>path</code>, <code>edit_path</code> and <code>export_as</code> (<code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:135-201</code>). Polling and webhooks for these tasks are covered in <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>This consumer relies on each frame's <code>data</code> being one JSON line. If you ever pretty-print SSE payloads (for example <code>json.dumps(..., indent=2)</code>), the v2 Smart API silently stops counting progress and fails with "Smart generation did not complete", because no <code>complete</code> line parses.</p>
+</div>
+<h2 id="step-11-how-the-browser-consumes-the-streams">Step 11: How the browser consumes the streams<a class="headerlink" href="#step-11-how-the-browser-consumes-the-streams" title="Permanent link">&para;</a></h2>
+<p>Both hooks use the browser's native <code>EventSource</code>, which can only issue a <code>GET</code> and cannot set custom headers (that is why the stream endpoints are <code>GET</code> routes keyed by the id in the path). Both listen for the <code>response</code> event name:</p>
+<table>
+<thead>
+<tr>
+<th>Behavior</th>
+<th><code>useOutlineStreaming</code></th>
+<th><code>usePresentationStreaming</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>URL</td>
+<td><code>/api/v1/ppt/outlines/stream/{id}</code> (<code>useOutlineStreaming.ts:107-109</code>)</td>
+<td><code>/api/v1/ppt/presentation/stream/{id}</code> (<code>usePresentationStreaming.ts:300-302</code>)</td>
+</tr>
+<tr>
+<td>Starts when</td>
+<td>the hook is enabled, there is a presentation id and no outlines in the store (<code>useOutlineStreaming.ts:52-55</code>)</td>
+<td>the page URL has <code>stream=...</code> (<code>usePresentationStreaming.ts:133-136</code>); it preloads <code>GET /presentation/{id}</code> first only for <code>type=smart</code> or <code>editor=v2</code> pages, and otherwise fetches it once when the first Template V2 slide chunk arrives (<code>usePresentationStreaming.ts:223-263</code>, <code>usePresentationStreaming.ts:472-478</code>)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>sets the status line</td>
+<td>not handled</td>
+</tr>
+<tr>
+<td><code>chunk</code></td>
+<td>appends to a buffer, parses with <code>jsonrepair</code>, dispatches <code>setOutlines</code>, tracks which outline index changed to highlight it (<code>useOutlineStreaming.ts:133-174</code>)</td>
+<td>parses the chunk as one slide and merges it; also <code>jsonrepair</code>s the buffer (<code>usePresentationStreaming.ts:454-510</code>)</td>
+</tr>
+<tr>
+<td><code>slide_assets</code></td>
+<td>not applicable</td>
+<td>merges the updated slide, toasts each new warning <code>detail</code> once (<code>usePresentationStreaming.ts:512-555</code>)</td>
+</tr>
+<tr>
+<td><code>fonts</code>, <code>slide_html</code>, <code>generation_metrics</code></td>
+<td>not applicable</td>
+<td>Smart handling (<code>usePresentationStreaming.ts:316-452</code>)</td>
+</tr>
+<tr>
+<td><code>complete</code></td>
+<td>stores <code>data.presentation.outlines.slides</code>, closes</td>
+<td>stores <code>data.presentation</code>, closes, removes <code>stream</code> from the URL (<code>usePresentationStreaming.ts:557-620</code>)</td>
+</tr>
+<tr>
+<td><code>closing</code></td>
+<td>handled</td>
+<td>handled</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>retries, then toasts</td>
+<td>retries unless <code>retryable === false</code>, then shows progress-aware message</td>
+</tr>
+<tr>
+<td>Retries</td>
+<td><code>MAX_STREAM_RETRIES = 3</code>, delay <code>1000 ms * attempt</code> (1 s, 2 s, 3 s)</td>
+<td>same constants (<code>usePresentationStreaming.ts:27-28</code>)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>A retry opens a brand-new request, and for outline and Standard slide streams the server starts over from scratch, paying for every LLM call again. Only Smart streams resume from checkpoints. The <code>closing</code> event type handled by both hooks is not emitted by any FastAPI endpoint in this snapshot.</p>
+</div>
+<p>The page-level flow around these hooks (upload, outline review, template choice, editor) is described in <a href="../21-user-journey/">User journey</a>.</p>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Every Presenton generation stream is <code>event: response</code> frames whose single-line JSON <code>data</code> carries a <code>type</code>: <code>status</code>, <code>chunk</code>, <code>slide_assets</code>, <code>fonts</code>, <code>slide_html</code>, <code>generation_metrics</code>, <code>complete</code> or <code>error</code>.</li>
+<li><code>stream_generate_events</code> bridges a blocking provider iterator to async code with a worker thread, a queue and a 0.1-second disconnect poll, and <code>safe_sse_stream</code> turns late failures into one error frame after rolling back the session.</li>
+<li>Outline streams forward raw JSON deltas that the browser repairs incrementally; slide streams send one JSON object per slide plus asynchronous <code>slide_assets</code> updates, with no commas between slides.</li>
+<li>Only the outline stream and the sync one-shot API check for disconnects in code; Standard streams persist nothing until the end, while Smart streams checkpoint and resume.</li>
+<li>There are no keepalives; the bundled nginx relies on 30-minute timeouts and does not disable buffering.</li>
+<li>The v2 Smart API consumes the same SSE stream in process to update async task progress.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../11-document-ingestion/">Document ingestion</a> to see how uploaded files become the <code>Context:</code> section of the outline prompt.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../09-prompts-and-schemas/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Prompts and schemas">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Prompts and schemas
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../11-document-ingestion/" class="md-footer__link md-footer__link--next" aria-label="Next: Document ingestion">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Document ingestion
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

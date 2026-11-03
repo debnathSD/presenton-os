@@ -1,0 +1,3451 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/19-themes-and-fonts/">
+      
+      
+        <link rel="prev" href="../18-custom-templates/">
+      
+      
+        <link rel="next" href="../20-nextjs-architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Themes and fonts - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#themes-and-fonts" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Themes and fonts
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-theme-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The theme data model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-where-themes-and-fonts-are-stored" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Where themes and fonts are stored
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Where themes and fonts are stored">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-a-presentation-gets-its-fonts-and-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a presentation gets its fonts and theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-deriving-a-theme-from-layouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Deriving a theme from layouts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Deriving a theme from layouts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: profile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-role-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: role selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-materialize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: materialize
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-serving-the-template-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Serving the template theme
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-normalizing-any-theme-payload-in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Normalizing any theme payload in the browser
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-which-theme-wins-when-a-deck-opens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Which theme wins when a deck opens
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-what-applying-a-theme-actually-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: What applying a theme actually does
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-the-font-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: The font catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-loading-fonts-in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Loading fonts in the browser
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-uploading-and-serving-font-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Uploading and serving font files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: Uploading and serving font files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-font-upload-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The font upload API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serving-app_datafonts-without-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serving /app_data/fonts/ without authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-fonts-in-docker-and-at-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Fonts in Docker and at export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-theme-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The theme data model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-where-themes-and-fonts-are-stored" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Where themes and fonts are stored
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Where themes and fonts are stored">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-a-presentation-gets-its-fonts-and-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a presentation gets its fonts and theme
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-deriving-a-theme-from-layouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Deriving a theme from layouts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Deriving a theme from layouts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: profile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-role-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: role selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-materialize" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: materialize
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-serving-the-template-theme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Serving the template theme
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-normalizing-any-theme-payload-in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Normalizing any theme payload in the browser
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-which-theme-wins-when-a-deck-opens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Which theme wins when a deck opens
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-what-applying-a-theme-actually-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: What applying a theme actually does
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-the-font-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: The font catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-loading-fonts-in-the-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Loading fonts in the browser
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-uploading-and-serving-font-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Uploading and serving font files
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 10: Uploading and serving font files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-font-upload-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The font upload API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serving-app_datafonts-without-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serving /app_data/fonts/ without authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-fonts-in-docker-and-at-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: Fonts in Docker and at export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="themes-and-fonts">Themes and fonts<a class="headerlink" href="#themes-and-fonts" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>servers/fastapi/models/theme_data.py</code>, <code>servers/fastapi/templates/v2/theme.py</code>, <code>servers/fastapi/utils/font_uploads.py</code>, <code>servers/fastapi/api/v1/ppt/endpoints/fonts.py</code>, <code>servers/fastapi/templates/pptx_font_utils.py</code>, <code>servers/nextjs/lib/template-theme.ts</code>, <code>servers/nextjs/app/(presentation-generator)/presentation/utils/applyPresentationThemeDom.ts</code>, <code>servers/nextjs/components/slide-editor/text/local-fonts.ts</code>, <code>nginx.conf</code>  ·  <strong>Builds on:</strong> <a href="../18-custom-templates/">Custom templates from PPTX</a>  ·  <strong>Time:</strong> ~35 min</p>
+</div>
+<h2 id="what-you-will-learn">What you will learn<a class="headerlink" href="#what-you-will-learn" title="Permanent link">&para;</a></h2>
+<p>A Presenton "theme" is a small JSON object with sixteen color roles and one text font, and a "font map" is a dictionary from family name to font file URL. This chapter specifies both, shows how a theme is derived from a template's layouts, where themes and fonts are stored on templates and presentations and which one wins, how the browser loads fonts and applies the theme, and where fonts live on disk and on the wire. It also explains the one surprising fact that governs everything else: template slides carry literal colors and font families, so the theme mostly affects newly inserted content, not existing slides.</p>
+<pre class="mermaid"><code>flowchart LR
+    TJ["templates/id/template.json: theme + fonts"] --&gt; IMP["import at startup"]
+    PPTX["custom PPTX"] --&gt; GEN["generate_template_theme"]
+    IMP --&gt; TV2["template_v2.theme, template_v2.assets.fonts"]
+    GEN --&gt; TV2
+    TV2 --&gt; API["GET /template/id/theme"]
+    TV2 --&gt; PRES["presentations.fonts (always), presentations.theme (API generate only)"]
+    API --&gt; FE["usePresentationData: fetched ?? stored ?? default"]
+    PRES --&gt; FE
+    FE --&gt; CSS["CSS variables + font-family on the slides wrapper"]
+    FE --&gt; INS["Insert palette: themed new elements"]
+    PRES --&gt; FL["useFontLoader: inject @font-face"]</code></pre>
+<h2 id="step-1-the-theme-data-model">Step 1: The theme data model<a class="headerlink" href="#step-1-the-theme-data-model" title="Permanent link">&para;</a></h2>
+<p>The backend contract is four Pydantic models in <code>servers/fastapi/models/theme_data.py</code>:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/models/theme_data.py (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">PresentationThemeColors</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">primary</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">background</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">card</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">stroke</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">background_text</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">primary_text</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">graph_0</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">graph_1</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="c1"># ... graph_2 to graph_8</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">graph_9</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="k">class</span><span class="w"> </span><span class="nc">PresentationThemeTextFont</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="k">class</span><span class="w"> </span><span class="nc">PresentationThemeFonts</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">textFont</span><span class="p">:</span> <span class="n">PresentationThemeTextFont</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="k">class</span><span class="w"> </span><span class="nc">PresentationThemeData</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="n">colors</span><span class="p">:</span> <span class="n">PresentationThemeColors</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="n">fonts</span><span class="p">:</span> <span class="n">PresentationThemeFonts</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Meaning (from <code>THEME_ROLE_SYSTEM_PROMPT</code>, <code>servers/fastapi/templates/v2/theme.py:131</code>)</th>
+<th>CSS variable set by the frontend</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>background</code></td>
+<td>a large, frequently repeated surface color</td>
+<td><code>--background-color</code></td>
+</tr>
+<tr>
+<td><code>primary</code></td>
+<td>the dominant branded or accent color, not a neutral background</td>
+<td><code>--primary-color</code></td>
+</tr>
+<tr>
+<td><code>card</code></td>
+<td>a secondary surface</td>
+<td><code>--card-color</code></td>
+</tr>
+<tr>
+<td><code>stroke</code></td>
+<td>a subtle structural or border color</td>
+<td><code>--stroke</code></td>
+</tr>
+<tr>
+<td><code>background_text</code></td>
+<td>text color that contrasts with <code>background</code></td>
+<td><code>--background-text</code></td>
+</tr>
+<tr>
+<td><code>primary_text</code></td>
+<td>text color that contrasts with <code>primary</code></td>
+<td><code>--primary-text</code></td>
+</tr>
+<tr>
+<td><code>graph_0</code> to <code>graph_9</code></td>
+<td>distinct chart and accent colors, in order</td>
+<td><code>--graph-0</code> to <code>--graph-9</code></td>
+</tr>
+<tr>
+<td><code>fonts.textFont {name, url}</code></td>
+<td>the dominant readable font</td>
+<td><code>font-family</code>, <code>--heading-font-family</code>, <code>--body-font-family</code></td>
+</tr>
+</tbody>
+</table>
+<p>Note the camelCase <code>textFont</code> inside an otherwise snake_case model; the frontend reads exactly that key. Every built-in <code>template.json</code> carries a <code>theme</code> block in this shape. For example, <code>templates/momentum/template.json</code> has <code>primary: "#213EBB"</code>, <code>background: "#F6F7FC"</code>, <code>primary_text: "#FFFFFF"</code>, <code>background_text: "#000000"</code> and <code>textFont: {"name": "Lato", "url": "static/Lato Regular.ttf"}</code>.</p>
+<p>The TypeScript mirror is <code>TemplateTheme</code> in <code>servers/nextjs/lib/template-theme.ts</code>: a flat record of the same sixteen keys (<code>TEMPLATE_THEME_COLOR_KEYS</code>, <code>lib/template-theme.ts:1</code>) plus an optional <code>fonts.textFont</code>. The frontend flattens <code>colors</code> into the top level.</p>
+<h2 id="step-2-where-themes-and-fonts-are-stored">Step 2: Where themes and fonts are stored<a class="headerlink" href="#step-2-where-themes-and-fonts-are-stored" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Written by</th>
+<th>Shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>template_v2.theme</code></td>
+<td>JSON</td>
+<td>default template import, template creation, <code>generate-blocks</code>, <code>PATCH /template/{id}</code>, lazy derivation in <code>GET /template/{id}/theme</code></td>
+<td><code>PresentationThemeData</code> dump</td>
+</tr>
+<tr>
+<td><code>template_v2.assets.fonts</code></td>
+<td>inside JSON <code>assets</code></td>
+<td>default template import (<code>_build_assets</code>, <code>servers/fastapi/templates/default_templates.py</code>), template creation, <code>PATCH /template/{id}</code> with <code>fonts</code></td>
+<td><code>{family: url}</code></td>
+</tr>
+<tr>
+<td><code>presentations.fonts</code></td>
+<td>JSON (<code>servers/fastapi/models/sql/presentation.py:74</code>)</td>
+<td><code>POST /presentation/create/blank</code> (when a template id is given), prepare, generate, and the stream endpoint as a fallback (<code>presentation.py:2027</code>)</td>
+<td><code>{family: url}</code> copied from the template</td>
+</tr>
+<tr>
+<td><code>presentations.theme</code></td>
+<td>JSON (<code>servers/fastapi/models/sql/presentation.py:73</code>)</td>
+<td>only the API generate path</td>
+<td>a wrapper around the template theme (below)</td>
+</tr>
+<tr>
+<td><code>font_uploads</code></td>
+<td>table (<code>servers/fastapi/models/sql/font_upload.py</code>)</td>
+<td><code>POST /fonts/upload</code>, template font uploads, disk backfill</td>
+<td>one row per font file</td>
+</tr>
+</tbody>
+</table>
+<p>The migrations are <code>servers/fastapi/alembic/versions/e4c7a9b2d6f1_add_theme_to_template_v2.py</code>, <code>f42ad4074449_add_theme_column_to_presentations.py</code> (an idempotent <code>_has_column</code> guard; <code>82abdbc476a7</code> has the same title), <code>9b2d1c4e5f6a_add_fonts_column_to_presentations.py</code> and <code>5d7e9a1b2c3f_add_font_uploads.py</code>. The schema as a whole is covered in <a href="../07-data-model/">Data model</a>.</p>
+<h3 id="how-a-presentation-gets-its-fonts-and-theme">How a presentation gets its fonts and theme<a class="headerlink" href="#how-a-presentation-gets-its-fonts-and-theme" title="Permanent link">&para;</a></h3>
+<p>When a presentation is created from a template, the backend copies the template's font map, never a mutable reference:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/presentation.py (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_extract_template_fonts_from_assets</span><span class="p">(</span><span class="n">assets</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">assets</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">return</span> <span class="n">_coerce_presentation_font_map</span><span class="p">(</span><span class="n">assets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fonts"</span><span class="p">))</span>
+</span></code></pre></div>
+<p><code>_coerce_presentation_font_map</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:322</code>) keeps only non-empty string names and URLs and returns <code>None</code> for an empty map. The UI flow sets <code>presentation.fonts = template_fonts</code> in <code>prepare_presentation</code> (<code>presentation.py:1919</code>); blank presentations get them at creation (<code>:1810</code>); the API <code>generate_presentation_handler</code> sets both <code>fonts=template_fonts</code> and <code>theme=template_theme</code> (<code>:2957</code> to <code>:2958</code>).</p>
+<p>The API path's theme is not the raw template theme but a wrapper built by <code>template_theme_for_presentation</code> (<code>servers/fastapi/templates/v2/theme.py:405</code>):</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/theme.py (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theme</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="s2">"name"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">template_name</span><span class="si">}</span><span class="s2"> Theme"</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="s2">"description"</span><span class="p">:</span> <span class="n">template_description</span> <span class="ow">or</span> <span class="s2">"Theme generated from the template"</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="s2">"data"</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">theme</span><span class="p">)),</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="s2">"source"</span><span class="p">:</span> <span class="s2">"template"</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="s2">"template_id"</span><span class="p">:</span> <span class="n">template_id</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="p">}</span>
+</span></code></pre></div>
+<p>During streaming, the backend also emits the font map as an SSE event <code>{"type": "fonts", "fonts": {...}}</code> (<code>presentation.py:1953</code>, <code>:2037</code>), which <code>usePresentationStreaming.ts:407</code> merges into the Redux presentation. See <a href="../10-streaming/">Streaming (SSE)</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>There is no API that changes a presentation's theme. <code>PATCH /api/v1/ppt/presentation/update</code> (<code>presentation.py:2527</code>) accepts only <code>id</code>, <code>n_slides</code>, <code>title</code> and <code>slides</code>; a <code>theme</code> key in the body is ignored. <code>servers/fastapi/tests/unit/test_presentation_template_theme_updates.py</code> pins this: updates with <code>{"theme": None}</code> or a new theme leave the stored theme unchanged. The chat assistant reads the theme (<code>get_template_theme</code> in <code>servers/fastapi/services/chat/memory_layer.py:1265</code>, documented as "without offering theme customization") but cannot write it.</p>
+</div>
+<h2 id="step-3-deriving-a-theme-from-layouts">Step 3: Deriving a theme from layouts<a class="headerlink" href="#step-3-deriving-a-theme-from-layouts" title="Permanent link">&para;</a></h2>
+<p>When a custom template is created (see <a href="../18-custom-templates/">Custom templates from PPTX</a>), or when <code>GET /template/{id}/theme</code> finds no valid stored theme, the backend derives one in three stages.</p>
+<h3 id="stage-1-profile">Stage 1: profile<a class="headerlink" href="#stage-1-profile" title="Permanent link">&para;</a></h3>
+<p><code>build_theme_profile(layouts, available_fonts)</code> (<code>theme.py:145</code>) walks every element of every layout with <code>_collect_element_profile</code> (<code>:431</code>) and records per-color statistics in <code>_ColorStats</code> (<code>:91</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Source in the element JSON</th>
+<th>Counted as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fill</code></td>
+<td><code>fill</code> (with normalized area = width x height / (1280 x 720), clamped to 1)</td>
+</tr>
+<tr>
+<td><code>stroke</code></td>
+<td><code>stroke</code></td>
+</tr>
+<tr>
+<td><code>color</code> (icon tint)</td>
+<td><code>fill</code></td>
+</tr>
+<tr>
+<td><code>font.color</code>, and <code>font.color</code> inside <code>runs</code>, <code>items</code>, <code>columns</code>, <code>rows</code></td>
+<td><code>text</code></td>
+</tr>
+<tr>
+<td>table cell <code>color</code> fills inside <code>columns</code> and <code>rows</code></td>
+<td><code>fill</code></td>
+</tr>
+<tr>
+<td><code>colors[]</code></td>
+<td><code>infographic</code> for infographic elements, else <code>chart</code></td>
+</tr>
+<tr>
+<td><code>title_color</code>, <code>legend_color</code>, <code>text_color</code></td>
+<td><code>text</code></td>
+</tr>
+<tr>
+<td><code>axis_color</code>, <code>grid_color</code></td>
+<td><code>stroke</code></td>
+</tr>
+</tbody>
+</table>
+<p>Every text color is also paired with the nearest enclosing fill (the "effective background"); text with no enclosing fill is paired with the slide's largest fill. Fonts are counted by family (case-insensitive) with an average size (<code>_record_font</code>, <code>:590</code>).</p>
+<p>Colors are then clustered: sorted by an importance score, and any color within RGB Euclidean distance 8 of an existing cluster is merged into it (<code>NEAR_COLOR_DISTANCE = 8.0</code>, <code>:30</code>; <code>_cluster_colors</code>, <code>:638</code>). The importance score is:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/templates/v2/theme.py (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>    <span class="nd">@property</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">importance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="k">return</span> <span class="p">(</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">fill_area</span> <span class="o">*</span> <span class="mi">12</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill_count</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">text_count</span> <span class="o">*</span> <span class="mf">1.5</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">stroke_count</span> <span class="o">*</span> <span class="mf">0.75</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chart_count</span> <span class="o">*</span> <span class="mi">2</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">infographic_count</span> <span class="o">*</span> <span class="mi">2</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slides</span><span class="p">)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p>The profile keeps at most 14 colors (ids <code>c0</code>..<code>c13</code>), 8 foreground/background pairs with their WCAG contrast ratio, and 5 fonts (ids <code>f0</code>..<code>f4</code>) (<code>MAX_PROFILE_COLORS</code>, <code>MAX_PROFILE_PAIRS</code>, <code>MAX_PROFILE_FONTS</code>, <code>:27</code> to <code>:29</code>). Fonts that appear in the template's font map but not in the layouts are added with a usage count of zero, and each profile font carries its URL from the map when one exists (<code>_build_profile_fonts</code>, <code>:604</code>). If the layouts contain no colors at all, the profile is seeded with <code>#FFFFFF</code>, <code>#111111</code>, <code>#2563EB</code> and <code>#E5E7EB</code>.</p>
+<h3 id="stage-2-role-selection">Stage 2: role selection<a class="headerlink" href="#stage-2-role-selection" title="Permanent link">&para;</a></h3>
+<p><code>generate_template_theme</code> (<code>:246</code>) first asks the LLM. <code>select_theme_roles_with_llm</code> (<code>:261</code>) sends the profile with font URLs removed, compact JSON, and requires a <code>ThemeRoleSelection</code> (<code>:77</code>) whose values are profile ids only. Its validator rejects unknown ids; it uses 2 validation retries and 2,000 max tokens. On any exception it falls back to <code>select_theme_roles_deterministically</code> (<code>:305</code>):</p>
+<ul>
+<li><code>background</code>: max by <code>(fill_area, slide_count, fill_count, -saturation)</code>.</li>
+<li><code>primary</code>: among the rest, max by <code>(chart_count + infographic_count, saturation, fill_count, slide_count)</code>.</li>
+<li><code>card</code>: max by <code>(fill_area, fill_count, -saturation)</code>.</li>
+<li><code>stroke</code>: max by <code>(stroke_count, fill_count)</code>.</li>
+<li><code>graph_colors</code>: the rest sorted by chart usage, then saturation, first 10.</li>
+<li><code>background_text</code> and <code>primary_text</code>: <code>_best_text_candidate</code> (<code>:664</code>), the most-used text color with contrast at least 4.5 against the surface.</li>
+<li><code>text_font</code>: the most-used profile font.</li>
+</ul>
+<p><code>_derive_template_theme</code> in the template endpoint (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:882</code>) skips the LLM entirely and always uses the deterministic selector.</p>
+<h3 id="stage-3-materialize">Stage 3: materialize<a class="headerlink" href="#stage-3-materialize" title="Permanent link">&para;</a></h3>
+<p><code>materialize_theme</code> (<code>:357</code>) turns ids back into hex colors and repairs them:</p>
+<ul>
+<li>Text colors with contrast below 4.5 are replaced by the best observed text color that passes, or else by black or white, whichever contrasts more (<code>_repair_text_color</code>, <code>:680</code>).</li>
+<li>A <code>card</code> within RGB distance 10 of <code>background</code> becomes a background variant shifted by 0.06 lightness; a <code>stroke</code> within 12 becomes a 0.14 variant (<code>_surface_variant</code>, <code>:723</code>).</li>
+<li>Graph colors are de-duplicated, <code>primary</code> is appended, and the list is padded to exactly 10 by rotating the primary hue in steps of 0.137 with lightness clamped to 0.25..0.78 (<code>_complete_graph_colors</code>, <code>:698</code>).</li>
+<li>With no font, the text font defaults to <code>{"name": "Inter", "url": ""}</code>.</li>
+</ul>
+<p><code>servers/fastapi/tests/unit/test_template_theme.py</code> covers clustering of near colors (<code>:117</code>), contrast repair and graph completion (<code>:136</code>), that the LLM receives only the compact profile (<code>:163</code>), and the fallback path (<code>:197</code>).</p>
+<h2 id="step-4-serving-the-template-theme">Step 4: Serving the template theme<a class="headerlink" href="#step-4-serving-the-template-theme" title="Permanent link">&para;</a></h2>
+<p><code>GET /api/v1/ppt/template/{template_id}/theme</code> (<code>template.py:2093</code>) returns <code>{"template_id": ..., "theme": PresentationThemeData | null}</code>. If the stored theme is missing or fails validation, it derives one deterministically and <strong>writes it back</strong> to the row before responding (<code>:2112</code> to <code>:2117</code>). A GET with a side effect is unusual; it means old templates acquire a theme the first time anyone opens them.</p>
+<p>On the frontend, <code>TemplateService.getTemplateTheme</code> (<code>servers/nextjs/app/(presentation-generator)/services/api/template.ts:153</code>) caches results per template id for <code>TEMPLATE_THEME_CACHE_TTL_MS = 5 * 60 * 1000</code> (<code>:10</code>), de-duplicates concurrent requests, caches a 404 as "no theme" (old decks can outlive their template), and does not cache other failures so they can be retried. Every write through <code>TemplateService</code> invalidates the cache entry. These behaviors are tested in <code>servers/nextjs/tests/template-theme-infographics.test.mjs</code> (<code>:119</code>, <code>:176</code>, <code>:197</code>).</p>
+<h2 id="step-5-normalizing-any-theme-payload-in-the-browser">Step 5: Normalizing any theme payload in the browser<a class="headerlink" href="#step-5-normalizing-any-theme-payload-in-the-browser" title="Permanent link">&para;</a></h2>
+<p>The frontend receives themes in at least four shapes: the API response <code>{template_id, theme: {colors, fonts}}</code>, a bare <code>{colors, fonts}</code>, the presentation wrapper <code>{name, data: {colors, fonts}, source, template_id}</code>, and legacy flat <code>{primary, background, ...}</code>. <code>normalizeTemplateTheme</code> (<code>lib/template-theme.ts</code>) accepts all of them:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/lib/template-theme.ts (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">normalizeTemplateTheme</span><span class="p">(</span><span class="nx">value</span><span class="o">:</span><span class="w"> </span><span class="kt">unknown</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">TemplateTheme</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">root</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">nestedTheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">theme</span><span class="p">)</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">data</span><span class="o">?</span><span class="p">.</span><span class="nx">theme</span><span class="p">);</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">colors</span><span class="w"> </span><span class="o">=</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">nestedTheme</span><span class="o">?</span><span class="p">.</span><span class="nx">colors</span><span class="p">)</span><span class="w"> </span><span class="o">??</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">root</span><span class="p">.</span><span class="nx">colors</span><span class="p">)</span><span class="w"> </span><span class="o">??</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nx">asRecord</span><span class="p">(</span><span class="nx">data</span><span class="o">?</span><span class="p">.</span><span class="nx">colors</span><span class="p">)</span><span class="w"> </span><span class="o">??</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="nx">nestedTheme</span><span class="w"> </span><span class="o">??</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="nx">data</span><span class="w"> </span><span class="o">??</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="nx">root</span><span class="p">;</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="o">!</span><span class="nx">TEMPLATE_THEME_COLOR_KEYS</span><span class="p">.</span><span class="nx">some</span><span class="p">(</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">      </span><span class="p">(</span><span class="nx">key</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">normalizedHex</span><span class="p">(</span><span class="nx">colors</span><span class="p">[</span><span class="nx">key</span><span class="p">])</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="p">)</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">  </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">  </span><span class="c1">// ...</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Each key must match <code>^#?[0-9a-f]{6}$</code> (six-digit hex only, no <code>rgb()</code>, no alpha) and is lower-cased; missing or invalid keys fall back to <code>DEFAULT_TEMPLATE_THEME</code> (<code>primary: "#4a6ebd"</code>, <code>background: "#ffffff"</code>, and so on). A text font is kept only when both <code>name</code> and <code>url</code> are non-empty. The Redux reducer <code>setPresentationData</code> runs every incoming theme through this function (<code>servers/nextjs/store/slices/presentationGeneration.ts:135</code>).</p>
+<p>There is also a pure-frontend fallback, <code>resolveTemplateTheme</code> (<code>lib/template-theme.ts</code>), used by the template editor (<code>TemplatePreviewClient.tsx:159</code>). If the template has no explicit theme it scans the layouts' JSON keys for hex values, classifies them by key path (<code>font</code>, <code>text_color</code>, <code>title_color</code>, <code>legend_color</code> as text; <code>stroke</code>, <code>axis_color</code>, <code>grid_color</code> as stroke; <code>chart</code>, <code>infographic</code>, <code>colors</code> as graph; everything else as fill), and picks roles with simple weights and a 4.5 contrast rule. It is a cousin of the Python deterministic selector, not a copy, so the two can disagree.</p>
+<h2 id="step-6-which-theme-wins-when-a-deck-opens">Step 6: Which theme wins when a deck opens<a class="headerlink" href="#step-6-which-theme-wins-when-a-deck-opens" title="Permanent link">&para;</a></h2>
+<p><code>usePresentationData.fetchUserSlides</code> (<code>servers/nextjs/app/(presentation-generator)/presentation/hooks/usePresentationData.ts:27</code>) decides:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/presentation/hooks/usePresentationData.ts (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">templateId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">resolveTemplateIdFromPresentation</span><span class="p">(</span><span class="nx">normalizedData</span><span class="p">);</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">responseTheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">normalizeTemplateTheme</span><span class="p">(</span><span class="nx">normalizedData</span><span class="p">.</span><span class="nx">theme</span><span class="p">);</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">fetchedTheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">templateId</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">          </span><span class="o">?</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">TemplateService</span><span class="p">.</span><span class="nx">getTemplateTheme</span><span class="p">(</span><span class="nx">templateId</span><span class="p">)</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">          </span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">theme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fetchedTheme</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="nx">responseTheme</span><span class="w"> </span><span class="o">??</span><span class="w"> </span><span class="nx">DEFAULT_TEMPLATE_THEME</span><span class="p">;</span>
+</span></code></pre></div>
+<p><code>resolveTemplateIdFromPresentation</code> (<code>lib/template-theme.ts</code>) looks at <code>template_id</code>, then <code>design_v2_id</code>, then the first slide's <code>layout_group</code>, then <code>presentation.layout</code>, ignoring the placeholder values <code>no</code>, <code>blank</code> and <code>template-v2</code>.</p>
+<p>So the precedence is: <strong>the template's current theme</strong>, then the presentation's stored theme, then the built-in default. The presentation's font map is loaded separately and in full (<code>useFontLoader(normalizedData.fonts)</code>, <code>:67</code>), and the theme's text font is loaded on top (<code>:71</code>). Finally the theme is applied to <code>#presentation-slides-wrapper</code> (<code>:74</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Because the live template theme wins, editing a template's theme (with <code>PATCH /template/{id}</code>) restyles the theme-driven parts of every presentation made from it the next time they load (after the 5-minute client cache expires). The stored <code>presentations.theme</code> is only a fallback for decks whose template was deleted. If you need per-deck theme snapshots, the precedence in <code>usePresentationData.ts:52</code> is the line to change.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The PDF/export renderer page does not follow the same precedence. <code>PdfMakerPage.tsx</code> loads <code>presentation.fonts</code> (<code>:184</code>) and applies only the <strong>stored</strong> <code>presentation.theme</code> (<code>:186</code> to <code>:191</code>), wrapped in a try/catch so theme errors cannot block export. Decks created through the UI have <code>theme = null</code> (only the API generate path stores one), so their export page applies no theme variables at all. Whether that changes pixels depends on Step 7. The export pipeline itself is in <a href="../24-export-pipeline/">PPTX and PDF export</a>.</p>
+</div>
+<h2 id="step-7-what-applying-a-theme-actually-does">Step 7: What applying a theme actually does<a class="headerlink" href="#step-7-what-applying-a-theme-actually-does" title="Permanent link">&para;</a></h2>
+<p><code>applyPresentationThemeToElement(element, theme)</code> (<code>servers/nextjs/app/(presentation-generator)/presentation/utils/applyPresentationThemeDom.ts:38</code>) normalizes the theme and sets sixteen CSS custom properties as inline styles on the given element. If there is a text font, it loads it and sets three more properties:</p>
+<div class="language-ts highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/presentation/utils/applyPresentationThemeDom.ts (excerpt)</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">textFont</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">normalizedTheme</span><span class="p">.</span><span class="nx">fonts</span><span class="o">?</span><span class="p">.</span><span class="nx">textFont</span><span class="p">;</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">textFont</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nx">useFontLoader</span><span class="p">({</span><span class="w"> </span><span class="p">[</span><span class="nx">textFont</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="nx">textFont</span><span class="p">.</span><span class="nx">url</span><span class="w"> </span><span class="p">});</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nx">element</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">setProperty</span><span class="p">(</span><span class="s2">"font-family"</span><span class="p">,</span><span class="w"> </span><span class="sb">`"</span><span class="si">${</span><span class="nx">textFont</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">"`</span><span class="p">);</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nx">element</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">setProperty</span><span class="p">(</span><span class="s2">"--heading-font-family"</span><span class="p">,</span><span class="w"> </span><span class="sb">`"</span><span class="si">${</span><span class="nx">textFont</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">"`</span><span class="p">);</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nx">element</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">setProperty</span><span class="p">(</span><span class="s2">"--body-font-family"</span><span class="p">,</span><span class="w"> </span><span class="sb">`"</span><span class="si">${</span><span class="nx">textFont</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">"`</span><span class="p">);</span>
+</span></code></pre></div>
+<p>It is called for the editor wrapper (<code>usePresentationData.ts:74</code>, and again in a <code>useLayoutEffect</code> in <code>PresentationPage.tsx:506</code> because leaving present mode remounts the tree and loses inline styles), for present mode (<code>PresentationMode.tsx:270</code>), and for export (<code>PdfMakerPage.tsx:188</code>). <code>clearPresentationThemeFromElement</code> (<code>:24</code>) removes the same properties; the outline page clears them with its own copy of the list (<code>outline/hooks/usePresentationGeneration.ts:66</code>).</p>
+<p>Now the important part. The Template v2 HTML renderer writes <strong>literal</strong> styles. <code>fontStyle</code> in <code>servers/nextjs/lib/template-v2-json-to-html.ts:3491</code> emits <code>color:</code> from the element's <code>font.color</code> (default <code>#111827</code>) and <code>font-family:</code> from <code>font.family</code> when present, and the slide root sets <code>font-family:Arial,Helvetica,sans-serif</code> (<code>template-v2-json-to-html.ts:298</code>). The renderer contains no <code>var(--...)</code> references at all. The Konva editor surface likewise reads colors and families from the element JSON. Consequences:</p>
+<ul>
+<li>An existing template slide looks the same whatever theme is applied: its colors come from its own elements.</li>
+<li>The inherited <code>font-family</code> on the wrapper reaches only HTML that does not set its own family. Template text elements imported from PPTX almost always carry <code>font.family</code>, and the slide root resets to Arial anyway.</li>
+<li>The CSS variables exist for other UI that might read them, but a search of <code>app/</code>, <code>components/</code> and <code>lib/</code> finds no <code>var(...)</code> reference to any of the sixteen color variables or to <code>--heading-font-family</code> and <code>--body-font-family</code>.</li>
+</ul>
+<p>Where the theme does matter is <strong>new content</strong>. The editor's insert palette passes <code>resolvePresentationTheme(presentationData)</code> (<code>PresentationActions.tsx:2121</code>) into <code>createTextInsertElements</code> and the other creators, which run <code>applyTemplateThemeToElement</code> (<code>servers/nextjs/components/slide-editor/insert/insert-elements.ts</code>, around <code>:3212</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Inserted element</th>
+<th>Theme roles applied</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>text, text-list</td>
+<td><code>font.color = background_text</code>, <code>font.family = textFont.name</code> on the element and every run</td>
+</tr>
+<tr>
+<td>table</td>
+<td>header cells: fill <code>primary</code>, text <code>primary_text</code>; body cells: fill <code>background</code>, text <code>background_text</code></td>
+</tr>
+<tr>
+<td>chart</td>
+<td><code>color = graph_0</code>, <code>colors = graph_0..graph_9</code>, axis and grid <code>stroke</code>, title and legend <code>background_text</code>, data point colors cycle through the graph colors</td>
+</tr>
+<tr>
+<td>infographic</td>
+<td><code>card_color = card</code>, <code>background_text_color = background_text</code>, icon tint <code>primary_text</code>; meters (progress bar, gauge) use <code>[card, primary]</code>, others <code>[background, graph..., card, stroke]</code></td>
+</tr>
+<tr>
+<td>vector</td>
+<td><code>fill.color = primary</code> when a fill exists, <code>stroke.color = stroke</code> when a stroke exists</td>
+</tr>
+<tr>
+<td>image</td>
+<td>icons get <code>color = primary</code>; photos are unchanged</td>
+</tr>
+<tr>
+<td>container</td>
+<td>fill <code>card</code>, stroke <code>stroke</code>, and the child is themed recursively; <code>flex</code>, <code>grid</code> and <code>group</code> theme their children</td>
+</tr>
+</tbody>
+</table>
+<p>These rules are tested in <code>servers/nextjs/tests/template-theme-infographics.test.mjs</code> (<code>:66</code>, <code>:82</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>If you expect "change theme, slides recolor", you will be surprised: that is not how Template v2 works. Recoloring existing slides would require rewriting element colors in <code>slides.ui</code> (or teaching the renderer to resolve role references), and neither exists in this snapshot. For a Superset-style product where a brand theme must apply to generated slides, plan for role references in the slide model from the start; see <a href="../../superset/33-data-bound-model/">Data-bound slide model</a>.</p>
+</div>
+<h2 id="step-8-the-font-catalog">Step 8: The font catalog<a class="headerlink" href="#step-8-the-font-catalog" title="Permanent link">&para;</a></h2>
+<p>Presenton ships its fonts. There are two catalogs that must stay in sync:</p>
+<ul>
+<li><strong>Backend:</strong> <code>servers/fastapi/templates/assets/fonts.json</code>, a JSON array of 95 <code>{"font_name", "font_url"}</code> entries, for example <code>{"font_name": "Anton", "font_url": "/vendor/fonts/display/anton/Anton-Regular.ttf"}</code>. It is read through <code>importlib.resources</code> (<code>get_static_font_catalog</code>, <code>servers/fastapi/templates/pptx_font_utils.py:162</code>), so it must be packaged into the wheel; the production <code>Dockerfile:22</code> asserts at build time that the catalog is non-empty, and <code>servers/fastapi/tests/unit/test_font_catalog_packaging.py</code> checks it loads outside the source tree.</li>
+<li><strong>Frontend:</strong> <code>LOCAL_FONT_OPTIONS</code> in <code>servers/nextjs/components/slide-editor/text/local-fonts.ts:70</code>, 95 entries built with <code>font(family, category, dir, file, italicFile?)</code> for variable fonts and <code>staticFont(family, category, dir, files[])</code> for families with one file per weight. Weights are inferred from file names (<code>fontWeightFromFileName</code>, <code>:58</code>). One extra application font, Syne, is added outside the catalog (<code>APPLICATION_FONT_OPTIONS</code>, <code>:174</code>), and <code>inter variable</code> is aliased to Inter.</li>
+</ul>
+<p>The files themselves live in <code>servers/nextjs/public/vendor/fonts/&lt;category&gt;/&lt;dir&gt;/</code> with categories <code>display</code>, <code>handwritten</code>, <code>monospace</code>, <code>sans_serif</code>, <code>script</code>, <code>serif</code>, <code>slab_serif</code>. <code>servers/nextjs/local-font-loading-validation.test.mjs</code> asserts exactly 95 catalog entries and 320 font files, and that runtime code under <code>app/</code>, <code>components/</code> and <code>lib/</code> never references <code>fonts.googleapis.com</code>, <code>fonts.gstatic.com</code> or <code>next/font/google</code>.</p>
+<p><code>next.config.mjs:18</code> adds one response header rule: <code>/vendor/fonts/:path*</code> gets <code>Access-Control-Allow-Origin: *</code>, because "Sandboxed community previews load public fonts from an opaque origin". <code>servers/nextjs/tests/font-cors.test.mjs</code> asserts this is the <strong>only</strong> wildcard CORS rule and that it never sets <code>Access-Control-Allow-Credentials</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Built-in templates still contain Google Fonts URLs. <code>templates/general/template.json</code> maps <code>"Poppins"</code> to <code>https://fonts.googleapis.com/css2?family=Poppins:...</code> in both <code>fonts</code> and <code>theme.fonts.textFont.url</code>. Nothing downloads it: the frontend parser only accepts URLs ending in a font file extension (<code>isFontAssetUrl</code>, <code>local-fonts.ts:391</code>), so the stylesheet URL is discarded and the family name <code>Poppins</code> is matched against the local catalog instead. A custom family that is not in the catalog and only has a CSS URL will silently fall back to the browser default.</p>
+</div>
+<h2 id="step-9-loading-fonts-in-the-browser">Step 9: Loading fonts in the browser<a class="headerlink" href="#step-9-loading-fonts-in-the-browser" title="Permanent link">&para;</a></h2>
+<p>The public entry point is a plain function with a hook-like name:</p>
+<div class="language-tsx highlight"><span class="filename">servers/nextjs/app/(presentation-generator)/hooks/useFontLoad.tsx</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nx">ensureTemplateFontLoaded</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nx">localFontOptionsFromUnknown</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"@/components/slide-editor/text/local-fonts"</span><span class="p">;</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">useFontLoader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">fonts</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="p">&lt;</span><span class="nt">string</span><span class="err">,</span><span class="w"> </span><span class="na">string</span><span class="p">&gt;)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nx">localFontOptionsFromUnknown</span><span class="p">(</span><span class="nx">fonts</span><span class="p">).</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">font</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="ow">void</span><span class="w"> </span><span class="nx">ensureTemplateFontLoaded</span><span class="p">(</span><span class="nx">font</span><span class="p">);</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="p">});</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="p">};</span>
+</span></code></pre></div>
+<p><code>hooks/useFontLoader.tsx</code> only re-exports it. Despite the <code>use</code> prefix it uses no React state and is safe to call from event handlers and non-component code, which is exactly how <code>applyPresentationThemeToElement</code> calls it.</p>
+<p><code>localFontOptionsFromUnknown</code> (<code>local-fonts.ts:249</code>) is a tolerant parser that walks any value (a font map, a list of <code>{family, url}</code> objects, CSS text, nested structures) and produces <code>LocalFontOption</code> records:</p>
+<ul>
+<li>A <code>family -&gt; url</code> pair is accepted only when the URL is a <code>data:font/</code> URI or ends in <code>.eot</code>, <code>.otf</code>, <code>.ttf</code>, <code>.woff</code> or <code>.woff2</code> (<code>isFontAssetUrl</code>, <code>:391</code>).</li>
+<li>If the family is in the local catalog and the URL starts with <code>/vendor/fonts/</code>, the full catalog option (with all its faces) is used.</li>
+<li>Otherwise a single-face option is created. Weight is read from an explicit <code>weight</code> field, else <code>100 900</code> for variable files whose name contains <code>[wght]</code>, else inferred from the filename; style is italic when the family or URL contains "italic". Aliases strip trailing weight words, so <code>Lato Bold</code> also registers as <code>Lato</code> (<code>fontFamilyAliases</code>, <code>:431</code>).</li>
+<li>Bare family names, and <code>font-family:</code> declarations inside CSS strings, are resolved against the catalog.</li>
+</ul>
+<p><code>ensureFontOptionLoaded</code> (<code>:558</code>) injects one <code>&lt;style data-local-font-family="..."&gt;</code> per family into <code>document.head</code> with <code>@font-face</code> rules from <code>renderLocalFontFaceCss</code> (<code>:482</code>), using <code>font-display: swap</code> and a <code>format()</code> hint derived from the extension. A template-provided font is allowed to replace a catalog font's style tag, but not the other way round (<code>data-font-source</code> is <code>template</code> or <code>vendor</code>). It then waits for <code>400 16px "&lt;family&gt;"</code> and <code>700 16px "&lt;family&gt;"</code> through <code>document.fonts.load</code>, with a <strong>3-second timeout</strong> after which it resolves anyway (<code>waitForFontDescriptorsLoaded</code>, <code>:522</code>). Concurrent waits for the same descriptor set share one promise.</p>
+<p>The Konva editor needs fonts loaded before it measures text, so <code>useFontLoadState</code> (<code>servers/nextjs/components/slide-editor/surface/fontLoading.ts:25</code>) collects font descriptors from every element, run, list item and table cell of a slide, triggers <code>ensureLocalFontsForDescriptors</code> (skipping system families such as Arial, Helvetica, Georgia and the generic families, <code>SYSTEM_FONT_FAMILY_KEYS</code>, <code>local-fonts.ts:181</code>) and <code>ensureTemplateFontsForDescriptors</code>, and bumps a revision counter when they are ready so the canvas re-measures. The editor surface is covered in <a href="../22-slide-editor/">Slide editor</a>.</p>
+<p>The HTML renderer embeds fonts differently: <code>renderFontAssetTags</code> (<code>template-v2-json-to-html.ts:301</code>) runs the same parser over the font map passed in and inlines the resulting <code>@font-face</code> CSS in a <code>&lt;style&gt;</code> tag inside the generated HTML, so a standalone HTML slide carries its own font declarations.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Font descriptor parsing is a security boundary because family names come from user PPTX files. <code>fontFamilyFromFontDescriptor</code> (<code>local-fonts.ts:615</code>) uses an anchored regex (<code>^[^"]*"((?:\\.|[^"\\])*)"\s*$</code>) so a malformed name with thousands of escaped quotes cannot trigger catastrophic backtracking. <code>servers/nextjs/tests/font-descriptor-security.test.mjs</code> runs adversarial descriptors in a child process with a 2-second timeout and checks that quoted, escaped and Unicode family names (<code>Font "quoted"</code>, <code>Path\Face</code>, <code>日本語 Font</code>) still load. Keep that regex anchored if you touch it.</p>
+</div>
+<h2 id="step-10-uploading-and-serving-font-files">Step 10: Uploading and serving font files<a class="headerlink" href="#step-10-uploading-and-serving-font-files" title="Permanent link">&para;</a></h2>
+<h3 id="the-font-upload-api">The font upload API<a class="headerlink" href="#the-font-upload-api" title="Permanent link">&para;</a></h3>
+<p><code>FONTS_ROUTER</code> (<code>servers/fastapi/api/v1/ppt/endpoints/fonts.py:18</code>) is mounted at <code>/api/v1/ppt/fonts</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /fonts/upload</code></td>
+<td>multipart <code>font_file</code>; validates, stores, indexes</td>
+<td><code>{success, font_name, font_url, font_path, message}</code></td>
+</tr>
+<tr>
+<td><code>GET /fonts/list</code></td>
+<td>all uploads with metadata</td>
+<td><code>{success, fonts: [{id, filename, font_name, original_name, font_url, font_path, font_type, file_size, family_name, subfamily_name, full_name, postscript_name, normalized_family_name, weight_class, width_class, format}], message}</code></td>
+</tr>
+<tr>
+<td><code>GET /fonts/uploaded</code></td>
+<td>compact list</td>
+<td><code>{fonts: [{id, name, url}]}</code></td>
+</tr>
+<tr>
+<td><code>POST /fonts/check</code></td>
+<td>PPTX font availability (see <a href="../18-custom-templates/">Custom templates from PPTX</a>)</td>
+<td><code>FontCheckResponse</code></td>
+</tr>
+<tr>
+<td><code>DELETE /fonts/delete/{filename}</code></td>
+<td>delete by stored filename or by row UUID</td>
+<td><code>{success, message}</code></td>
+</tr>
+</tbody>
+</table>
+<p>In the files read for this chapter, the Next.js app calls only <code>/fonts/check</code>; the other routes are available to API and MCP clients (they appear in <code>servers/fastapi/openai_spec.json</code>).</p>
+<p><code>persist_upload_file</code> (<code>servers/fastapi/utils/font_uploads.py:346</code>) implements the upload:</p>
+<ol>
+<li><code>safe_font_filename</code> keeps only the basename and replaces slashes (<code>:126</code>).</li>
+<li>The extension must be one of <code>.eot</code>, <code>.fntdata</code>, <code>.otf</code>, <code>.ttc</code>, <code>.ttf</code>, <code>.woff</code>, <code>.woff2</code> (<code>ALLOWED_FONT_EXTENSIONS</code>, <code>:24</code>), else 400.</li>
+<li>The target name is <code>&lt;stem&gt;_&lt;8 hex chars&gt;&lt;ext&gt;</code>, to avoid collisions, inside <code>&lt;APP_DATA_DIRECTORY&gt;/fonts/</code> (default <code>/tmp/presenton/fonts</code>, <code>get_fonts_directory</code>, <code>:68</code>).</li>
+<li>The body is read in 64 KiB chunks and rejected with 413 as soon as it passes <code>MAX_FONT_UPLOAD_BYTES = 10 * 1024 * 1024</code> (<code>:35</code>, <code>read_upload_with_size_limit</code>, <code>:148</code>); only then is it written to the target path.</li>
+<li>fontTools parses the name table (<code>get_font_details</code>); a parse error is a 400 and the written file is deleted (<code>remove_font_file_quietly</code>).</li>
+<li>A <code>font_uploads</code> row is flushed, refreshed and only then committed, so a refresh failure cannot leave a committed row without a file (<code>_persist_built_font_upload</code>, <code>:304</code>).</li>
+</ol>
+<p><code>_font_display_name</code> (<code>fonts.py:41</code>) prefers <code>family_name</code>, then <code>full_name</code>, then the normalized family, then the filename stem. <code>_font_original_name</code> (<code>:50</code>) strips the 8-character suffix back off for display.</p>
+<p>Variants for matching are computed by <code>get_font_upload_variant</code> (<code>font_uploads.py:75</code>): weight class 700 is bold, 400 is regular, and <strong>any other weight class is <code>unsupported</code></strong> and ignored by matching; without a weight class, tokens like <code>bold</code> or <code>gras</code> in the metadata decide, and <code>medium</code> or <code>black</code> (with no <code>bold</code> token) make the file unsupported. Because the check is a substring match on the compacted metadata, <code>semibold</code>, <code>demibold</code> and <code>extrabold</code> all contain <code>bold</code> and are therefore classified as bold, not unsupported.</p>
+<p>Every listing, deletion and match first calls <code>backfill_font_uploads_from_disk</code> (<code>:265</code>), which indexes any font file sitting in the fonts directory without a row. Dropping a <code>.ttf</code> into <code>&lt;app_data&gt;/fonts/</code> is therefore enough to make it available.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>font_uploads</code> has no <code>owner_id</code> column (compare <code>template_v2.owner_id</code>). Uploaded fonts are shared across all users of an instance: any user's <code>/fonts/list</code> shows them, <code>/fonts/check</code> will report another user's upload as available, and any user can delete any font by filename. This is consistent with how the files are served (below), but it matters for multi-tenant deployments; see <a href="../25-auth-and-multiuser/">Auth and multi-user</a>.</p>
+</div>
+<h3 id="serving-app_datafonts-without-authentication">Serving <code>/app_data/fonts/</code> without authentication<a class="headerlink" href="#serving-app_datafonts-without-authentication" title="Permanent link">&para;</a></h3>
+<p>Font URLs are built by <code>_font_path_to_url</code> (<code>font_uploads.py:173</code>) as <code>/app_data/&lt;path relative to app data&gt;</code> through <code>absolute_fastapi_asset_url</code>. In Docker, nginx serves app-data directly with <code>alias</code>, and most locations are gated by <code>auth_request /_auth_check</code>, a subrequest to <code>/api/v1/auth/verify</code> (<code>nginx.conf:133</code>). Two are not:</p>
+<div class="language-nginx highlight"><span class="filename">nginx.conf (excerpt)</span><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="w">    </span><span class="k">location</span><span class="w"> </span><span class="s">/app_data/fonts/</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">      </span><span class="kn">alias</span><span class="w"> </span><span class="s">/app_data/fonts/</span><span class="p">;</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">      </span><span class="kn">disable_symlinks</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">      </span><span class="kn">expires</span><span class="w"> </span><span class="s">1y</span><span class="p">;</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">"private,</span><span class="w"> </span><span class="s">max-age=31536000"</span><span class="p">;</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="k">location</span><span class="w"> </span><span class="s">/app_data/templates/</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">      </span><span class="kn">alias</span><span class="w"> </span><span class="s">/app_data/templates/</span><span class="p">;</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">      </span><span class="kn">disable_symlinks</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">      </span><span class="kn">expires</span><span class="w"> </span><span class="s">1y</span><span class="p">;</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">      </span><span class="kn">add_header</span><span class="w"> </span><span class="s">Cache-Control</span><span class="w"> </span><span class="s">"private,</span><span class="w"> </span><span class="s">max-age=31536000"</span><span class="p">;</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span><span class="p">}</span>
+</span></code></pre></div>
+<p>FastAPI's own <code>SessionAuthMiddleware</code> mirrors this with <code>_PUBLIC_APP_DATA_PREFIXES = ("/app_data/fonts/", "/app_data/templates/")</code> (<code>servers/fastapi/api/middlewares.py:38</code>), and <code>servers/fastapi/tests/unit/test_session_auth_middleware.py:14</code> (named <code>test_only_shared_app_data_asset_prefixes_do_not_require_auth</code>) asserts that <code>/app_data/fonts/embedded/font.ttf</code> and <code>/app_data/templates/default/thumbnail.png</code> are public while images, uploads and conversion outputs under <code>/app_data/pptx-to-html/...</code> are not.</p>
+<p>The code does not state the reason in a comment. What it does show is that these are the two <strong>shared</strong> asset trees: fonts are not owner-scoped (above), and <code>/app_data/templates/&lt;id&gt;/static/</code> holds bundled template assets such as <code>static/Lato Regular.ttf</code> from <code>templates/momentum</code>, which <code>default_templates.py</code> rewrites to <code>/app_data/templates/momentum/static/Lato Regular.ttf</code> and which every user's presentation references. Fonts are also fetched by <code>@font-face</code> and by headless renderers, where attaching session credentials is less straightforward than for page requests. Treat both directories as public: never write user-private files there.</p>
+<h2 id="step-11-fonts-in-docker-and-at-export">Step 11: Fonts in Docker and at export<a class="headerlink" href="#step-11-fonts-in-docker-and-at-export" title="Permanent link">&para;</a></h2>
+<p>The production image installs only Noto fonts system-wide and then deletes everything else:</p>
+<div class="language-dockerfile highlight"><span class="filename">Dockerfile (excerpt)</span><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c"># Remove any non-Noto fonts that may have been installed as dependencies.</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">RUN</span><span class="w"> </span>find<span class="w"> </span>/usr/share/fonts<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>!<span class="w"> </span>-iname<span class="w"> </span><span class="s1">'Noto*'</span><span class="w"> </span>-delete<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>find<span class="w"> </span>/usr/share/fonts<span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-empty<span class="w"> </span>-delete<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="o">&amp;&amp;</span><span class="w"> </span>fc-cache<span class="w"> </span>-fsv
+</span></code></pre></div>
+<p>The apt package list includes <code>fonts-liberation</code> alongside the Noto packages (<code>Dockerfile:98</code>), but the cleanup removes Liberation too. Chromium inside the container therefore resolves <code>Arial</code>, <code>Helvetica</code> and <code>sans-serif</code> through fontconfig to a Noto face. Any text whose family is not supplied as a web font (through the presentation font map, the theme text font, or the inlined <code>@font-face</code> CSS) renders in Noto in screenshots, previews and PDF exports, while the same deck in a desktop browser renders in the real Arial. The Template v2 renderer's root <code>font-family:Arial,Helvetica,sans-serif</code> is exactly such a case. <code>Dockerfile.dev:43</code> does the same.</p>
+<p>How the export runtime receives and embeds fonts (the font map passed to <code>json-to-images</code> and to the PPTX writer, and PPTX font embedding) is covered in <a href="../24-export-pipeline/">PPTX and PDF export</a>. Template creation previews pass fonts the same way, as shown in <a href="../18-custom-templates/">Custom templates from PPTX</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>A missing font never fails loudly. Backend catalog misses fall through to "unavailable" only at <code>/fonts/check</code> time; the frontend parser silently drops unusable URLs; <code>waitForFontDescriptorsLoaded</code> resolves after 3 seconds even if nothing loaded; and Docker falls back to Noto. When a slide "looks wrong" in export but right in the editor, compare the presentation's <code>fonts</code> map against what the export page actually injected before suspecting layout code.</p>
+</div>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A theme is sixteen hex color roles plus one <code>textFont {name, url}</code> (<code>PresentationThemeData</code>), stored on <code>template_v2.theme</code>; presentations store a font map always and a wrapped theme only when created through the API generate path.</li>
+<li>Custom template themes come from a color/font profile of the certified layouts, role selection by LLM with a deterministic fallback, and contrast and graph-color repair; <code>GET /template/{id}/theme</code> derives and persists a theme lazily.</li>
+<li>In the editor the live template theme beats the stored presentation theme; the export page applies only the stored one.</li>
+<li>Applying a theme sets CSS variables and a wrapper font, but Template v2 slides use literal colors and families, so the theme mainly styles newly inserted elements and chart palettes.</li>
+<li>Fonts come from a 95-family local catalog mirrored in <code>fonts.json</code> and <code>local-fonts.ts</code>, plus uploaded or embedded files under the shared, unauthenticated <code>/app_data/fonts/</code>; no remote font service is used at runtime, and Docker falls back to Noto for anything else.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with <a href="../20-nextjs-architecture/">Next.js architecture</a> to see how the frontend that loads these themes and fonts is organized.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../18-custom-templates/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Custom templates from PPTX">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Custom templates from PPTX
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../20-nextjs-architecture/" class="md-footer__link md-footer__link--next" aria-label="Next: Next.js architecture">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Next.js architecture
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

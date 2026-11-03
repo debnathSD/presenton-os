@@ -1,0 +1,3460 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/01-what-is-presenton/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../02-repository-tour/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>What Presenton is - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#what-presenton-is" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              What Presenton is
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-one-paragraph-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The one-paragraph summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-what-goes-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: What goes in
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-the-two-generation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: The two generation modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: The two generation modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-presentation_generation_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 PRESENTATION_GENERATION_MODE
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Templates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-editing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Editing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-model-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Model providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Model providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-text-llm-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Text LLM providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-image-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Image providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-web-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Web search
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-deployment-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Deployment shapes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-multi-user-workspaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Multi-user workspaces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-one-generation-prompt-to-pptx-at-30000-feet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: One generation, prompt to PPTX, at 30,000 feet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-runtime-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-one-paragraph-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The one-paragraph summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-what-goes-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: What goes in
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-the-two-generation-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: The two generation modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: The two generation modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-presentation_generation_mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 PRESENTATION_GENERATION_MODE
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Templates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-editing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Editing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-model-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Model providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Model providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-text-llm-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Text LLM providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-image-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Image providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-web-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Web search
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-deployment-shapes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Deployment shapes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-multi-user-workspaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Multi-user workspaces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-one-generation-prompt-to-pptx-at-30000-feet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: One generation, prompt to PPTX, at 30,000 feet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="what-presenton-is">What Presenton is<a class="headerlink" href="#what-presenton-is" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>README.md</code>, <code>VISION.md</code>, <code>docs/presentation-generation-modes.md</code>, <code>docs/template-v2.md</code>, <code>servers/fastapi/utils/get_env.py</code>, <code>servers/fastapi/mcp_server.py</code>, <code>servers/fastapi/api/v1/ppt/endpoints/presentation.py</code>, <code>servers/fastapi/constants/llm.py</code>  ·  <strong>Builds on:</strong> <a href="../">Part I landing</a>  ·  <strong>Time:</strong> ~25 min</p>
+</div>
+<p>This chapter describes Presenton as a product, but every claim is pinned to the code that implements it. You will learn what goes in (prompts, documents, PPTX designs), the two generation modes and how <code>PRESENTATION_GENERATION_MODE</code> gates them, what ships as templates, how editing and export work, which model providers are supported, and which deployment shapes exist. The chapter ends with a 30,000-foot walk through one Standard generation, naming the function at each step, and a vocabulary table used by the rest of the book.</p>
+<h2 id="step-1-the-one-paragraph-summary">Step 1: The one-paragraph summary<a class="headerlink" href="#step-1-the-one-paragraph-summary" title="Permanent link">&para;</a></h2>
+<p>Presenton is an open-source (Apache 2.0) AI presentation generator. A user gives it a prompt, optionally with reference documents, chooses a design, and gets back a deck that is fully editable in the browser and exportable as an editable PPTX or a PDF. It runs self-hosted as a Docker web app or as an Electron desktop app, it exposes the same generation as a REST API and as an MCP server, and it lets you bring your own text and image model providers, including local ones such as Ollama and LM Studio (<code>README.md:40-46</code>).</p>
+<p><code>VISION.md</code> frames the project as "an open source document engine, not a closed design platform", and the code reflects that: almost every behavior is configurable through environment variables or a Settings page, and nothing requires a hosted service except the optional Community gallery and the optional Presenton Cloud provider (<code>README.md:356-369</code>, <code>README.md:563-582</code>).</p>
+<p>The rest of this chapter goes through the product surface one feature at a time.</p>
+<h2 id="step-2-what-goes-in">Step 2: What goes in<a class="headerlink" href="#step-2-what-goes-in" title="Permanent link">&para;</a></h2>
+<p>Presenton accepts three kinds of input. Each maps to concrete endpoints.</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>How the user supplies it</th>
+<th>Where it enters the backend</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A prompt</td>
+<td>Text box on the upload page, or <code>content</code> in the API body</td>
+<td><code>POST /api/v1/ppt/presentation/create</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1681</code>) or <code>POST /api/v1/ppt/presentation/generate</code> (<code>presentation.py:3169</code>)</td>
+</tr>
+<tr>
+<td>Pre-written slides</td>
+<td><code>slides_markdown</code>, one Markdown string per slide (API only)</td>
+<td><code>GeneratePresentationRequest.slides_markdown</code> (<code>servers/fastapi/models/generate_presentation_request.py:10</code>); skips outline generation (<code>presentation.py:2710-2711</code>, <code>presentation.py:2836-2844</code>, see <a href="../08-standard-pipeline/">Standard generation pipeline</a>)</td>
+</tr>
+<tr>
+<td>Reference documents</td>
+<td>File picker on the upload page, or <code>files</code> in the API body</td>
+<td><code>POST /api/v1/ppt/files/upload</code> (<code>servers/fastapi/api/v1/ppt/endpoints/files.py:79</code>) stores files in a temp directory and returns their paths; <code>DocumentsLoader</code> (<code>servers/fastapi/services/documents_loader.py:163</code>) extracts text</td>
+</tr>
+<tr>
+<td>Your own PowerPoint design</td>
+<td>Custom template wizard</td>
+<td>The template endpoints under <code>/api/v1/ppt/template</code> (<code>servers/fastapi/api/v1/ppt/endpoints/template.py:96</code>), which convert a PPTX into a Template v2 design (see <a href="../18-custom-templates/">Custom templates from PPTX</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>The one-shot API accepts any combination of <code>content</code>, <code>slides_markdown</code> and <code>files</code>, but at least one must be non-empty. The check lives in <code>check_if_api_request_is_valid</code> (<code>presentation.py:2620</code>):</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/presentation.py (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>    <span class="c1"># Making sure either content, slides markdown or files is provided</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">content</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">slides_markdown</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">files</span><span class="p">):</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>            <span class="n">detail</span><span class="o">=</span><span class="s2">"Either content or slides markdown or files is required to generate presentation"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">n_slides</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">n_slides</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>            <span class="n">detail</span><span class="o">=</span><span class="s2">"Number of slides must be greater than 0"</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        <span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">n_slides</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">n_slides</span> <span class="o">&gt;</span> <span class="n">MAX_NUMBER_OF_SLIDES</span><span class="p">:</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Number of slides cannot be greater than </span><span class="si">{</span><span class="n">MAX_NUMBER_OF_SLIDES</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<p><code>MAX_NUMBER_OF_SLIDES</code> is 50 (<code>servers/fastapi/constants/presentation.py:4</code>). Each outline is capped at <code>MAX_OUTLINE_CONTENT_WORDS</code> words, read from the <code>MAX_OUTLINE_WORDS</code> environment variable and 100 by default (<code>constants/presentation.py:5-23</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>content</code> is declared as a required field (<code>content: str = Field(...)</code>, <code>servers/fastapi/models/generate_presentation_request.py:9</code>). A body that omits <code>content</code> entirely fails Pydantic validation with HTTP 422 before the check above runs, even if <code>slides_markdown</code> is present. Send <code>"content": ""</code> when you only want to supply <code>slides_markdown</code> or <code>files</code>.</p>
+</div>
+<p>Generation can be tuned with <code>tone</code> (<code>default</code>, <code>casual</code>, <code>professional</code>, <code>funny</code>, <code>educational</code>, <code>sales_pitch</code>, from <code>servers/fastapi/enums/tone.py</code>), <code>verbosity</code> (<code>concise</code>, <code>standard</code>, <code>text-heavy</code>, from <code>servers/fastapi/enums/verbosity.py</code>), <code>language</code>, <code>instructions</code>, <code>include_title_slide</code>, <code>include_table_of_contents</code> and <code>web_search</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The README says <code>language</code> defaults to <code>"English"</code> (<code>README.md:814</code>). The code says otherwise: <code>language</code> is <code>Optional[str]</code> with default <code>None</code> and the description "If omitted, model auto-detects language" (<code>servers/fastapi/models/generate_presentation_request.py:25-28</code>). Pass the language explicitly if you need a deterministic result.</p>
+</div>
+<h2 id="step-3-the-two-generation-modes">Step 3: The two generation modes<a class="headerlink" href="#step-3-the-two-generation-modes" title="Permanent link">&para;</a></h2>
+<p>Presenton has two different generation engines that share the same database, editor and export path.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Standard</th>
+<th>Smart</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layouts</td>
+<td>Fixed layouts from a Template v2 design; the LLM only fills schema fields</td>
+<td>Adaptive HTML slides written by the LLM for the content</td>
+</tr>
+<tr>
+<td>Outline review</td>
+<td>Yes: outlines stream to an outline page where the user edits them and picks a template</td>
+<td>No: generation streams straight into the editor</td>
+</tr>
+<tr>
+<td>Templates</td>
+<td>Built-in and custom templates</td>
+<td>Not used (no template workflow)</td>
+</tr>
+<tr>
+<td>Stored slide</td>
+<td><code>SlideModel.content</code> (JSON) plus <code>SlideModel.ui</code> (layout tree)</td>
+<td><code>SlideModel.html_content</code>, with <code>layout_group</code> and <code>layout</code> set to <code>"smart-html"</code> (<code>presentation.py:2062-2066</code>)</td>
+</tr>
+<tr>
+<td>One-shot API</td>
+<td><code>POST /api/v1/ppt/presentation/generate</code> and <code>/generate/async</code></td>
+<td><code>POST /api/v2/ppt/presentation/generate/smart</code> and <code>/generate/smart/async</code> (<code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:229</code>, <code>servers/fastapi/api/v2/ppt/endpoints/presentation.py:264</code>)</td>
+</tr>
+<tr>
+<td>Covered in</td>
+<td><a href="../08-standard-pipeline/">Standard generation pipeline</a></td>
+<td><a href="../13-smart-mode/">Smart mode</a></td>
+</tr>
+</tbody>
+</table>
+<p>In the browser both modes start from the same upload page. <code>UploadPage.tsx</code> creates the presentation row with <code>generation_mode</code> set, then routes to <code>/outline</code> for Standard or straight to <code>/presentation</code> for Smart (<code>servers/nextjs/app/(presentation-generator)/upload/components/UploadPage.tsx:517-525</code>). On the server, <code>stream_presentation</code> checks the stored mode and hands Smart presentations to a separate streamer:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/api/v1/ppt/endpoints/presentation.py (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@PRESENTATION_ROUTER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/stream/</span><span class="si">{id}</span><span class="s2">"</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">PresentationWithSlides</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream_presentation</span><span class="p">(</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="nb">id</span><span class="p">:</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">,</span> <span class="n">sql_session</span><span class="p">:</span> <span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_async_session</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">):</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">presentation</span> <span class="o">=</span> <span class="k">await</span> <span class="n">sql_session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PresentationModel</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">presentation</span><span class="p">:</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Presentation not found"</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="k">if</span> <span class="n">presentation</span><span class="o">.</span><span class="n">generation_mode</span> <span class="o">==</span> <span class="s2">"smart"</span><span class="p">:</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">stream_smart_presentation</span><span class="p">(</span><span class="n">presentation</span><span class="p">,</span> <span class="n">sql_session</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">presentation</span><span class="o">.</span><span class="n">structure</span><span class="p">:</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="n">detail</span><span class="o">=</span><span class="s2">"Presentation not prepared for stream"</span><span class="p">,</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="p">)</span>
+</span></code></pre></div>
+<h3 id="31-presentation_generation_mode">3.1 <code>PRESENTATION_GENERATION_MODE</code><a class="headerlink" href="#31-presentation_generation_mode" title="Permanent link">&para;</a></h3>
+<p>An operator chooses which modes users see with one environment variable. FastAPI parses it like this:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/utils/get_env.py (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_presentation_generation_mode</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">PresentationGenerationMode</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="sd">"""Return the enabled generation mode, matching the web UI's fallback."""</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"PRESENTATION_GENERATION_MODE"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"standard"</span><span class="p">,</span> <span class="s2">"smart"</span><span class="p">,</span> <span class="s2">"both"</span><span class="p">}:</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="k">return</span> <span class="n">value</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">return</span> <span class="s2">"both"</span>
+</span></code></pre></div>
+<p>Next.js has a twin, <code>normalizePresentationGenerationMode</code> (<code>servers/nextjs/utils/presentationGenerationMode.ts:7-21</code>), with the same fallback to <code>"both"</code>. The effect of each value:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Web UI</th>
+<th>MCP tools exposed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>both</code> (default, and any unknown value)</td>
+<td>Mode selector shown; Standard is selected first (<code>getInitialGenerationMode</code>, <code>presentationGenerationMode.ts:30-34</code>)</td>
+<td>Standard, template-generation, Smart and shared tools</td>
+</tr>
+<tr>
+<td><code>standard</code></td>
+<td>Selector hidden, always Standard; template pages available</td>
+<td>Standard, template-generation and shared tools</td>
+</tr>
+<tr>
+<td><code>smart</code></td>
+<td>Selector hidden, always Smart; <code>/templates</code>, <code>/custom-template</code> and <code>/template-preview</code> redirect to <code>/dashboard</code> (for example <code>servers/nextjs/app/(presentation-generator)/(dashboard)/templates/page.tsx:7-14</code>)</td>
+<td>Smart tools plus the shared tools</td>
+</tr>
+</tbody>
+</table>
+<p>The "shared" tools are file upload (<code>/api/v1/ppt/files/mcp-upload</code>) and async task status (<code>/api/v1/async-tasks/status/{id}</code>), which every mode needs (<code>servers/fastapi/mcp_server.py:88-99</code>). The MCP side is implemented by choosing which OpenAPI routes become tools:</p>
+<div class="language-python highlight"><span class="filename">servers/fastapi/mcp_server.py (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_mcp_route_maps</span><span class="p">(</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">generation_mode</span><span class="p">:</span> <span class="n">PresentationGenerationMode</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">RouteMap</span><span class="p">]:</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="sd">"""Expose only workflows enabled by PRESENTATION_GENERATION_MODE."""</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">route_maps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">RouteMap</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">if</span> <span class="n">generation_mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"both"</span><span class="p">,</span> <span class="s2">"standard"</span><span class="p">}:</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="n">route_maps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">MCP_STANDARD_ROUTE_MAPS</span><span class="p">)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="n">route_maps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">MCP_TEMPLATE_ROUTE_MAPS</span><span class="p">)</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="k">if</span> <span class="n">generation_mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"both"</span><span class="p">,</span> <span class="s2">"smart"</span><span class="p">}:</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>        <span class="n">route_maps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">MCP_SMART_ROUTE_MAPS</span><span class="p">)</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">route_maps</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">MCP_SHARED_ROUTE_MAPS</span><span class="p">)</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">route_maps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">RouteMap</span><span class="p">(</span><span class="n">mcp_type</span><span class="o">=</span><span class="n">MCPType</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">))</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="k">return</span> <span class="n">route_maps</span>
+</span></code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p><code>PRESENTATION_GENERATION_MODE</code> is a UI and MCP filter, not an access control. The REST endpoints for both modes stay mounted regardless of the value (<code>servers/fastapi/api/main.py:68-74</code>), and <code>docs/presentation-generation-modes.md</code> says so explicitly. If you need to forbid a mode, you must add a check in the endpoints.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The variable is read from the process environment of both servers at request time. In Docker both inherit it from the container, but if you run Next.js and FastAPI separately you must set the same value in both, and restart both after changing it.</p>
+</div>
+<h2 id="step-4-templates">Step 4: Templates<a class="headerlink" href="#step-4-templates" title="Permanent link">&para;</a></h2>
+<p>A template is a Template v2 design: a JSON document of slide layouts on a 1280 by 720 canvas, each layout made of components, each component made of typed elements. Elements marked <code>decorative: true</code> are fixed artwork; the rest become fields in a JSON schema the LLM fills (<code>docs/template-v2.md:116-117</code>). <a href="../16-template-v2-format/">Template v2 format</a> covers the format.</p>
+<p>Sixteen built-in designs live in the top-level <code>templates/</code> directory, one folder each with a <code>template.json</code> and a <code>static/</code> folder of fonts and images. At startup, <code>import_default_templates_on_startup</code> (<code>servers/fastapi/templates/default_templates.py:22</code>) upserts each one into the <code>TemplateV2</code> table with <code>is_default=True</code> and copies its static assets into <code>app_data/templates/&lt;id&gt;/static</code> (<code>default_templates.py:295-301</code>). Layout counts at this snapshot, counted from each <code>template.json</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Template</th>
+<th style="text-align: right;">Layouts</th>
+<th>Template</th>
+<th style="text-align: right;">Layouts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>civic</td>
+<td style="text-align: right;">29</td>
+<td>modern</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr>
+<td>dynamic</td>
+<td style="text-align: right;">32</td>
+<td>momentum</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr>
+<td>editorial</td>
+<td style="text-align: right;">24</td>
+<td>mosaic</td>
+<td style="text-align: right;">34</td>
+</tr>
+<tr>
+<td>executive</td>
+<td style="text-align: right;">32</td>
+<td>nova</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr>
+<td>general</td>
+<td style="text-align: right;">12</td>
+<td>pulse</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr>
+<td>horizon</td>
+<td style="text-align: right;">28</td>
+<td>signal</td>
+<td style="text-align: right;">24</td>
+</tr>
+<tr>
+<td>landmark</td>
+<td style="text-align: right;">27</td>
+<td>standard</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr>
+<td>verdant</td>
+<td style="text-align: right;">27</td>
+<td>swift</td>
+<td style="text-align: right;">9</td>
+</tr>
+</tbody>
+</table>
+<p>That is 383 layouts in total. The API default is <code>general</code> (<code>generate_presentation_request.py:29-31</code>).</p>
+<p>Custom templates are created from an uploaded PPTX: the export runtime converts the deck to raw element JSON, a vision-capable model certifies each slide into components and editable fields, and the result is stored as a private <code>TemplateV2</code> row (<code>docs/template-v2.md:7-14</code>). See <a href="../18-custom-templates/">Custom templates from PPTX</a>.</p>
+<h2 id="step-5-editing">Step 5: Editing<a class="headerlink" href="#step-5-editing" title="Permanent link">&para;</a></h2>
+<p>After generation the user lands in the editor at <code>/presentation?id=...</code>. Three editing paths exist:</p>
+<ol>
+<li><strong>Direct manipulation.</strong> Template v2 slides render on a Konva canvas (<code>servers/nextjs/components/slide-editor/surface/TemplateV2KonvaSlide.tsx</code>) with drag, resize, alignment guides, and inline rich-text editing through Tiptap (<code>servers/nextjs/components/slide-editor/text/TiptapInlineTextEditor.tsx</code>). Changes flow into Redux and are saved with <code>PATCH /api/v1/ppt/presentation/update</code> or <code>PATCH /api/v1/ppt/presentation/slide_update</code> (<code>presentation.py:2527</code>, <code>presentation.py:2585</code>). See <a href="../22-slide-editor/">Slide editor</a>.</li>
+<li><strong>AI slide edit.</strong> The user types an instruction for one slide. Standard slides go to <code>POST /api/v1/ppt/slide/edit</code> (<code>servers/fastapi/api/v1/ppt/endpoints/slide.py:38</code>), Smart slides to <code>POST /api/v1/ppt/slide/edit-html</code> (<code>slide.py:135</code>).</li>
+<li><strong>Chat assistant.</strong> A conversational panel backed by <code>POST /api/v1/ppt/chat/message</code> and <code>POST /api/v1/ppt/chat/message/stream</code> (<code>servers/fastapi/api/v1/ppt/endpoints/chat.py:105</code>, <code>chat.py:124</code>), with tools and memory implemented under <code>servers/fastapi/services/chat/</code>. See <a href="../14-editing-and-chat/">Editing and chat assistant</a>.</li>
+</ol>
+<h2 id="step-6-export">Step 6: Export<a class="headerlink" href="#step-6-export" title="Permanent link">&para;</a></h2>
+<p>The deck exports as an editable PPTX or as a PDF. Both formats are produced the same way: a Node process runs <code>presentation-export/runner.mjs</code>, which calls <code>runTask</code> from the <code>@presenton/export-core</code> package (<code>scripts/run-presentation-export.mjs:3</code>, <code>scripts/run-presentation-export.mjs:116-119</code>). That package drives headless Chromium against the <code>/pdf-maker?id=...</code> page of the Next.js app and writes the file into <code>app_data/exports</code>. The package version is pinned by <code>"presentationExportVersion": "v1.0.51"</code> in the root <code>package.json</code> and installed by <code>scripts/sync-presentation-export.cjs</code>. <a href="../24-export-pipeline/">PPTX and PDF export</a> covers the details.</p>
+<h2 id="step-7-model-providers">Step 7: Model providers<a class="headerlink" href="#step-7-model-providers" title="Permanent link">&para;</a></h2>
+<h3 id="71-text-llm-providers">7.1 Text LLM providers<a class="headerlink" href="#71-text-llm-providers" title="Permanent link">&para;</a></h3>
+<p><code>LLM</code> selects the text provider. The accepted values are the members of <code>LLMProvider</code> (<code>servers/fastapi/enums/llm_provider.py:4-20</code>). Defaults come from <code>servers/fastapi/constants/llm.py</code> and are applied in <code>get_model</code> (<code>servers/fastapi/utils/llm_provider.py:126-175</code>):</p>
+<table>
+<thead>
+<tr>
+<th><code>LLM</code></th>
+<th>Default model when the <code>*_MODEL</code> variable is unset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>openai</code></td>
+<td><code>gpt-4.1</code></td>
+</tr>
+<tr>
+<td><code>deepseek</code></td>
+<td><code>deepseek-chat</code></td>
+</tr>
+<tr>
+<td><code>google</code></td>
+<td><code>models/gemini-2.5-flash</code></td>
+</tr>
+<tr>
+<td><code>vertex</code></td>
+<td><code>gemini-2.5-flash</code></td>
+</tr>
+<tr>
+<td><code>azure</code></td>
+<td><code>AZURE_OPENAI_MODEL</code>, then <code>AZURE_OPENAI_DEPLOYMENT</code>, then <code>gpt-4.1</code></td>
+</tr>
+<tr>
+<td><code>bedrock</code></td>
+<td><code>us.anthropic.claude-3-5-haiku-20241022-v1:0</code></td>
+</tr>
+<tr>
+<td><code>openrouter</code></td>
+<td><code>openai/gpt-4o</code></td>
+</tr>
+<tr>
+<td><code>fireworks</code></td>
+<td><code>accounts/fireworks/models/llama-v3p1-8b-instruct</code></td>
+</tr>
+<tr>
+<td><code>together</code></td>
+<td><code>openai/gpt-oss-20b</code></td>
+</tr>
+<tr>
+<td><code>cerebras</code></td>
+<td><code>llama-3.3-70b</code></td>
+</tr>
+<tr>
+<td><code>anthropic</code></td>
+<td><code>claude-sonnet-4-20250514</code></td>
+</tr>
+<tr>
+<td><code>litellm</code></td>
+<td><code>gpt-4.1</code></td>
+</tr>
+<tr>
+<td><code>lmstudio</code></td>
+<td><code>openai/gpt-oss-20b</code></td>
+</tr>
+<tr>
+<td><code>ollama</code></td>
+<td>none (<code>OLLAMA_MODEL</code> must be set)</td>
+</tr>
+<tr>
+<td><code>custom</code></td>
+<td>none (<code>CUSTOM_MODEL</code> must be set; any OpenAI-compatible endpoint)</td>
+</tr>
+<tr>
+<td><code>codex</code></td>
+<td><code>gpt-5.6-luna</code> unless <code>CODEX_MODEL</code> is one of the supported Codex models (<code>constants/llm.py:18-27</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Two more provider paths exist outside that enum. <code>LLM=presenton</code> selects the optional Presenton Cloud provider, in which case <code>maybe_proxy_presenton_cloud_request</code> forwards generation requests to the hosted API instead of calling a model locally (<code>servers/fastapi/services/presenton_cloud_proxy.py:407-460</code>). And <code>codex</code> uses an OAuth sign-in with a ChatGPT account, which is why the Compose services publish host port 1455 for its callback (<code>docker-compose.yml:11-12</code>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The README's provider table lists <code>models/gemini-2.0-flash</code> as the Google default and <code>claude-3-5-sonnet-20241022</code> as the Anthropic default (<code>README.md:392</code>, <code>README.md:426</code>). The code defaults are <code>models/gemini-2.5-flash</code> and <code>claude-sonnet-4-20250514</code> (<code>constants/llm.py:6</code>, <code>constants/llm.py:14</code>). When in doubt, trust <code>constants/llm.py</code>.</p>
+</div>
+<p>An unset or unknown <code>LLM</code> fails at the first LLM call, not at startup, with HTTP 500 and the detail <code>"Invalid LLM provider. Please select one of: ..."</code> (<code>utils/llm_provider.py:47-58</code>). This is deliberate: the lifespan docstring says provider availability is checked when used, so account setup still works on an unconfigured instance (<code>servers/fastapi/api/lifespan.py:46-53</code>).</p>
+<p>Provider configuration chapters: <a href="../06-configuration-and-providers/">Configuration and LLM providers</a> for text, <a href="../12-images-icons-search/">Images, icons, web search</a> for images and search.</p>
+<h3 id="72-image-providers">7.2 Image providers<a class="headerlink" href="#72-image-providers" title="Permanent link">&para;</a></h3>
+<p><code>IMAGE_PROVIDER</code> selects how <code>__image_prompt__</code> fields become pictures. Values come from <code>ImageProvider</code> (<code>servers/fastapi/enums/image_provider.py:4-13</code>):</p>
+<table>
+<thead>
+<tr>
+<th><code>IMAGE_PROVIDER</code></th>
+<th>Kind</th>
+<th>Credentials</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pexels</code></td>
+<td>Stock search</td>
+<td><code>PEXELS_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>pixabay</code></td>
+<td>Stock search</td>
+<td><code>PIXABAY_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>gemini_flash</code></td>
+<td>Generation (Google)</td>
+<td><code>GOOGLE_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>nanobanana_pro</code></td>
+<td>Generation (Google)</td>
+<td><code>GOOGLE_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>gpt-image-2</code></td>
+<td>Generation (OpenAI)</td>
+<td><code>OPENAI_API_KEY</code>, quality from <code>GPT_IMAGE_2_QUALITY</code></td>
+</tr>
+<tr>
+<td><code>gpt-image-1.5</code></td>
+<td>Generation (OpenAI)</td>
+<td><code>OPENAI_API_KEY</code>, quality from <code>GPT_IMAGE_1_5_QUALITY</code></td>
+</tr>
+<tr>
+<td><code>comfyui</code></td>
+<td>Self-hosted generation</td>
+<td><code>COMFYUI_URL</code>, <code>COMFYUI_WORKFLOW</code></td>
+</tr>
+<tr>
+<td><code>open_webui</code></td>
+<td>Self-hosted generation</td>
+<td><code>OPEN_WEBUI_IMAGE_URL</code>, <code>OPEN_WEBUI_IMAGE_API_KEY</code></td>
+</tr>
+<tr>
+<td><code>openai_compatible</code></td>
+<td>Any <code>/v1/images/*</code> gateway</td>
+<td><code>OPENAI_COMPAT_IMAGE_BASE_URL</code>, <code>_API_KEY</code>, <code>_MODEL</code></td>
+</tr>
+</tbody>
+</table>
+<p>The dispatcher is <code>ImageGenerationService.generate_image</code> (<code>servers/fastapi/services/image_generation_service.py:187</code>). Image generation can be turned off with <code>DISABLE_IMAGE_GENERATION</code>. Icons are not generated: <code>__icon_query__</code> fields are matched against a bundled FastEmbed vector index of Phosphor icons (<code>servers/fastapi/services/icon_finder_service.py:26-28</code>, data in <code>servers/fastapi/assets/icons-vectorstore.json</code>).</p>
+<h3 id="73-web-search">7.3 Web search<a class="headerlink" href="#73-web-search" title="Permanent link">&para;</a></h3>
+<p>Optional web grounding uses either the provider's native search (OpenAI, Google, Anthropic) or an external provider. <code>WebSearchProvider</code> lists <code>auto</code>, <code>native</code>, <code>searxng</code>, <code>tavily</code>, <code>exa</code>, <code>brave</code> and <code>serper</code> (<code>servers/fastapi/enums/web_search_provider.py</code>), although the README notes that Brave and Serper are hidden until tested (<code>README.md:451</code>).</p>
+<h2 id="step-8-deployment-shapes">Step 8: Deployment shapes<a class="headerlink" href="#step-8-deployment-shapes" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>What runs</th>
+<th>Entry point</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Docker web app</td>
+<td>nginx, FastAPI, MCP, Next.js, optional Ollama in one container</td>
+<td><code>CMD ["node", "/app/start.js"]</code> (<code>Dockerfile:153</code>), image <code>ghcr.io/presenton/presenton</code></td>
+<td><a href="../03-runtime-topology/">Runtime topology</a>, <a href="../26-docker-and-deployment/">Docker build and deployment</a></td>
+</tr>
+<tr>
+<td>Electron desktop app</td>
+<td>FastAPI and Next.js on loopback ports chosen at launch, inside a desktop window; no nginx, no MCP</td>
+<td><code>electron/app/main.ts</code></td>
+<td><a href="../27-electron/">Electron desktop app</a></td>
+</tr>
+<tr>
+<td>REST API</td>
+<td>The same FastAPI routes, called with an <code>sk-presenton-...</code> API key</td>
+<td><code>POST /api/v1/ppt/presentation/generate</code> and friends</td>
+<td><a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a></td>
+</tr>
+<tr>
+<td>MCP server</td>
+<td>A FastMCP Streamable HTTP server at <code>/mcp</code> whose tools are generated from the OpenAPI document</td>
+<td><code>servers/fastapi/mcp_server.py</code></td>
+<td><a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a></td>
+</tr>
+</tbody>
+</table>
+<p>The MCP tool names are fixed by a mapping from OpenAPI operation IDs (<code>mcp_server.py:101-111</code>): <code>start_standard_presentation</code>, <code>start_smart_presentation</code>, <code>list_templates</code>, <code>upload_template_assets</code>, <code>start_template_generation</code>, <code>upload_files</code> and <code>get_job_status</code>. Generation tools all return an async task ID that the client polls with <code>get_job_status</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>External REST and MCP access are server features. In Electron, <code>PRESENTON_ELECTRON=true</code> makes <code>mcp_server.py</code> exit immediately (<code>mcp_server.py:319-321</code>, <code>mcp_server.py:419-424</code>), and both HTTP servers reject any request that does not carry the per-launch desktop credential (<code>servers/fastapi/api/v1/auth/desktop.py:25-48</code>).</p>
+</div>
+<h2 id="step-9-multi-user-workspaces">Step 9: Multi-user workspaces<a class="headerlink" href="#step-9-multi-user-workspaces" title="Permanent link">&para;</a></h2>
+<p>Presenton keeps a <code>user</code> table and scopes every owned row to a user. The first account created through <code>/api/v1/auth/setup</code> becomes the primary administrator (<code>servers/fastapi/api/v1/auth/router.py:110-152</code>); administrators create, reset and delete other accounts and issue API keys under <code>/api/v1/admin</code> (<code>servers/fastapi/api/v1/admin/router.py:41</code>).</p>
+<p>Isolation is enforced in three places:</p>
+<ol>
+<li><strong>Request context.</strong> <code>SessionAuthMiddleware</code> resolves the caller from the <code>presenton_session</code> cookie or a bearer API key and stores the user ID in a context variable (<code>servers/fastapi/api/middlewares.py:94-128</code>).</li>
+<li><strong>Database.</strong> SQLAlchemy event hooks add <code>owner_id == &lt;current user&gt;</code> to every ORM <code>SELECT</code> on owned models and stamp <code>owner_id</code> on new rows (<code>servers/fastapi/services/database.py:66-108</code>). Built-in templates stay visible to everyone because the template filter also admits rows with <code>owner_id IS NULL AND is_default</code> (<code>database.py:86-94</code>).</li>
+<li><strong>Files.</strong> Generated files go to per-user folders such as <code>app_data/images/users/&lt;user-id&gt;/</code> (<code>servers/fastapi/utils/asset_directory_utils.py:23-30</code>), and <code>/app_data/...</code> URLs are authorized per path segment (<code>servers/fastapi/api/v1/auth/assets.py:106-123</code>).</li>
+</ol>
+<p>The Electron app runs auth-disabled and single-user. <a href="../25-auth-and-multiuser/">Auth and multi-user</a> covers all of this in depth.</p>
+<h2 id="step-10-one-generation-prompt-to-pptx-at-30000-feet">Step 10: One generation, prompt to PPTX, at 30,000 feet<a class="headerlink" href="#step-10-one-generation-prompt-to-pptx-at-30000-feet" title="Permanent link">&para;</a></h2>
+<p>Here is one Standard generation from the browser, with the module and function that does the work at each step. Each later chapter zooms into one or more of these steps.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant U as Browser
+    participant N as Next.js
+    participant A as FastAPI
+    participant L as LLM provider
+    participant X as Export runtime
+    U-&gt;&gt;A: POST /api/v1/ppt/presentation/create
+    A--&gt;&gt;U: presentation row with id
+    U-&gt;&gt;A: GET /api/v1/ppt/outlines/stream/ID
+    A-&gt;&gt;L: outline prompt, streamed
+    A--&gt;&gt;U: SSE outline chunks
+    U-&gt;&gt;A: POST /api/v1/ppt/presentation/prepare with outlines and template
+    A-&gt;&gt;L: structure prompt picks a layout per slide
+    A--&gt;&gt;U: prepared
+    U-&gt;&gt;A: GET /api/v1/ppt/presentation/stream/ID
+    A-&gt;&gt;L: one slide-content call per slide
+    A--&gt;&gt;U: SSE slides, then asset updates
+    U-&gt;&gt;N: POST /api/export-presentation
+    N-&gt;&gt;X: node runner.mjs export task
+    X-&gt;&gt;N: Chromium loads /pdf-maker
+    X--&gt;&gt;N: PPTX written to app_data/exports
+    N--&gt;&gt;U: download URL</code></pre>
+<ol>
+<li><strong>Collect the request.</strong> The upload page (<code>servers/nextjs/app/(presentation-generator)/upload/components/UploadPage.tsx</code>) gathers prompt, slide count, language, tone, verbosity and toggles. If files were attached it first calls <code>PresentationGenerationApi.uploadDoc</code> (<code>POST /api/v1/ppt/files/upload</code>). It then calls <code>PresentationGenerationApi.createPresentation</code> (<code>servers/nextjs/app/(presentation-generator)/services/api/presentation-generation.ts:82</code>). Details: <a href="../21-user-journey/">User journey</a>.</li>
+<li><strong>Create the row.</strong> <code>create_presentation</code> (<code>servers/fastapi/api/v1/ppt/endpoints/presentation.py:1682</code>) validates the inputs and inserts a <code>PresentationModel</code> row with <code>generation_mode="standard"</code>. Nothing has been generated yet. Details: <a href="../07-data-model/">Data model</a>, <a href="../08-standard-pipeline/">Standard generation pipeline</a>.</li>
+<li><strong>Stream the outline.</strong> The outline page hook <code>useOutlineStreaming</code> opens <code>GET /api/v1/ppt/outlines/stream/{id}</code> (<code>servers/nextjs/app/(presentation-generator)/outline/hooks/useOutlineStreaming.ts:108</code>). <code>stream_outlines</code> (<code>servers/fastapi/api/v1/ppt/endpoints/outlines.py:85</code>) loads any documents, then iterates <code>generate_ppt_outline</code> (<code>servers/fastapi/utils/llm_calls/generate_presentation_outlines.py:252</code>), forwarding LLM chunks as server-sent events through <code>safe_sse_stream</code> (<code>servers/fastapi/utils/sse.py:10</code>). Details: <a href="../09-prompts-and-schemas/">Prompts and schemas</a>, <a href="../10-streaming/">Streaming (SSE)</a>, <a href="../11-document-ingestion/">Document ingestion</a>.</li>
+<li><strong>Review and prepare.</strong> The user edits outlines and picks a template. <code>usePresentationGeneration</code> calls <code>presentationPrepare</code> with <code>{presentation_id, outlines, layout: &lt;template id&gt;}</code> (<code>servers/nextjs/app/(presentation-generator)/outline/hooks/usePresentationGeneration.ts:107-111</code>). <code>prepare_presentation</code> (<code>presentation.py:1841</code>) loads the template and converts it to per-layout JSON schemas through <code>get_template_schema</code> (<code>servers/fastapi/templates/v2/schema.py:257</code>, called from <code>presentation.py:416</code>), then asks the LLM to pick a layout index for each outline with <code>generate_presentation_structure</code> (<code>servers/fastapi/utils/llm_calls/generate_presentation_structure.py:157</code>) and stores the result as <code>presentation.structure</code>. Details: <a href="../17-template-to-slide/">From template to schema to slide</a>.</li>
+<li><strong>Stream the slides.</strong> The editor opens with <code>stream=true</code>, and <code>usePresentationStreaming</code> calls <code>GET /api/v1/ppt/presentation/stream/{id}</code> (<code>servers/nextjs/app/(presentation-generator)/presentation/hooks/usePresentationStreaming.ts:301</code>). For each slide, <code>stream_presentation</code> calls <code>get_slide_content_from_type_and_outline</code> (<code>presentation.py:2370</code>, defined in <code>servers/fastapi/utils/llm_calls/generate_slide_content.py:229</code>) to produce JSON that matches the chosen layout's schema, emits the slide immediately with placeholder assets, and starts <code>process_slide_and_fetch_assets</code> (<code>presentation.py:2404</code>, defined in <code>servers/fastapi/utils/process_slides.py:173</code>) to resolve <code>__image_prompt__</code> through the image provider and <code>__icon_query__</code> through the icon index. Finished assets are pushed as further events. Details: <a href="../08-standard-pipeline/">Standard generation pipeline</a>, <a href="../12-images-icons-search/">Images, icons, web search</a>.</li>
+<li><strong>Edit.</strong> The Konva editor renders each slide's <code>ui</code> tree and saves edits back through the update endpoints. Details: <a href="../22-slide-editor/">Slide editor</a>.</li>
+<li><strong>Export.</strong> Clicking "Export as PPTX" runs <code>fetch("/api/export-presentation", ...)</code> (<code>servers/nextjs/app/(presentation-generator)/presentation/components/PresentationHeader.tsx:256</code>). The Next.js route handler (<code>servers/nextjs/app/api/export-presentation/route.ts:90</code>) calls <code>runBundledPresentationExport</code> (<code>servers/nextjs/lib/run-bundled-presentation-export.ts:138</code>), which writes an <code>export_task.json</code> and spawns <code>node runner.mjs &lt;task&gt;</code>. <code>@presenton/export-core</code> loads <code>/pdf-maker?id=...</code> in Chromium, builds an editable PPTX, and writes it under <code>app_data/exports</code>. The route moves the file into <code>app_data/exports/users/&lt;user-id&gt;/</code> and returns <code>/api/export-presentation/file?name=...</code>, which the browser downloads. Details: <a href="../24-export-pipeline/">PPTX and PDF export</a>.</li>
+</ol>
+<p>The one-shot API (<code>POST /api/v1/ppt/presentation/generate</code>) runs the same steps server-side inside <code>generate_presentation_handler</code> (<code>presentation.py:2684</code>): outlines, layout selection, slide content in batches of 10 with <code>asyncio.gather</code> (<code>presentation.py:2984-3006</code>), asset tasks, one commit that saves the presentation, slides and image assets together (<code>presentation.py:3087-3091</code>; the other commits in the handler only update the async task status row), then <code>export_presentation</code> (<code>servers/fastapi/utils/export_utils.py:43</code>) instead of the Next.js route.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The UI and the API export through different code paths that share the runtime. The browser path goes through the Next.js route and <code>lib/run-bundled-presentation-export.ts</code>; the API path goes through <code>ExportTaskService.export_from_url</code> in FastAPI (<code>servers/fastapi/services/export_task_service.py:422</code>). A fix to one does not automatically apply to the other.</p>
+</div>
+<h2 id="core-vocabulary">Core vocabulary<a class="headerlink" href="#core-vocabulary" title="Permanent link">&para;</a></h2>
+<p>These terms are used with exactly these meanings in the rest of the book.</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Where it lives</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Presentation</td>
+<td>One deck: the prompt, settings, outlines, chosen layout payload, structure, theme and fonts</td>
+<td><code>PresentationModel</code> (<code>servers/fastapi/models/sql/presentation.py</code>)</td>
+</tr>
+<tr>
+<td>Outline</td>
+<td>Audience-facing Markdown for one slide, at most <code>MAX_OUTLINE_WORDS</code> words</td>
+<td><code>SlideOutlineModel.content</code> (<code>servers/fastapi/models/presentation_outline_model.py:8-21</code>); stored in <code>presentation.outlines</code></td>
+</tr>
+<tr>
+<td>Structure</td>
+<td>The list of layout indexes, one per slide</td>
+<td><code>PresentationStructureModel.slides: List[int]</code> (<code>servers/fastapi/models/presentation_structure_model.py:5-6</code>); stored in <code>presentation.structure</code></td>
+</tr>
+<tr>
+<td>Layout</td>
+<td>One slide design inside a template: an ID, a description and a list of components</td>
+<td><code>SlideLayout</code> (<code>servers/fastapi/templates/v2/models/layouts.py:98</code>); at generation time a <code>SlideLayoutModel</code> with a <code>json_schema</code> (<code>presentation.py:450-456</code>)</td>
+</tr>
+<tr>
+<td>Slide content</td>
+<td>The JSON the LLM returns for one slide, conforming to the layout's schema, including fields such as <code>__speaker_note__</code>, <code>__image_prompt__</code> and <code>__icon_query__</code></td>
+<td><code>SlideModel.content</code> (<code>servers/fastapi/models/sql/slide.py:26</code>)</td>
+</tr>
+<tr>
+<td>Template v2</td>
+<td>A complete design: layouts, merged components, theme, fonts and assets</td>
+<td><code>TemplateV2</code> table (<code>servers/fastapi/models/sql/template_v2.py:16</code>); built-ins in <code>templates/&lt;name&gt;/template.json</code></td>
+</tr>
+<tr>
+<td>Component</td>
+<td>A positioned group of elements with an ID and description, the unit the certification passes reason about</td>
+<td><code>Component</code> (<code>templates/v2/models/layouts.py:54-58</code>)</td>
+</tr>
+<tr>
+<td>Element</td>
+<td>A typed visual primitive: text, image, container, text list, table, vector, chart, infographic and others</td>
+<td><code>servers/fastapi/templates/v2/models/elements.py</code></td>
+</tr>
+<tr>
+<td>Decorative flag</td>
+<td><code>decorative: bool</code> on an element; <code>false</code> turns the element into an LLM-filled schema field, <code>true</code> keeps it fixed</td>
+<td>for example <code>Text.decorative</code> (<code>elements.py:218</code>)</td>
+</tr>
+<tr>
+<td>Smart slide</td>
+<td>A slide produced in Smart mode: sanitized HTML in <code>html_content</code>, with <code>layout_group</code> and <code>layout</code> set to <code>"smart-html"</code></td>
+<td><code>presentation.py:2062-2066</code>; prompts in <code>servers/fastapi/utils/llm_calls/generate_smart_presentation.py</code></td>
+</tr>
+<tr>
+<td>Export runtime</td>
+<td>The <code>presentation-export/</code> directory: <code>runner.mjs</code> plus <code>node_modules/@presenton/export-core</code>, driven by headless Chromium</td>
+<td>installed by <code>scripts/sync-presentation-export.cjs</code>; checked by <code>ExportTaskService._ensure_runtime_ready</code> (<code>export_task_service.py:202-220</code>)</td>
+</tr>
+<tr>
+<td>app_data</td>
+<td>The persistent data root named by <code>APP_DATA_DIRECTORY</code> (<code>/app_data</code> in Docker): database, <code>userConfig.json</code>, images, uploads, fonts, templates, exports, memory</td>
+<td>created by <code>start.js:93-103</code>; layout in <a href="../03-runtime-topology/">Runtime topology</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Presenton turns a prompt, documents or pre-written Markdown into an editable deck, using either Standard (template layouts plus outline review) or Smart (adaptive HTML) generation.</li>
+<li><code>PRESENTATION_GENERATION_MODE</code> (<code>both</code>, <code>standard</code>, <code>smart</code>) filters the UI and the MCP tools but does not restrict the REST API.</li>
+<li>Sixteen built-in Template v2 designs with 383 layouts are imported at startup; custom designs come from PPTX files.</li>
+<li>Text and image providers are pluggable through <code>LLM</code> and <code>IMAGE_PROVIDER</code>; defaults live in <code>constants/llm.py</code>, and misconfiguration surfaces only when a model is first called.</li>
+<li>The same backend serves the Docker web app, the Electron app, the REST API and the MCP server, with per-user isolation enforced in middleware, SQL event hooks and file paths.</li>
+<li>A Standard generation is create, outline stream, prepare, slide stream, edit, export, and each step has a named function you can open.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>Continue with the <a href="../02-repository-tour/">Repository tour</a> to see where each of these pieces lives on disk.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Presenton internals, Parts I to VI">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Presenton internals, Parts I to VI
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../02-repository-tour/" class="md-footer__link md-footer__link--next" aria-label="Next: Repository tour">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Repository tour
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

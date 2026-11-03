@@ -1,0 +1,3960 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A step-by-step, code-level tutorial on how Presenton (the open-source AI presentation generator) works, and a design for bringing the same prompt-to-deck workflow to Apache Superset with live, data-bound slides.">
+      
+      
+      
+        <link rel="canonical" href="https://debnathsd.github.io/presenton-os/presenton/03-runtime-topology/">
+      
+      
+        <link rel="prev" href="../02-repository-tour/">
+      
+      
+        <link rel="next" href="../04-running-locally/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Runtime topology - Presenton OS Internals</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#runtime-topology" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Presenton OS Internals" class="md-header__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Presenton OS Internals
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Runtime topology
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part I · Orientation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../05-fastapi-startup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part II · Backend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../16-template-v2-format/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part III · Templates
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../20-nextjs-architecture/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part IV · Frontend
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../24-export-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part V · Export
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../25-auth-and-multiuser/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VI · Auth, infra, ops
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../superset/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Part VII · Superset integration
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../appendix-glossary/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Appendix
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Presenton OS Internals" class="md-nav__button md-logo" aria-label="Presenton OS Internals" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Presenton OS Internals
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/debnathSD/presenton-os" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    debnathSD/presenton-os
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part I · Orientation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part I · Orientation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-what-is-presenton/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    What Presenton is
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-repository-tour/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Repository tour
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-process-tree-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The process tree at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-what-happens-before-main-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: What happens before main() runs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: What happens before main() runs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-umask-and-required-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 umask and required environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-creating-the-app_data-skeleton" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Creating the app_data skeleton
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-environment-variables-startjs-sets-for-its-children" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Environment variables start.js sets for its children
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-main-in-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: main() in order
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: main() in order">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-ensurepresentationexportruntime-startjs444-466" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 ensurePresentationExportRuntime() (start.js:444-466)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-ensureollamaruntime-startjs433-442" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 ensureOllamaRuntime() (start.js:433-442)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-dev-only-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Dev-only steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-setupuserconfigfromenv-startjs490-497" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 setupUserConfigFromEnv() (start.js:490-497)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-syncnginxconfigfordev-startjs468-479" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 syncNginxConfigForDev() (start.js:468-479)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-startnginx-startjs696-718" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 startNginx() (start.js:696-718)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-startservers-startjs499-693" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 startServers() (start.js:499-693)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-readiness-restarts-and-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Readiness, restarts and shutdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Readiness, restarts and shutdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Readiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-child-exit-and-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Child exit and restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-the-app_data-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: The app_data directory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-nginx-routing-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The nginx routing table
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: The nginx routing table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-the-static-path-traversal-comment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 The /static/ path-traversal comment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-sequence-a-a-browser-page-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Sequence (a), a browser page load
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-sequence-b-an-authenticated-api-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Sequence (b), an authenticated API call
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Sequence (b), an authenticated API call">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-how-proxyts-behaves-for-api-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 How proxy.ts behaves for /api paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-sequence-c-a-protected-image-under-app_dataimages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Sequence (c), a protected image under /app_data/images
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-sequence-d-an-mcp-client-call-to-mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Sequence (d), an MCP client call to /mcp
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-one-more-hop-the-export-runtime-calling-back-into-the-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: One more hop, the export runtime calling back into the app
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-electron-the-same-code-without-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: Electron, the same code without nginx
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-running-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running it locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part II · Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part II · Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-fastapi-startup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI app and startup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-configuration-and-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration and LLM providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-data-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-standard-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Standard generation pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-prompts-and-schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts and schemas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Streaming (SSE)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-document-ingestion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document ingestion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-images-icons-search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Images, icons, web search
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-smart-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Smart mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-editing-and-chat/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Editing and chat assistant
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-api-async-mcp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API, async tasks, webhooks, MCP
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part III · Templates
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part III · Templates
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16-template-v2-format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Template v2 format
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17-template-to-slide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    From template to schema to slide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18-custom-templates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom templates from PPTX
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19-themes-and-fonts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Themes and fonts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part IV · Frontend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part IV · Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20-nextjs-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Next.js architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../21-user-journey/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User journey
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../22-slide-editor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide editor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../23-settings-and-auth-ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings, onboarding, auth UI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part V · Export
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part V · Export
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../24-export-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PPTX and PDF export
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VI · Auth, infra, ops
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VI · Auth, infra, ops
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../25-auth-and-multiuser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auth and multi-user
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../26-docker-and-deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docker build and deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../27-electron/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Electron desktop app
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../28-ci-tests-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI, tests, security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../superset/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Part VII · Superset integration
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Part VII · Superset integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/30-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vision and requirements
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/31-superset-landscape/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Superset landscape (6.1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/32-architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Target architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/33-data-bound-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data-bound slide model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/34-generation-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generation flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/35-native-rendering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Native rendering, no screenshots
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/36-superset-extension/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the Superset extension
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/37-generation-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building the generation service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/38-security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security, RLS, auth
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/39-scheduling-and-refresh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scheduling and live refresh
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../superset/40-roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-endpoints/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Endpoint index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix-files/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-will-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you will learn
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-the-process-tree-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: The process tree at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-what-happens-before-main-runs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: What happens before main() runs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: What happens before main() runs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-umask-and-required-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 umask and required environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-creating-the-app_data-skeleton" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Creating the app_data skeleton
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-environment-variables-startjs-sets-for-its-children" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Environment variables start.js sets for its children
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-main-in-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: main() in order
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: main() in order">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-ensurepresentationexportruntime-startjs444-466" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 ensurePresentationExportRuntime() (start.js:444-466)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-ensureollamaruntime-startjs433-442" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 ensureOllamaRuntime() (start.js:433-442)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-dev-only-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Dev-only steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-setupuserconfigfromenv-startjs490-497" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 setupUserConfigFromEnv() (start.js:490-497)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-syncnginxconfigfordev-startjs468-479" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 syncNginxConfigForDev() (start.js:468-479)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-startnginx-startjs696-718" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 startNginx() (start.js:696-718)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-startservers-startjs499-693" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 startServers() (start.js:499-693)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-readiness-restarts-and-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Readiness, restarts and shutdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Readiness, restarts and shutdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Readiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-child-exit-and-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Child exit and restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-the-app_data-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: The app_data directory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-the-nginx-routing-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: The nginx routing table
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 6: The nginx routing table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-the-static-path-traversal-comment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 The /static/ path-traversal comment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-sequence-a-a-browser-page-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Sequence (a), a browser page load
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-sequence-b-an-authenticated-api-call" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Sequence (b), an authenticated API call
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Sequence (b), an authenticated API call">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-how-proxyts-behaves-for-api-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 How proxy.ts behaves for /api paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-sequence-c-a-protected-image-under-app_dataimages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Sequence (c), a protected image under /app_data/images
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-sequence-d-an-mcp-client-call-to-mcp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 10: Sequence (d), an MCP client call to /mcp
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-one-more-hop-the-export-runtime-calling-back-into-the-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 11: One more hop, the export runtime calling back into the app
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-electron-the-same-code-without-nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 12: Electron, the same code without nginx
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-now-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you now know
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="runtime-topology">Runtime topology<a class="headerlink" href="#runtime-topology" title="Permanent link">&para;</a></h1>
+<div class="chapter-meta">
+<p><strong>Reads:</strong> <code>start.js</code>, <code>nginx.conf</code>, <code>servers/fastapi/server.py</code>, <code>servers/fastapi/api/main.py</code>, <code>servers/fastapi/api/middlewares.py</code>, <code>servers/fastapi/api/v1/auth/router.py</code>, <code>servers/fastapi/api/v1/auth/assets.py</code>, <code>servers/fastapi/mcp_server.py</code>, <code>servers/nextjs/proxy.ts</code>, <code>scripts/export-permissions.cjs</code>, <code>electron/app/main.ts</code>  ·  <strong>Builds on:</strong> <a href="../02-repository-tour/">Repository tour</a>  ·  <strong>Time:</strong> ~35 min</p>
+</div>
+<h2 id="what-you-will-learn">What you will learn<a class="headerlink" href="#what-you-will-learn" title="Permanent link">&para;</a></h2>
+<p>This chapter is about what is running once a Presenton container has started, not how the image is built (that is <a href="../26-docker-and-deployment/">Docker build and deployment</a>). You will follow <code>start.js</code> from its first line to the point where it parks forever, learn exactly which process listens on which port and how readiness and shutdown work, map every directory under <code>app_data</code> to the code that writes it, read every nginx <code>location</code> block, and trace four representative requests end to end: a page load, an authenticated API call, a protected image fetch, and an MCP tool call.</p>
+<h2 id="step-1-the-process-tree-at-a-glance">Step 1: The process tree at a glance<a class="headerlink" href="#step-1-the-process-tree-at-a-glance" title="Permanent link">&para;</a></h2>
+<p>In the production image the container command is <code>CMD ["node", "/app/start.js"]</code> (<code>Dockerfile:153</code>). The development image runs <code>CMD ["node", "/app/start.js", "--dev"]</code> (<code>Dockerfile.dev:93</code>). <code>start.js</code> is a small supervisor: it prepares the filesystem, starts nginx as a system service, and spawns four kinds of children.</p>
+<pre class="mermaid"><code>flowchart TB
+  N["node /app/start.js (PID 1 supervisor)"]
+  NG["nginx master + www-data workers (port 80)"]
+  FA["python server.py --port 8000 (uvicorn, 127.0.0.1:8000)"]
+  MCP["python mcp_server.py --port 8001 (FastMCP, 127.0.0.1:8001)"]
+  NX["node servers/nextjs/server.js (127.0.0.1:3000)"]
+  OL["ollama serve (only when START_OLLAMA is truthy)"]
+  EX["node presentation-export/runner.mjs + Chromium (per export, spawned by FastAPI or Next.js)"]
+  N --&gt;|"service nginx start"| NG
+  N --&gt;|"spawn, watched"| FA
+  N --&gt;|"spawn, not watched"| MCP
+  N --&gt;|"spawn, watched"| NX
+  N --&gt;|"spawn, watched"| OL
+  FA --&gt;|"subprocess per API export task"| EX
+  NX --&gt;|"subprocess per UI export"| EX</code></pre>
+<table>
+<thead>
+<tr>
+<th>Process</th>
+<th>Bind address</th>
+<th>Started at</th>
+<th>Watched by <code>start.js</code>?</th>
+<th>Logs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nginx</td>
+<td><code>0.0.0.0:80</code> (<code>listen 80</code>, <code>nginx.conf:26</code>)</td>
+<td><code>start.js:696-718</code></td>
+<td>No (only the <code>service</code> command's exit code)</td>
+<td><code>/var/log/nginx/error.log</code> (<code>nginx.conf:4</code>)</td>
+</tr>
+<tr>
+<td>FastAPI (uvicorn)</td>
+<td><code>127.0.0.1:8000</code> (<code>servers/fastapi/server.py:21-28</code>)</td>
+<td><code>start.js:521-536</code>, <code>601-606</code></td>
+<td>Yes</td>
+<td>forwarded to container stdout/stderr</td>
+</tr>
+<tr>
+<td>MCP server (FastMCP)</td>
+<td><code>127.0.0.1:8001</code> (<code>servers/fastapi/mcp_server.py:457-465</code>)</td>
+<td><code>start.js:608-620</code></td>
+<td>No</td>
+<td>discarded (<code>stdio: "ignore"</code>)</td>
+</tr>
+<tr>
+<td>Next.js</td>
+<td><code>127.0.0.1:3000</code></td>
+<td><code>start.js:538-566</code>, <code>622-627</code></td>
+<td>Yes</td>
+<td>forwarded</td>
+</tr>
+<tr>
+<td>Ollama (optional)</td>
+<td>Ollama's default</td>
+<td><code>start.js:661-670</code></td>
+<td>Yes (no restart)</td>
+<td>inherited</td>
+</tr>
+</tbody>
+</table>
+<p>Only port 80 is meant to be reachable from outside the container. FastAPI hard-codes <code>host = "127.0.0.1"</code> (<code>servers/fastapi/server.py:21</code>), Next.js is told <code>-H 127.0.0.1</code> or <code>HOSTNAME=127.0.0.1</code>, and FastMCP runs on <code>host="127.0.0.1"</code>. The Compose files also publish <code>1455:1455</code> for the Codex OAuth callback (<code>docker-compose.yml:12</code>), which is unrelated to the four servers above.</p>
+<h2 id="step-2-what-happens-before-main-runs">Step 2: What happens before <code>main()</code> runs<a class="headerlink" href="#step-2-what-happens-before-main-runs" title="Permanent link">&para;</a></h2>
+<p><code>start.js</code> does real work at module load time, before <code>main()</code> is called.</p>
+<h3 id="21-umask-and-required-environment">2.1 umask and required environment<a class="headerlink" href="#21-umask-and-required-environment" title="Permanent link">&para;</a></h3>
+<p><code>process.umask(0o022)</code> (<code>start.js:28</code>) makes every file and directory created by the supervisor and its children default to group/other read but not write. Then:</p>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">fastapiPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">8000</span><span class="p">;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">nextjsPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3000</span><span class="p">;</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">appmcpPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">8001</span><span class="p">;</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">appDataDirectory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">APP_DATA_DIRECTORY</span><span class="p">;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">appDataDirectory</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">"APP_DATA_DIRECTORY is required"</span><span class="p">);</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The ports are constants (<code>start.js:46-48</code>); there is no environment variable to change them. Both Dockerfiles set <code>APP_DATA_DIRECTORY=/app_data</code> and <code>TEMP_DIRECTORY=/tmp/presenton</code> (<code>Dockerfile:82-83</code>, <code>Dockerfile.dev:10-11</code>).</p>
+<h3 id="22-creating-the-app_data-skeleton">2.2 Creating the <code>app_data</code> skeleton<a class="headerlink" href="#22-creating-the-app_data-skeleton" title="Permanent link">&para;</a></h3>
+<p><code>ensureAppDataDirectories()</code> runs at <code>start.js:103</code>. It creates the data root and seven asset directories with mode <code>0755</code>, then tightens the three directories that hold export output:</p>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">appDataDirectoryMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mo">0o755</span><span class="p">;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">const</span><span class="w"> </span><span class="nx">userConfigPath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">join</span><span class="p">(</span><span class="nx">appDataDirectory</span><span class="p">,</span><span class="w"> </span><span class="s2">"userConfig.json"</span><span class="p">);</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">userConfigBackupPath</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span><span class="si">${</span><span class="nx">userConfigPath</span><span class="si">}</span><span class="sb">.bak`</span><span class="p">;</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">const</span><span class="w"> </span><span class="nx">userDataDir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">dirname</span><span class="p">(</span><span class="nx">userConfigPath</span><span class="p">);</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">appDataStaticDirectories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="s2">"exports"</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="s2">"images"</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="s2">"uploads"</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="s2">"fonts"</span><span class="p">,</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="s2">"templates"</span><span class="p">,</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="s2">"pptx-to-html"</span><span class="p">,</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="s2">"pptx-to-json"</span><span class="p">,</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">].</span><span class="nx">map</span><span class="p">((</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">join</span><span class="p">(</span><span class="nx">appDataDirectory</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">));</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1">// ...</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="kd">const</span><span class="w"> </span><span class="nx">ensureAppDataDirectories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="nx">ensureReadableDirectory</span><span class="p">(</span><span class="nx">userDataDir</span><span class="p">);</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">dirPath</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">appDataStaticDirectories</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="nx">ensureReadableDirectory</span><span class="p">(</span><span class="nx">dirPath</span><span class="p">);</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="p">[</span><span class="s2">"exports"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pptx-to-html"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pptx-to-json"</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="nx">ensureReadableExportFiles</span><span class="p">(</span><span class="nx">join</span><span class="p">(</span><span class="nx">appDataDirectory</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">));</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="p">};</span>
+</span></code></pre></div>
+<p><code>chmodBestEffort</code> (<code>start.js:73-82</code>) swallows <code>EPERM</code> and <code>EACCES</code>, so a volume owned by another UID (the comment mentions Kubernetes/OpenShift PVCs) does not crash startup. Immediately afterwards <code>userConfig.json</code> and <code>userConfig.json.bak</code> are forced to <code>0600</code> if they exist (<code>start.js:104-106</code>).</p>
+<p><code>ensureReadableExportFiles</code> calls <code>finalizeExportPermissions(dirPath, [appDataDirectory], { recursive: true, legacy: true })</code> from <code>scripts/export-permissions.cjs:37-64</code>. When the process runs as root it looks up the <code>www-data</code> (or <code>nginx</code>) group in <code>/etc/group</code> (<code>scripts/export-permissions.cjs:4-16</code>), <code>chown</code>s each path to that group, sets files to <code>0640</code>, and for directories in legacy mode keeps the existing mode but strips the "other" bits (<code>stat.mode &amp; 0o7770</code>, <code>scripts/export-permissions.cjs:27-30</code>). It walks upward from the export directory to the boundary root (<code>app_data</code> itself), so <code>app_data</code>, <code>exports</code>, <code>pptx-to-html</code> and <code>pptx-to-json</code> end up group-readable by the nginx worker user but not world-readable.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>nginx runs its workers as <code>user www-data</code> (<code>nginx.conf:1</code>) and serves <code>/app_data/...</code> straight from disk with <code>alias</code>. If you change the nginx user, or run the container as a non-root UID without a <code>www-data</code> group, exported files may become unreadable to nginx and downloads fail with 403/404 from nginx even though FastAPI produced the file. The export runtime calls the same helper after each export (<code>scripts/run-presentation-export.mjs:123</code>, <code>servers/fastapi/services/export_task_service.py:269-280</code>).</p>
+</div>
+<h3 id="23-environment-variables-startjs-sets-for-its-children">2.3 Environment variables <code>start.js</code> sets for its children<a class="headerlink" href="#23-environment-variables-startjs-sets-for-its-children" title="Permanent link">&para;</a></h3>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_CONFIG_PATH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">userConfigPath</span><span class="p">;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="c1">// Let Next.js middleware reach FastAPI over the loopback interface inside the</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1">// container without having to bounce through nginx (the host-facing port is</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="c1">// not reachable from inside the Next.js process).</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">FAST_API_INTERNAL_URL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">FAST_API_INTERNAL_URL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`http://127.0.0.1:</span><span class="si">${</span><span class="nx">fastapiPort</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+<th>Consumers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>USER_CONFIG_PATH</code></td>
+<td><code>/app_data/userConfig.json</code></td>
+<td>FastAPI <code>utils/get_env.py:63-64</code> (provider settings, auth secret), Next.js <code>lib/fastapi-internal.ts:27</code>, user-config route handlers</td>
+</tr>
+<tr>
+<td><code>FAST_API_INTERNAL_URL</code></td>
+<td><code>http://127.0.0.1:8000</code> unless already set</td>
+<td>Next.js <code>proxy.ts:10-23</code>, <code>utils/serverAuth.ts:17-30</code>, <code>lib/fastapi-internal.ts:3-13</code></td>
+</tr>
+<tr>
+<td><code>HOSTNAME</code>, <code>PORT</code></td>
+<td><code>127.0.0.1</code>, <code>3000</code></td>
+<td>only for the standalone Next.js server (<code>start.js:557-562</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Every child is spawned with <code>env: process.env</code>, so all container environment variables (provider keys, <code>PRESENTATION_GENERATION_MODE</code>, <code>DATABASE_URL</code> and the rest) reach FastAPI, MCP and Next.js unchanged.</p>
+<h2 id="step-3-main-in-order">Step 3: <code>main()</code> in order<a class="headerlink" href="#step-3-main-in-order" title="Permanent link">&para;</a></h2>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">main</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">ensurePresentationExportRuntime</span><span class="p">();</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">ensureOllamaRuntime</span><span class="p">();</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isDev</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">setupNodeModules</span><span class="p">();</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">ensurePresentationExportNodeDependencies</span><span class="p">();</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="nx">setupUserConfigFromEnv</span><span class="p">();</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="nx">syncNginxConfigForDev</span><span class="p">();</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">nginxReadyPromise</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">startNginx</span><span class="p">();</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="nx">startServers</span><span class="p">(</span><span class="nx">nginxReadyPromise</span><span class="p">);</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">nginxReadyPromise</span><span class="p">;</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="p">};</span>
+</span></code></pre></div>
+<h3 id="31-ensurepresentationexportruntime-startjs444-466">3.1 <code>ensurePresentationExportRuntime()</code> (<code>start.js:444-466</code>)<a class="headerlink" href="#31-ensurepresentationexportruntime-startjs444-466" title="Permanent link">&para;</a></h3>
+<p>Skipped when <code>ENSURE_PRESENTATION_EXPORT_RUNTIME === "false"</code> or when <code>scripts/sync-presentation-export.cjs</code> is absent. Otherwise it runs <code>node scripts/sync-presentation-export.cjs --check-only</code>. The check (<code>scripts/sync-presentation-export.cjs:253-286</code>, <code>359-366</code>) verifies that <code>presentation-export/runner.mjs</code>, <code>node_modules/@presenton/export-core/package.json</code> and <code>presenton-export-version.json</code> exist, that the installed version equals <code>presentationExportVersion</code> in the root <code>package.json</code> (<code>v1.0.51</code> at this snapshot), that the sharp native runtime is valid, and that <code>export-permissions.cjs</code> was copied in.</p>
+<ul>
+<li>Production: a failed check throws <code>presentation-export runtime is missing in this container image. Rebuild the image so the runtime package is installed.</code> (<code>start.js:457-461</code>). Because <code>main()</code> is not awaited with a catch, the unhandled rejection terminates Node and the container exits.</li>
+<li>Development: it warns and runs the same script with <code>--force</code>, which downloads <code>presenton-export-core-opensource-&lt;version&gt;.tgz</code> from GitHub releases (<code>scripts/sync-presentation-export.cjs:32-33</code>, <code>382-394</code>).</li>
+</ul>
+<h3 id="32-ensureollamaruntime-startjs433-442">3.2 <code>ensureOllamaRuntime()</code> (<code>start.js:433-442</code>)<a class="headerlink" href="#32-ensureollamaruntime-startjs433-442" title="Permanent link">&para;</a></h3>
+<p>If <code>START_OLLAMA</code> is truthy (anything except empty, <code>0</code>, <code>false</code>, <code>no</code>, <code>off</code>, <code>start.js:418-426</code>) and neither <code>/usr/bin/ollama</code> nor <code>/usr/local/bin/ollama</code> exists, it runs <code>curl -fsSL https://ollama.com/install.sh | sh</code>. The production image sets <code>START_OLLAMA=false</code> (<code>Dockerfile:91</code>).</p>
+<h3 id="33-dev-only-steps">3.3 Dev-only steps<a class="headerlink" href="#33-dev-only-steps" title="Permanent link">&para;</a></h3>
+<p>With <code>--dev</code> (or <code>-d</code>, <code>start.js:43</code>): <code>npm ci</code> inside <code>servers/nextjs</code> (<code>start.js:171-195</code>), then <code>scripts/sync-document-dependencies.cjs</code> (<code>start.js:225-227</code>), which installs the LiteParse document-extraction dependencies.</p>
+<h3 id="34-setupuserconfigfromenv-startjs490-497">3.4 <code>setupUserConfigFromEnv()</code> (<code>start.js:490-497</code>)<a class="headerlink" href="#34-setupuserconfigfromenv-startjs490-497" title="Permanent link">&para;</a></h3>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">setupUserConfigFromEnv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">existingConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">readUserConfig</span><span class="p">();</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">envConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">readUserConfigEnv</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">);</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">existingConfig</span><span class="p">).</span><span class="nx">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">envConfig</span><span class="p">).</span><span class="nx">length</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nx">writeUserConfig</span><span class="p">(</span><span class="nx">buildUserConfigFromEnv</span><span class="p">(</span><span class="nx">existingConfig</span><span class="p">,</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">));</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">};</span>
+</span></code></pre></div>
+<p><code>readUserConfig()</code> falls back to <code>userConfig.json.bak</code> when the main file is missing or corrupt (<code>start.js:126-127</code>). <code>readUserConfigEnv</code> picks only the keys in <code>USER_CONFIG_ENV_KEYS</code> (<code>scripts/user-config-env.cjs:20-116</code>), ignoring empty strings. <code>buildUserConfigFromEnv</code> merges env over the existing file, converts boolean-like and integer values, and picks a default <code>IMAGE_PROVIDER</code> when none is given (<code>scripts/user-config-env.cjs:186-222</code>). <code>writeUserConfig</code> is crash-safe: it copies the current file to <code>.bak</code>, writes a unique temp file opened with <code>wx</code> and mode <code>0600</code>, <code>fsync</code>s it, then <code>rename</code>s it over the target (<code>start.js:140-168</code>). The details of the merge and how FastAPI consumes it belong to <a href="../06-configuration-and-providers/">Configuration and LLM providers</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>On the first FastAPI startup, <code>migrate_provider_settings_from_file</code> copies <code>userConfig.json</code> into a <code>ProviderSettings</code> database row. On every later startup the database row is mirrored back over the file, keeping only <code>AUTH_*</code> keys from the file (<code>servers/fastapi/services/provider_settings.py:85-127</code>). So editing provider variables in <code>docker-compose.yml</code> after the first boot does not reliably change the active provider: <code>start.js</code> writes them, then FastAPI's lifespan replaces them with the stored settings. Change providers in the Settings UI instead.</p>
+</div>
+<h3 id="35-syncnginxconfigfordev-startjs468-479">3.5 <code>syncNginxConfigForDev()</code> (<code>start.js:468-479</code>)<a class="headerlink" href="#35-syncnginxconfigfordev-startjs468-479" title="Permanent link">&para;</a></h3>
+<p>In dev only, copies the bind-mounted <code>/app/nginx.conf</code> to <code>/etc/nginx/nginx.conf</code>, so nginx changes in your working tree take effect on container restart without rebuilding.</p>
+<h3 id="36-startnginx-startjs696-718">3.6 <code>startNginx()</code> (<code>start.js:696-718</code>)<a class="headerlink" href="#36-startnginx-startjs696-718" title="Permanent link">&para;</a></h3>
+<p>Runs <code>service nginx start</code>. The init script daemonizes nginx and exits; the promise resolves <code>true</code> on exit code 0 and <code>false</code> otherwise. It never rejects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>nginx is not in the supervisor's managed set. If nginx fails to start, <code>start.js</code> only logs <code>Nginx failed to start with exit code: ...</code> and keeps running FastAPI and Next.js, so the container looks healthy while port 80 refuses connections. If nginx dies later, nothing notices.</p>
+</div>
+<h3 id="37-startservers-startjs499-693">3.7 <code>startServers()</code> (<code>start.js:499-693</code>)<a class="headerlink" href="#37-startservers-startjs499-693" title="Permanent link">&para;</a></h3>
+<p>Spawn order: FastAPI, MCP, Next.js, then optional Ollama. Command lines:</p>
+<table>
+<thead>
+<tr>
+<th>Child</th>
+<th>Command</th>
+<th>Working dir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FastAPI</td>
+<td><code>python server.py --port 8000 --reload false</code> (<code>true</code> in dev)</td>
+<td><code>servers/fastapi</code></td>
+</tr>
+<tr>
+<td>MCP</td>
+<td><code>python mcp_server.py --port 8001</code></td>
+<td><code>servers/fastapi</code></td>
+</tr>
+<tr>
+<td>Next.js, production</td>
+<td><code>node servers/nextjs/server.js</code> with <code>HOSTNAME=127.0.0.1 PORT=3000</code> (only if <code>server.js</code> exists, <code>start.js:539</code>)</td>
+<td><code>servers/nextjs</code></td>
+</tr>
+<tr>
+<td>Next.js, dev or no standalone build</td>
+<td><code>node node_modules/next/dist/bin/next dev --webpack -H 127.0.0.1 -p 3000</code> (or <code>start</code> instead of <code>dev --webpack</code>)</td>
+<td><code>servers/nextjs</code></td>
+</tr>
+<tr>
+<td>Ollama</td>
+<td><code>ollama serve</code></td>
+<td><code>/</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>server.py</code> simply parses <code>--port</code>, <code>--reload</code> and <code>--log-level</code> (default <code>info</code>) and calls <code>uvicorn.run("api.main:app", host="127.0.0.1", ...)</code> (<code>servers/fastapi/server.py:6-28</code>). Everything about the FastAPI app itself (lifespan, migrations, admin bootstrap, routers, middleware) is in <a href="../05-fastapi-startup/">FastAPI app and startup</a>.</p>
+<h2 id="step-4-readiness-restarts-and-shutdown">Step 4: Readiness, restarts and shutdown<a class="headerlink" href="#step-4-readiness-restarts-and-shutdown" title="Permanent link">&para;</a></h2>
+<h3 id="41-readiness">4.1 Readiness<a class="headerlink" href="#41-readiness" title="Permanent link">&para;</a></h3>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">nextjsReadyPromise</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">waitForProcessOutputLine</span><span class="p">(</span><span class="s2">"Next.js"</span><span class="p">,</span><span class="w"> </span><span class="nx">nextjsProcess</span><span class="p">,</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="sr">/Ready in\s+\d+/i</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="sr">/started server on/i</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">]);</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">fastApiReadyPromise</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">isDev</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span><span class="o">?</span><span class="w"> </span><span class="nx">waitForProcessOutputLine</span><span class="p">(</span><span class="s2">"FastAPI"</span><span class="p">,</span><span class="w"> </span><span class="nx">fastApiProcess</span><span class="p">,</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">      </span><span class="sr">/Application startup complete\./i</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="p">])</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="nx">waitForProcessHttp</span><span class="p">(</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">      </span><span class="s2">"FastAPI"</span><span class="p">,</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">      </span><span class="nx">fastApiProcess</span><span class="p">,</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">      </span><span class="nx">fastapiPort</span><span class="p">,</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">      </span><span class="s2">"/api/v1/auth/status"</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="w">    </span><span class="p">);</span>
+</span></code></pre></div>
+<ul>
+<li>Next.js readiness (both modes) is a regex match on any stdout or stderr line (<code>start.js:269-330</code>).</li>
+<li>FastAPI readiness in production is an HTTP probe: <code>GET http://127.0.0.1:8000/api/v1/auth/status</code>, 1 second per attempt, retried every 250 ms, giving up after 60 seconds (<code>start.js:332-416</code>). Any HTTP response counts as ready, whatever its status code (<code>start.js:373-376</code>). <code>/api/v1/auth/status</code> is listed in <code>SessionAuthMiddleware._PUBLIC_AUTH_PATHS</code> (<code>servers/fastapi/api/middlewares.py:30-36</code>), so it answers before any admin exists.</li>
+<li>In dev, FastAPI readiness is uvicorn's <code>Application startup complete.</code> line, which appears only after the lifespan (migrations, template import) finishes.</li>
+</ul>
+<p><code>Promise.all([fastApi, nextjs, nginx])</code> gates only the startup banner (<code>start.js:681-690</code>). On failure it logs <code>Skipping startup banner: ...</code>. Readiness never kills anything.</p>
+<p>In production <code>forwardProcessOutput(..., { suppressStartupUrls: true })</code> hides lines such as <code>Uvicorn running on http://127.0.0.1:8000</code> (<code>start.js:229-234</code>, <code>644-656</code>) so users are not misled into opening internal loopback ports; the banner prints the public URL instead.</p>
+<h3 id="42-child-exit-and-restart">4.2 Child exit and restart<a class="headerlink" href="#42-child-exit-and-restart" title="Permanent link">&para;</a></h3>
+<div class="language-javascript highlight"><span class="filename">start.js (excerpt)</span><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">childProcess</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">"exit"</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="nx">signal</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nx">managedProcesses</span><span class="p">.</span><span class="ow">delete</span><span class="p">(</span><span class="nx">childProcess</span><span class="p">);</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isShuttingDown</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">exitCode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">typeof</span><span class="w"> </span><span class="nx">code</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"number"</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">code</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">signal</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isDev</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">exitCode</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">restart</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">name</span><span class="si">}</span><span class="sb"> exited cleanly; restarting it for development.`</span><span class="p">);</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">    </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">isShuttingDown</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">        </span><span class="nx">restart</span><span class="p">();</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">      </span><span class="p">}</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="mf">1000</span><span class="p">);</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">    </span><span class="k">return</span><span class="p">;</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">  </span><span class="c1">// ...</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">  </span><span class="nx">shutdown</span><span class="p">(</span><span class="nx">exitCode</span><span class="p">);</span>
+</span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="p">});</span>
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Production, FastAPI/Next.js/Ollama exits (any code)</td>
+<td><code>shutdown(exitCode)</code>: kill every managed child, <code>process.exit(exitCode)</code>; the container stops</td>
+</tr>
+<tr>
+<td>Dev, FastAPI or Next.js exits with code 0</td>
+<td>restart after 1 s; the new child gets <code>stdio: ["ignore", "inherit", "inherit"]</code> (<code>start.js:602-605</code>, <code>623-626</code>)</td>
+</tr>
+<tr>
+<td>Dev, non-zero exit or killed by a signal</td>
+<td>same as production: whole container exits</td>
+</tr>
+<tr>
+<td>Ollama exits (any mode)</td>
+<td>no restart function is passed (<code>start.js:670</code>), so <code>shutdown</code></td>
+</tr>
+<tr>
+<td>MCP server exits</td>
+<td>nothing happens; the process is not watched</td>
+</tr>
+<tr>
+<td><code>SIGINT</code> / <code>SIGTERM</code> to Node</td>
+<td><code>shutdown(0)</code> (<code>start.js:518-519</code>)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The MCP server is spawned with <code>stdio: "ignore"</code> and no exit watcher (<code>start.js:608-620</code>). If <code>mcp_server.py</code> crashes on startup (for example because <code>openai_spec.json</code> is missing or malformed), <code>/mcp</code> returns nginx 502 forever and there are no logs anywhere. Run <code>python mcp_server.py --port 8001</code> by hand inside the container to see its <code>DEBUG:</code> and <code>ERROR:</code> output.</p>
+</div>
+<p>After <code>startServers</code> returns its spawn work it awaits a never-resolving promise (<code>start.js:692</code>), which keeps the Node event loop alive.</p>
+<h2 id="step-5-the-app_data-directory">Step 5: The <code>app_data</code> directory<a class="headerlink" href="#step-5-the-app_data-directory" title="Permanent link">&para;</a></h2>
+<p><code>APP_DATA_DIRECTORY</code> (<code>/app_data</code> in Docker, a bind mount <code>./app_data:/app_data</code> in every Compose service) is the only persistent state.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Mode</th>
+<th>Written by</th>
+<th>Read by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>userConfig.json</code></td>
+<td><code>0600</code></td>
+<td><code>start.js:140-168</code>; FastAPI <code>api/v1/auth/config.py:32-47</code> (auth secret, admin hash), <code>services/provider_settings.py:85-100</code> (mirror)</td>
+<td>FastAPI, Next.js route handlers</td>
+</tr>
+<tr>
+<td><code>userConfig.json.bak</code></td>
+<td><code>0600</code></td>
+<td><code>start.js:129-138</code></td>
+<td><code>start.js:126-127</code> fallback</td>
+</tr>
+<tr>
+<td><code>fastapi.db</code></td>
+<td>default umask</td>
+<td>SQLite default when <code>DATABASE_URL</code> is empty (<code>servers/fastapi/utils/db_utils.py:57-60</code>)</td>
+<td>FastAPI, MCP server</td>
+</tr>
+<tr>
+<td><code>exports/</code> and <code>exports/users/&lt;user-id&gt;/</code></td>
+<td><code>0750</code>-style dirs, <code>0640</code> files, group <code>www-data</code></td>
+<td>export runtime writes to <code>exports/</code> (<code>scripts/run-presentation-export.mjs:47-51</code>), FastAPI moves into the owner folder (<code>servers/fastapi/services/export_task_service.py:773-805</code>)</td>
+<td>nginx <code>/app_data/exports/</code></td>
+</tr>
+<tr>
+<td><code>images/users/&lt;user-id&gt;/</code></td>
+<td><code>0755</code></td>
+<td>generated and fetched slide images (<code>servers/fastapi/utils/asset_directory_utils.py:23-30</code>, <code>227-228</code>)</td>
+<td>nginx <code>/app_data/images/</code></td>
+</tr>
+<tr>
+<td><code>uploads/users/&lt;user-id&gt;/</code></td>
+<td><code>0755</code></td>
+<td>uploaded documents and files (<code>asset_directory_utils.py:233-234</code>); editor image uploads from the Next.js route <code>servers/nextjs/app/api/upload-image/route.ts:46-48</code></td>
+<td>nginx, document ingestion</td>
+</tr>
+<tr>
+<td><code>fonts/</code></td>
+<td><code>0755</code></td>
+<td>font uploads (<code>servers/fastapi/utils/font_uploads.py:68-72</code>)</td>
+<td>nginx, public</td>
+</tr>
+<tr>
+<td><code>templates/&lt;template-id&gt;/static/</code></td>
+<td><code>0755</code></td>
+<td>bundled template assets copied on startup (<code>servers/fastapi/templates/default_templates.py:295-307</code>)</td>
+<td>nginx, public</td>
+</tr>
+<tr>
+<td><code>pptx-to-html/</code>, <code>pptx-to-json/</code> (<code>users/&lt;user-id&gt;/&lt;session&gt;/</code>)</td>
+<td>like <code>exports/</code></td>
+<td>PPTX conversion artifacts for custom templates (<code>export_task_service.py:807-845</code>)</td>
+<td>nginx with auth</td>
+</tr>
+<tr>
+<td><code>mem0/</code> (<code>qdrant/</code>, <code>history.db</code>)</td>
+<td>default</td>
+<td>chat memory (<code>servers/fastapi/services/mem0_oss_memory.py:94-102</code>, <code>MEM0_DIR</code> in Compose)</td>
+<td>FastAPI</td>
+</tr>
+<tr>
+<td><code>preview_slide/&lt;n&gt;/</code></td>
+<td>default</td>
+<td>template-generation previews (<code>servers/fastapi/templates/v2/tools.py:84-91</code>)</td>
+<td>FastAPI</td>
+</tr>
+<tr>
+<td><code>assets/</code></td>
+<td>default</td>
+<td>created by <code>IconFinderService</code> through <code>get_writable_path("assets")</code> as a fallback location for the icon vector store; normally empty because the bundled <code>servers/fastapi/assets/icons-vectorstore.json</code> is used (<code>servers/fastapi/services/icon_finder_service.py:53-58</code>)</td>
+<td>FastAPI</td>
+</tr>
+</tbody>
+</table>
+<p>Per-user subfolders come from <code>_owned_directory</code> (<code>asset_directory_utils.py:23-30</code>): when a request has an owner (set by the auth middleware), files go under <code>&lt;root&gt;/users/&lt;owner_id&gt;/</code>. Files left in the root by pre-multi-user versions are "legacy" and only the admin may read them (<code>servers/fastapi/api/v1/auth/assets.py:106-123</code>).</p>
+<div class="admonition info">
+<p class="admonition-title">Why <code>0600</code> for userConfig.json</p>
+<p>The file holds provider API keys, the JWT signing secret <code>AUTH_SECRET_KEY</code> (<code>servers/fastapi/api/v1/auth/config.py:71-81</code>) and a recovery copy of the admin password hash. The app-data mounts in nginx and FastAPI deliberately expose only the seven asset roots (<code>servers/fastapi/api/main.py:80-82</code>), never the root itself, so <code>userConfig.json</code> and <code>fastapi.db</code> have no HTTP path at all.</p>
+</div>
+<p><code>TEMP_DIRECTORY</code> (<code>/tmp/presenton</code>) is not persistent; the export service puts per-owner work folders there (<code>servers/fastapi/services/export_task_service.py:164-171</code>).</p>
+<h2 id="step-6-the-nginx-routing-table">Step 6: The nginx routing table<a class="headerlink" href="#step-6-the-nginx-routing-table" title="Permanent link">&para;</a></h2>
+<p><code>nginx.conf</code> has one <code>server</code> on port 80. Global settings: <code>worker_connections 1024</code>, <code>client_max_body_size 100M</code> (<code>nginx.conf:7</code>, <code>13</code>), and two <code>map</code>s that keep <code>X-Forwarded-Proto</code>/<code>X-Forwarded-Host</code> from an outer proxy, falling back to <code>$scheme</code> and <code>$http_host</code> (<code>nginx.conf:16-23</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Upstream / target</th>
+<th>Auth</th>
+<th>Body limit</th>
+<th>Timeouts</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code> (<code>:29</code>)</td>
+<td><code>http://localhost:3000</code> (Next.js)</td>
+<td>none at nginx; Next.js layouts and <code>proxy.ts</code></td>
+<td>100M</td>
+<td>read 30m, connect 30m</td>
+<td>WebSocket <code>Upgrade</code>/<code>Connection</code> headers (Next dev HMR); <code>Host $http_host</code> keeps the port</td>
+</tr>
+<tr>
+<td><code>/api/v1/</code> (<code>:45</code>)</td>
+<td><code>http://localhost:8000</code> (path kept)</td>
+<td>FastAPI <code>SessionAuthMiddleware</code></td>
+<td>110M</td>
+<td>read/send/connect 30m</td>
+<td><code>error_page 413 = @request_entity_too_large</code></td>
+</tr>
+<tr>
+<td><code>/api/v2/</code> (<code>:59</code>)</td>
+<td><code>http://localhost:8000</code></td>
+<td>FastAPI</td>
+<td>100M (inherited)</td>
+<td>30m</td>
+<td>no custom 413 body</td>
+</tr>
+<tr>
+<td><code>@request_entity_too_large</code> (<code>:71</code>)</td>
+<td>returns 413</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>body <code>{"detail":"File size must be less than 100MB."}</code></td>
+</tr>
+<tr>
+<td><code>/mcp/</code> and <code>/mcp</code> (<code>:77</code>, <code>:94</code>)</td>
+<td><code>http://localhost:8001/mcp/</code> and <code>/mcp</code></td>
+<td>bearer API key checked inside FastMCP</td>
+<td>145M</td>
+<td>read/connect 30m</td>
+<td>forces <code>Host: localhost:8001</code>, forwards public host in <code>X-Forwarded-Host</code></td>
+</tr>
+<tr>
+<td><code>/docs</code> (<code>:110</code>)</td>
+<td><code>http://localhost:8000/docs</code></td>
+<td>FastAPI (protected path)</td>
+<td>100M</td>
+<td>30m</td>
+<td>uses <code>$host</code> and <code>$scheme</code>, not the forwarded maps</td>
+</tr>
+<tr>
+<td><code>/openapi.json</code> (<code>:120</code>)</td>
+<td><code>http://localhost:8000/openapi.json</code></td>
+<td>FastAPI (protected path)</td>
+<td>100M</td>
+<td>30m</td>
+<td>same as <code>/docs</code></td>
+</tr>
+<tr>
+<td><code>= /_auth_check</code> (<code>:133</code>)</td>
+<td><code>http://localhost:8000/api/v1/auth/verify</code></td>
+<td><code>internal</code> only</td>
+<td>body dropped</td>
+<td>defaults</td>
+<td>sends <code>X-Original-URI</code>, <code>Cookie</code>, <code>Authorization</code></td>
+</tr>
+<tr>
+<td><code>/static/</code> (<code>:153</code>)</td>
+<td><code>alias /app/servers/fastapi/static/</code></td>
+<td>none</td>
+<td>n/a</td>
+<td>n/a</td>
+<td><code>expires 1y</code>, <code>Cache-Control: public, immutable</code></td>
+</tr>
+<tr>
+<td><code>/app_data/images/</code>, <code>exports/</code>, <code>uploads/</code>, <code>pptx-to-html/</code>, <code>pptx-to-json/</code></td>
+<td><code>alias /app_data/&lt;root&gt;/</code></td>
+<td><code>auth_request /_auth_check</code></td>
+<td>n/a</td>
+<td>n/a</td>
+<td><code>disable_symlinks on</code>, <code>Cache-Control: private, max-age=31536000</code></td>
+</tr>
+<tr>
+<td><code>/app_data/fonts/</code>, <code>/app_data/templates/</code></td>
+<td><code>alias</code></td>
+<td>none</td>
+<td>n/a</td>
+<td>n/a</td>
+<td>same caching; matches <code>SHARED_APP_DATA_ROOTS</code> (<code>assets.py:17</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>nginx picks the longest matching prefix, so <code>/api/v1/...</code> never reaches Next.js and <code>/app_data/images/...</code> never reaches FastAPI in Docker. There is no location for <code>/redoc</code>; it falls to <code>/</code> and Next.js answers 404.</p>
+<h3 id="61-the-static-path-traversal-comment">6.1 The <code>/static/</code> path-traversal comment<a class="headerlink" href="#61-the-static-path-traversal-comment" title="Permanent link">&para;</a></h3>
+<div class="language-nginx highlight"><span class="filename">nginx.conf (excerpt)</span><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="w">    </span><span class="c1"># Bundled UI static assets (logos, fonts packaged with the app) are safe to</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="c1"># serve unauthenticated; they contain no user data. The trailing slash on</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="c1"># the location pattern is required: with a bare `/static`, a request like</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="c1"># `/static../server.py` matches this block and `alias` rewrites it to</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="c1"># `/app/servers/fastapi/static/../server.py`, which nginx resolves to</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="c1"># `/app/servers/fastapi/server.py` — unauthenticated arbitrary read of any</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="c1"># file under /app the worker can stat. `/static/` constrains the match so</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="c1"># the only path that lands here is one that actually started with the</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="c1"># separator.</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="k">location</span><span class="w"> </span><span class="s">/static/</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">      </span><span class="kn">alias</span><span class="w"> </span><span class="s">/app/servers/fastapi/static/</span><span class="p">;</span>
+</span></code></pre></div>
+<p>This is the classic nginx "alias traversal" misconfiguration: with <code>location /static</code> plus <code>alias .../static/</code>, nginx substitutes the matched prefix and the rest of the URI (<code>../server.py</code>) is appended verbatim. Ending both the location and the alias with <code>/</code> closes it.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>When you add a new <code>alias</code> location (for example a new asset root), always end both the <code>location</code> prefix and the <code>alias</code> path with a slash, keep <code>disable_symlinks on</code> for user-writable roots, and add the root to <code>PRIVATE_APP_DATA_ROOTS</code> or <code>SHARED_APP_DATA_ROOTS</code> in <code>servers/fastapi/api/v1/auth/assets.py:10-17</code>. Otherwise <code>/_auth_check</code> returns 403 for every file in it, because <code>_namespace_authorized</code> rejects unknown roots (<code>assets.py:111-112</code>).</p>
+</div>
+<h2 id="step-7-sequence-a-a-browser-page-load">Step 7: Sequence (a), a browser page load<a class="headerlink" href="#step-7-sequence-a-a-browser-page-load" title="Permanent link">&para;</a></h2>
+<p>Take <code>GET /dashboard</code> with a valid session cookie.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant B as Browser
+  participant NG as nginx :80
+  participant NX as Next.js :3000
+  participant PX as proxy.ts
+  participant L as Server layout
+  participant FA as FastAPI :8000
+  B-&gt;&gt;NG: GET /dashboard (Cookie presenton_session)
+  NG-&gt;&gt;NX: location / proxy_pass, Host and X-Forwarded headers
+  NX-&gt;&gt;PX: proxy(request)
+  PX--&gt;&gt;NX: not /api, not /app_data, not /pdf-maker so NextResponse.next()
+  NX-&gt;&gt;L: render (presentation-generator)/layout.tsx
+  L-&gt;&gt;FA: GET 127.0.0.1:8000/api/v1/auth/status with the cookie
+  FA--&gt;&gt;L: configured true, authenticated true, role
+  L--&gt;&gt;NX: requireAppSession passes
+  NX--&gt;&gt;NG: HTML, RSC payload
+  NG--&gt;&gt;B: 200
+  B-&gt;&gt;NG: GET /_next/static/... (matcher excludes it from proxy.ts)</code></pre>
+<ol>
+<li>nginx matches <code>location /</code> and forwards to <code>localhost:3000</code> (<code>nginx.conf:29-43</code>).</li>
+<li><code>proxy.ts</code> runs for every path except <code>_next/static</code> and <code>favicon.ico</code> (<code>servers/nextjs/proxy.ts:174-176</code>). For page paths it first runs <code>desktopRequestDenied</code> (a no-op unless <code>PRESENTON_ELECTRON=true</code>, <code>servers/nextjs/lib/desktop-auth.ts:14-15</code>), then returns <code>NextResponse.next()</code> (<code>proxy.ts:103-105</code>).</li>
+<li>The <code>(presentation-generator)</code> layout calls <code>requireAppSession()</code> (<code>servers/nextjs/app/(presentation-generator)/layout.tsx:6-7</code>), which fetches <code>${FAST_API_INTERNAL_URL}/api/v1/auth/status</code> with the incoming cookie (<code>servers/nextjs/utils/serverAuth.ts:37-58</code>). It redirects to <code>/</code> when FastAPI is unreachable or no admin exists, and to <code>/?reason=unauthorized</code> when not signed in (<code>serverAuth.ts:93-107</code>).</li>
+<li>The response to <code>/api/v1/auth/status</code> looks like this (<code>servers/fastapi/api/v1/auth/router.py:71-78</code>):</li>
+</ol>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span><span class="nt">"configured"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">"authenticated"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"admin"</span><span class="p">,</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w"> </span><span class="nt">"user_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"6f1c2d8e-..."</span><span class="p">,</span><span class="w"> </span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"admin"</span><span class="p">}</span>
+</span></code></pre></div>
+<p>Page-level guarding is covered in <a href="../23-settings-and-auth-ui/">Settings, onboarding, auth UI</a>.</p>
+<h2 id="step-8-sequence-b-an-authenticated-api-call">Step 8: Sequence (b), an authenticated API call<a class="headerlink" href="#step-8-sequence-b-an-authenticated-api-call" title="Permanent link">&para;</a></h2>
+<p>Browser code builds FastAPI URLs with <code>getApiUrl()</code>, which in the Docker web runtime returns a same-origin relative path such as <code>/api/v1/ppt/presentation/all</code> (<code>servers/nextjs/utils/api.ts:123-141</code>, <code>resolveBackendPathForRuntime</code> at <code>api.ts:88-98</code>). So the request goes to nginx, not to Next.js.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant B as Browser
+  participant NG as nginx :80
+  participant MW as SessionAuthMiddleware
+  participant R as Route handler
+  participant DB as Database
+  B-&gt;&gt;NG: GET /api/v1/ppt/presentation/all (Cookie presenton_session)
+  NG-&gt;&gt;MW: location /api/v1/ proxy_pass to 127.0.0.1:8000
+  MW-&gt;&gt;DB: SELECT count(*) FROM user
+  alt no users
+    MW--&gt;&gt;B: 428 detail Login setup is required, setup_required true
+  else users exist
+    MW-&gt;&gt;DB: decode JWT cookie, load user (or verify Bearer sk-presenton- key)
+    alt no principal
+      MW--&gt;&gt;B: 401 detail Unauthorized
+    else principal found
+      MW-&gt;&gt;R: set request.state and owner context vars
+      R-&gt;&gt;DB: owner-scoped query
+      R--&gt;&gt;B: 200 JSON
+    end
+  end</code></pre>
+<p>The middleware stack, outermost first, is: the <code>static_icon_fallback_middleware</code> function middleware, <code>SessionAuthMiddleware</code>, <code>UserConfigEnvUpdateMiddleware</code>, then <code>CORSMiddleware</code> (Starlette runs the last-added middleware first, <code>servers/fastapi/api/main.py:94-118</code>). <code>SessionAuthMiddleware.dispatch</code> (<code>servers/fastapi/api/middlewares.py:55-152</code>) does, in order:</p>
+<ol>
+<li>Desktop guard (<code>desktop_request_denied</code>), then the auth-disabled branch for Electron.</li>
+<li>Pass through <code>OPTIONS</code>, public auth paths, and paths that do not require auth (<code>_requires_auth</code>, <code>middlewares.py:44-53</code>: everything under <code>/api/</code>, <code>/app_data/</code> except fonts and templates, plus <code>/docs</code>, <code>/openapi.json</code>, <code>/redoc</code>).</li>
+<li>428 when the <code>user</code> table is empty (<code>middlewares.py:83-94</code>).</li>
+<li><code>resolve_request_principal</code> (<code>servers/fastapi/api/v1/auth/principal.py:22-57</code>): cookie JWT first, then <code>Authorization: Bearer &lt;token&gt;</code> checked as an API key. Failure gives 401.</li>
+<li>Admin-only paths (<code>/api/v1/admin/</code>, Codex auth, font POST/DELETE, model listings, <code>/api/v1/ppt/images/test</code>) require a browser JWT from an admin, otherwise 403 <code>Admin browser session required</code> (<code>middlewares.py:100-119</code>).</li>
+<li>Store the principal on <code>request.state</code>, mint an internal JWT for API-key callers (used later by the exporter), set owner context variables, and call the route.</li>
+</ol>
+<h3 id="81-how-proxyts-behaves-for-api-paths">8.1 How <code>proxy.ts</code> behaves for <code>/api</code> paths<a class="headerlink" href="#81-how-proxyts-behaves-for-api-paths" title="Permanent link">&para;</a></h3>
+<p>In Docker, <code>/api/v1/*</code> and <code>/api/v2/*</code> never reach Next.js because nginx routes them first. Next.js's own route handlers do reach it: <code>servers/nextjs/app/api/</code> contains <code>export-presentation</code>, <code>export-presentation-data/[id]</code>, <code>read-file</code>, <code>runtime-config</code>, <code>telemetry-status</code>, <code>update-svg</code>, <code>upload-image</code>, <code>user-config</code>, <code>has-required-key</code> and <code>github-stars</code>. For those, <code>proxy.ts:138-171</code> applies:</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DISABLE_AUTH</code> truthy</td>
+<td>pass through (<code>continueRequest</code>)</td>
+</tr>
+<tr>
+<td><code>OPTIONS</code>, or path is <code>/api/v1/auth/*</code>, <code>/api/telemetry-status</code>, <code>/api/update-svg</code>, <code>/api/export-presentation-data/*</code></td>
+<td>pass through</td>
+</tr>
+<tr>
+<td><code>Authorization: Bearer sk-presenton-...</code></td>
+<td>if FastAPI path, rewrite to FastAPI, else 403 <code>API keys are only accepted by the Presenton API</code></td>
+</tr>
+<tr>
+<td>cookie valid per <code>GET {FAST_API_INTERNAL_URL}/api/v1/auth/status</code></td>
+<td>pass through</td>
+</tr>
+<tr>
+<td>no admin configured</td>
+<td>428 <code>{"detail":"Login setup is required","setup_required":true}</code></td>
+</tr>
+<tr>
+<td>otherwise</td>
+<td>401 <code>{"detail":"Unauthorized"}</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>continueRequest</code> rewrites <code>/api/v1</code> and <code>/api/v2</code> paths to the FastAPI base URL and lets other paths fall to the Next.js handler (<code>proxy.ts:51-55</code>). The rewrite branch matters when Next.js is reached without nginx (local <code>next dev</code> and Electron). <code>getAuthStatus</code> treats any fetch failure as <code>{configured: true, authenticated: false}</code> (<code>proxy.ts:65-85</code>), so a down FastAPI produces 401, not 428.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>API keys are rejected by Next.js route handlers on purpose (<code>proxy.ts:146-156</code>). A script that calls <code>/api/export-presentation</code> with <code>Authorization: Bearer sk-presenton-...</code> gets 403. Use the FastAPI endpoints such as <code>POST /api/v1/ppt/presentation/{id}/export</code> instead; see <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</p>
+</div>
+<h2 id="step-9-sequence-c-a-protected-image-under-app_dataimages">Step 9: Sequence (c), a protected image under <code>/app_data/images</code><a class="headerlink" href="#step-9-sequence-c-a-protected-image-under-app_dataimages" title="Permanent link">&para;</a></h2>
+<p>Generated images are stored as files and referenced in slide JSON by URL, for example <code>/app_data/images/users/6f1c.../a1b2.png</code>. In Docker the filesystem path and the URL path coincide because <code>APP_DATA_DIRECTORY</code> is <code>/app_data</code>.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant B as Browser
+  participant NG as nginx :80
+  participant AC as location /_auth_check
+  participant FA as FastAPI /api/v1/auth/verify
+  participant FS as Disk /app_data/images
+  B-&gt;&gt;NG: GET /app_data/images/users/U/a1b2.png (Cookie)
+  NG-&gt;&gt;AC: auth_request subrequest
+  AC-&gt;&gt;FA: GET /api/v1/auth/verify, X-Original-URI, Cookie, Authorization, no body
+  FA-&gt;&gt;FA: resolve_request_principal
+  alt no session or key
+    FA--&gt;&gt;NG: 401
+    NG--&gt;&gt;B: 401
+  else path not owned by caller
+    FA--&gt;&gt;NG: 403 Asset access denied
+    NG--&gt;&gt;B: 403
+  else authorized
+    FA--&gt;&gt;NG: 200 authenticated true
+    NG-&gt;&gt;FS: alias read with disable_symlinks on
+    FS--&gt;&gt;NG: bytes
+    NG--&gt;&gt;B: 200 image, Cache-Control private, max-age=31536000
+  end</code></pre>
+<p><code>verify_session</code> (<code>servers/fastapi/api/v1/auth/router.py:81-107</code>) is public at the middleware level (it is in <code>_PUBLIC_AUTH_PATHS</code>) and does its own check. It calls <code>is_app_data_path_authorized(original_uri, ...)</code> (<code>servers/fastapi/api/v1/auth/assets.py:78-103</code>), which:</p>
+<ol>
+<li>Decodes the path up to 8 times until stable, failing closed on deeper nesting, and rejects NUL bytes, backslashes, empty, <code>.</code> and <code>..</code> segments (<code>assets.py:47-75</code>).</li>
+<li>Allows <code>fonts</code> and <code>templates</code> for everyone; for the five private roots requires <code>users/&lt;caller-id&gt;/&lt;file&gt;</code> (at least three segments) or, for legacy root-level files, an admin (<code>assets.py:106-123</code>).</li>
+<li>Re-checks the canonical <code>realpath</code> target relative to the root, so a symlink cannot alias another user's folder (<code>assets.py:89-103</code>).</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>nginx <code>auth_request</code> treats only 2xx as allow and 401/403 as deny; any other status from <code>/api/v1/auth/verify</code> (for example a 500 while the database is locked) becomes a 500 to the browser. Broken images during heavy SQLite contention usually come from this subrequest, not from the file itself.</p>
+</div>
+<p>Outside Docker, the same URL is served by FastAPI's own <code>_OwnerScopedStaticFiles</code> mounts (<code>servers/fastapi/api/v1/auth/assets.py:20-44</code>, mounted in <code>servers/fastapi/api/main.py:77-82</code>), with <code>SessionAuthMiddleware</code> returning 404 <code>Asset not found</code> for unauthorized paths (<code>middlewares.py:138-148</code>). The response code for "not yours" therefore differs: 403 behind nginx, 404 without it.</p>
+<h2 id="step-10-sequence-d-an-mcp-client-call-to-mcp">Step 10: Sequence (d), an MCP client call to <code>/mcp</code><a class="headerlink" href="#step-10-sequence-d-an-mcp-client-call-to-mcp" title="Permanent link">&para;</a></h2>
+<p><code>mcp_server.py</code> builds a FastMCP server from the checked-in OpenAPI spec <code>servers/fastapi/openai_spec.json</code> and exposes only a short allowlist of routes as tools (<code>servers/fastapi/mcp_server.py:54-125</code>). It proxies each tool call to FastAPI over HTTP.</p>
+<pre class="mermaid"><code>sequenceDiagram
+  participant C as MCP client
+  participant NG as nginx :80
+  participant M as FastMCP :8001
+  participant V as PresentonTokenVerifier
+  participant FA as FastAPI :8000
+  C-&gt;&gt;NG: POST /mcp, Authorization Bearer sk-presenton-ID.SECRET, tools/call
+  NG-&gt;&gt;M: proxy_pass /mcp, Host localhost:8001, X-Forwarded-Host public host
+  M-&gt;&gt;M: host and origin allowlist check
+  M-&gt;&gt;V: verify_token(token)
+  V-&gt;&gt;V: verify_api_key against api_keys table, mint 1 h internal JWT
+  V--&gt;&gt;M: AccessToken with claims user_id and internal_session_token
+  M-&gt;&gt;FA: POST 127.0.0.1:8000/api/v1/ppt/presentation/generate/async, Cookie presenton_session=JWT, X-Presenton-MCP-Request 1
+  FA-&gt;&gt;FA: SessionAuthMiddleware principal method jwt
+  FA--&gt;&gt;M: AsyncTaskModel id, status pending
+  M--&gt;&gt;C: tool result
+  C-&gt;&gt;NG: POST /mcp tools/call get_job_status
+  NG-&gt;&gt;M: proxy
+  M-&gt;&gt;FA: GET /api/v1/async-tasks/status/ID
+  FA--&gt;&gt;M: completed, data.path and data.edit_path made absolute
+  M--&gt;&gt;C: tool result</code></pre>
+<p>Key code points:</p>
+<ul>
+<li>nginx forces <code>Host: localhost:8001</code> because FastMCP's DNS-rebinding guard only accepts <code>localhost</code>, <code>127.0.0.1</code> and <code>::1</code> (<code>servers/fastapi/mcp_server.py:41</code>, <code>nginx.conf:85-87</code>). The browser-visible host travels in <code>X-Forwarded-Host</code>. Allowed <code>Origin</code>s are local origins plus <code>PRESENTON_PUBLIC_URL</code> when set (<code>mcp_server.py:128-140</code>).</li>
+<li>nginx deliberately does not use <code>/_auth_check</code> for <code>/mcp</code> (comment at <code>nginx.conf:79-81</code>): the asset ownership check would reject the non-asset path.</li>
+<li><code>PresentonTokenVerifier.verify_token</code> accepts only tokens starting with <code>sk-presenton-</code> (<code>mcp_server.py:285-316</code>). Browser cookies are never accepted as MCP credentials.</li>
+<li>In normal operation <code>attach_request_auth_header</code> never forwards the long-lived API key to FastAPI (the only bearer fallback is for auth-disabled development and old tests, per its docstring). It sends the minted internal session as <code>Cookie: presenton_session=...</code>, adds <code>X-Presenton-MCP-Request: 1</code>, and copies <code>X-Forwarded-Host</code>/<code>X-Forwarded-Proto</code> (<code>mcp_server.py:365-414</code>). That header makes FastAPI turn <code>path</code>, <code>edit_path</code> and <code>preview_url</code> into absolute URLs (<code>servers/fastapi/utils/mcp_public_urls.py:9-52</code>).</li>
+<li>The internal JWT lives for one hour (<code>MCP_INTERNAL_SESSION_TTL_SECONDS</code>, <code>mcp_server.py:39</code>) because the same session is reused by the exporter at the end of a long generation. Upstream reads time out after 600 s, connects after 15 s (<code>mcp_server.py:31-34</code>).</li>
+<li>Which tools exist depends on <code>PRESENTATION_GENERATION_MODE</code> (<code>get_mcp_route_maps</code>, <code>mcp_server.py:113-125</code>). The full tool list and naming are in <a href="../15-api-async-mcp/">REST API, async tasks, webhooks, MCP</a>.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>The MCP server reads the database directly (<code>async_session_maker</code> for API-key verification) but serves everything else by calling FastAPI at the hard-coded <code>http://127.0.0.1:8000</code> (<code>MCP_API_BASE_URL</code>, <code>mcp_server.py:31</code>). It must run in the same network namespace as FastAPI, with the same <code>DATABASE_URL</code> and <code>USER_CONFIG_PATH</code>; splitting them into separate containers needs code changes.</p>
+</div>
+<h2 id="step-11-one-more-hop-the-export-runtime-calling-back-into-the-app">Step 11: One more hop, the export runtime calling back into the app<a class="headerlink" href="#step-11-one-more-hop-the-export-runtime-calling-back-into-the-app" title="Permanent link">&para;</a></h2>
+<p>When FastAPI exports a deck, <code>export_presentation</code> builds a URL <code>"{NEXT_PUBLIC_URL or http://127.0.0.1}/pdf-maker?id=..."</code> and hands it to the export runtime (<code>servers/fastapi/utils/export_utils.py:18-40</code>). In Docker <code>NEXT_PUBLIC_URL</code> is not set, so headless Chromium loads <code>http://127.0.0.1/pdf-maker</code>, which is nginx on port 80, then <code>location /</code>, then Next.js. The caller's cookie travels two ways: the task's <code>cookieHeader</code> is installed as browser cookies for the page origin by the runner (<code>scripts/run-presentation-export.mjs:43-56</code>), and it is also appended as a <code>#exportCookie=...</code> URL fragment that <code>PdfMakerPage</code> reads (<code>export_utils.py:35-36</code>, <code>servers/nextjs/app/(export)/pdf-maker/PdfMakerPage.tsx:146-152</code>). The browser export path built by Next.js additionally sets an <code>exportSession</code> query parameter (<code>servers/nextjs/lib/run-bundled-presentation-export.ts:162-165</code>), which <code>proxy.ts:114-136</code> converts into a <code>presenton_session</code> cookie before redirecting to the clean URL. The whole export path is the subject of <a href="../24-export-pipeline/">PPTX and PDF export</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Gotcha</p>
+<p>Because the exporter goes through nginx on <code>127.0.0.1:80</code> from inside the container, an nginx that failed to start (Step 3.6) breaks exports even if you were reaching the UI some other way, and a custom nginx config that drops <code>location /</code> or binds a different port breaks every PPTX/PDF download.</p>
+</div>
+<h2 id="step-12-electron-the-same-code-without-nginx">Step 12: Electron, the same code without nginx<a class="headerlink" href="#step-12-electron-the-same-code-without-nginx" title="Permanent link">&para;</a></h2>
+<p>The desktop app runs the same FastAPI and Next.js with a different topology. Details are in <a href="../27-electron/">Electron desktop app</a>; the contrasts that matter here:</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Docker</th>
+<th>Electron</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reverse proxy</td>
+<td>nginx on port 80</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Ports</td>
+<td>fixed 8000, 3000, 8001</td>
+<td>first two free ports scanning upward from 40000 (<code>findUnusedPorts</code>, <code>electron/app/utils/index.ts:39-65</code>, called at <code>electron/app/main.ts:468-470</code>)</td>
+</tr>
+<tr>
+<td>How the browser reaches FastAPI</td>
+<td>same origin through nginx</td>
+<td><code>NEXT_PUBLIC_FAST_API=http://127.0.0.1:&lt;port&gt;</code> set by <code>setupEnv</code> (<code>electron/app/utils/index.ts:5-22</code>), plus <code>proxy.ts</code> rewriting <code>/app_data</code> and <code>/static</code> (<code>proxy.ts:107-112</code>) and <code>/api/v1</code>, <code>/api/v2</code> (<code>continueRequest</code>, <code>proxy.ts:51-55</code>) to FastAPI at request time</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>enabled; admin account required</td>
+<td><code>DISABLE_AUTH</code> defaults to <code>"true"</code> unless <code>ELECTRON_DISABLE_AUTH</code>/<code>DISABLE_AUTH</code> says otherwise (<code>electron/app/main.ts:150-160</code>, <code>455-459</code>); FastAPI and Next.js short-circuit to an "electron" admin</td>
+</tr>
+<tr>
+<td>Request guard</td>
+<td>none beyond auth</td>
+<td>desktop token cookie or header plus exact host and origin checks (<code>servers/nextjs/lib/desktop-auth.ts:14-44</code>)</td>
+</tr>
+<tr>
+<td>MCP</td>
+<td>port 8001 behind <code>/mcp</code></td>
+<td>disabled when <code>PRESENTON_ELECTRON</code> is truthy (<code>mcp_server.py:319-321</code>)</td>
+</tr>
+<tr>
+<td>CORS</td>
+<td><code>*</code> fallback (same origin anyway)</td>
+<td>exact <code>NEXT_PUBLIC_URL</code> origin with credentials (<code>servers/fastapi/api/main.py:92-100</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>start.js</code> validates the export runtime, optionally installs Ollama, writes <code>userConfig.json</code> atomically from the environment, starts nginx as a daemon, then spawns FastAPI (8000), the MCP server (8001) and Next.js (3000), all bound to loopback.</li>
+<li>Readiness is an HTTP probe of <code>/api/v1/auth/status</code> for FastAPI in production and log-line regexes otherwise; it only gates the banner. Any watched child exit stops the container, except clean exits in dev, which restart; nginx and MCP are not watched.</li>
+<li><code>app_data</code> holds <code>userConfig.json</code> (0600), the SQLite database, and seven asset roots with per-user <code>users/&lt;id&gt;/</code> folders; export roots are group-owned by <code>www-data</code> with no world bits.</li>
+<li>nginx routes <code>/api/v1</code>, <code>/api/v2</code>, <code>/docs</code> and <code>/openapi.json</code> to FastAPI, <code>/mcp</code> to FastMCP, serves <code>/static/</code> and <code>/app_data/*</code> from disk, and protects five private asset roots with an <code>auth_request</code> to <code>/api/v1/auth/verify</code>.</li>
+<li><code>proxy.ts</code> guards Next.js's own <code>/api</code> handlers, rejects API keys there, and performs the rewrites that replace nginx in Electron.</li>
+</ul>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<p>With the topology in mind, get a copy running yourself in <a href="../04-running-locally/">Running it locally</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../02-repository-tour/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Repository tour">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Repository tour
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../04-running-locally/" class="md-footer__link md-footer__link--next" aria-label="Next: Running it locally">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Running it locally
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Tutorial text © 2026 Sourav Debnath (debnathSD). Presenton source code is © Presenton contributors, Apache License 2.0.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.top", "navigation.footer", "navigation.tracking", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
