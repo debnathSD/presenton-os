@@ -1,12 +1,14 @@
 # Run protocol and client
 
 <div class="chapter-meta" markdown>
-**Reads:** `servers/fastapi/utils/sse.py`, `servers/fastapi/models/sse_response.py`, `servers/fastapi/api/v1/ppt/endpoints/presentation.py`, `servers/fastapi/api/v1/auth/principal.py`, `servers/fastapi/api/main.py`, `servers/nextjs/app/(presentation-generator)/outline/hooks/useOutlineStreaming.ts`, `servers/nextjs/app/(presentation-generator)/services/api/chat.ts`, `servers/nextjs/app/(presentation-generator)/services/api/header.ts`  ·  **Builds on:** [Artifact Spec and targets](62-artifact-spec-and-targets.md)  ·  **Time:** ~45 min
+**Reads:** `servers/fastapi/utils/sse.py`, `servers/fastapi/models/sse_response.py`, `servers/fastapi/api/v1/ppt/endpoints/presentation.py`, `servers/fastapi/api/v1/auth/principal.py`, `servers/fastapi/api/main.py`, `servers/nextjs/app/(presentation-generator)/outline/hooks/useOutlineStreaming.ts`, `servers/nextjs/app/(presentation-generator)/services/api/chat.ts`, `servers/nextjs/app/(presentation-generator)/services/api/header.ts`  ·  **Builds on:** [Artifact Spec and targets](62-artifact-spec-and-targets.md)  ·  **Time:** ~60 min
 </div>
 
 This chapter specifies the wire contract between the browser and the GCK Engine and builds both ends of it: the run lifecycle and endpoints, every stream event with a JSON example, ordering and idempotency, block-level JSON Patch plus `text.delta`, outline review, the error model, resume with `Last-Event-ID` from a server-side event log, heartbeats, auth and CORS. You get the full TypeScript for `@gck/protocol` events and the `@gck/client` transport, an AG-UI mapping, and a FastAPI sketch of the event log that generalizes Presenton's SSE helpers.
 
-Files under `gck/` are **new code** for Part IX; files under `servers/` are Presenton at snapshot `571461f`.
+A run resolves each data binding once, but no GCK output may keep the numbers of that moment. The data side of the protocol (protocol 1.1, additive to `gck.artifact/1`) therefore has two halves: inside a run, `binding.resolved` carries each binding's live Superset snapshot, status and error (Step 3); after the run, the **refresh protocol** (`/v1/data/catalog`, `/v1/data/resolve`, `/v1/render`, Step 16) re-resolves the stored binding definitions as the viewing user on open, on demand, on an interval, when artifact parameters change and when host filters change, and headless for schedules. The data model itself (binding sources, snapshots, parameters, refresh policies, per-target behavior and viz coverage) is in [Live Superset data](69-live-superset-data.md).
+
+Files under `gck/` and `gck_engine/` are **new code** for Part IX; files under `servers/` are Presenton at snapshot `571461f`. Superset citations of the form `apache/superset: path:line` refer to the Superset master clone used for Part IX.
 
 ## Step 1: What the protocol must fix in Presenton's streams
 
@@ -30,11 +32,13 @@ Paths below are relative to the engine base URL `{engine}`, the `engineUrl` give
 | `POST /v1/runs` | `RunRequest` JSON, headers `Authorization`, optional `Idempotency-Key` | `201 {runId, streamUrl, inputUrl, cancelUrl, createdAt}`; with `Accept: text/event-stream` instead `200` and the event stream, run id in header `GCK-Run-Id` | same key within 24 h returns the same run (`200`) |
 | `GET /v1/runs/{runId}/events` | headers `Authorization`, optional `Last-Event-ID` | `200 text/event-stream` | safe to repeat |
 | `GET /v1/runs/{runId}` | none | `200 RunSummary` (state, `lastEventId`, `artifactVersion`, pending input, error) | safe |
-| `GET /v1/runs/{runId}/artifact` | none | `200 {version, lastEventId, artifact}` | safe |
+| `GET /v1/runs/{runId}/artifact` | none | `200 {version, lastEventId, artifact, bindingState}`; `bindingState` is the latest `binding.resolved` payload per binding (protocol 1.1) | safe |
 | `POST /v1/runs/{runId}/input` | `{inputId, kind, decision, outline?}` | `202 {accepted: true}` | same `inputId` and same body returns `202` again; a different body returns `409 input_already_resolved` |
 | `POST /v1/runs/{runId}/cancel` | `{reason?}` | `202 {state}` | always `202`; a terminal run reports its final state |
 
-The request body is the one fixed in the blueprint:
+Bindings are re-resolved outside any run through three more endpoints, `GET /v1/data/catalog`, `POST /v1/data/resolve` and `POST /v1/render`; they share this chapter's auth, SSE framing and error model and are specified in Step 16.
+
+The request body is the one fixed in the blueprint, with the protocol 1.1 data fields filled in for a run started on a filtered Superset dashboard:
 
 ```json title="POST /v1/runs (request body)"
 {
@@ -43,10 +47,26 @@ The request body is the one fixed in the blueprint:
   "target": { "id": "tiptap-doc", "manifestVersion": "1.0.0", "manifest": {} },
   "context": { "host": "superset", "surface": "dashboard", "dashboardId": 37, "selection": null,
                "document": null, "locale": "en", "theme": {} },
-  "data": { "provider": "superset", "allowedChartIds": [412, 413] },
+  "data": { "provider": "superset", "allowedChartIds": [412, 413], "allowedDatasetIds": [12],
+            "scope": { "host": "superset_dashboard", "dashboardId": 37,
+                       "dataMask": { "NATIVE_FILTER-r1": { "extraFormData": {
+                         "filters": [{ "col": "region", "op": "IN", "val": ["EMEA"] }] } } },
+                       "permalinkKey": "kq2Lm9PzR4x", "capturedAt": "2026-11-03T10:15:02Z" },
+            "rowLimit": 50 },
   "options": { "reviewOutline": true, "maxSections": 8, "tone": "professional" }
 }
 ```
+
+| `data` field | Since | Meaning |
+|---|---|---|
+| `provider` | 1.0 | Data provider id, `"superset"`. |
+| `allowedChartIds` | 1.0 | Saved charts the viewer can see (from the catalog); the planner may bind only these. |
+| `allowedDatasetIds` | 1.1 | Datasets the planner may use for `superset_dataset` and `superset_metric` sources. |
+| `scope` | 1.1 | `HostDataScope`: the host's filter state at submit. On a dashboard it is the native filters' own `extraFormData` per filter id plus a dashboard permalink key (`POST /api/v1/dashboard/<pk>/permalink`, `apache/superset: superset/dashboards/permalink/api.py:48`), so the capture is durable. The engine stores it as `Artifact.dataContext` and gives every binding it stamps `filter_context: {dashboard_id, mode: "captured", data_mask, permalink_key}`, so the narrative and every later refresh use the same filter selection. |
+| `params` | 1.1 | The viewer's current values for the artifact parameters of an `edit` base (`Record<string, ParamValue>`). |
+| `rowLimit` | 1.1 | Default `row_limit` for bindings the engine stamps; the server cap is 500 (`AI_SLIDES_MAX_ROW_LIMIT`, [Story 8](../delivery/49-story8-analytics-mcp.md)). |
+
+Every field is optional and additive: a 1.0 engine ignores the 1.1 fields, and a 1.1 engine treats a missing `scope` as "no host filters".
 
 The other two intents use the same body and differ in what `context` carries. A `transform` sends the content to rewrite in `context.selection`, as Artifact blocks (the target's `fromHost` output for the user's selection), and is applied with `replace` by default:
 
@@ -81,13 +101,28 @@ An `edit` sends the artifact it changes in `context.document`: the artifact appl
                      { "id": "blk_q7x2m40100", "type": "paragraph", "text": [{ "text": "Pipeline reached a record level across EMEA, led by Germany, France and the Nordics." }] },
                      { "id": "blk_q7x2m40101", "type": "chart", "bindingId": "b_c413", "chartType": "bar" }] }],
                  "bindings": {
-                   "b_c412": { "kind": "metric", "source": { "type": "superset_chart", "chart_id": 412 }, "mapping": {} },
-                   "b_c413": { "kind": "chart", "source": { "type": "superset_chart", "chart_id": 413 }, "mapping": {} } },
+                   "b_c412": { "kind": "metric",
+                               "source": { "type": "superset_chart", "chart_id": 412, "dashboard_id": 37, "viz_type": "big_number",
+                                           "filter_context": { "dashboard_id": 37, "mode": "captured", "permalink_key": "kq2Lm9PzR4x",
+                                             "data_mask": { "NATIVE_FILTER-r1": { "extraFormData": {
+                                               "filters": [{ "col": "region", "op": "IN", "val": ["EMEA"] }] } } } } },
+                               "mapping": { "metric": "revenue", "x": "order_date", "compare": "previous_period" },
+                               "format": { "number": "SMART_NUMBER", "delta": "+.1%" },
+                               "generatedAgainst": { "snapshot_hash": "5c0e9a71d2b4", "snapshotAt": "2026-11-03T10:15:11Z" } },
+                   "b_c413": { "kind": "chart",
+                               "source": { "type": "superset_chart", "chart_id": 413, "dashboard_id": 37, "viz_type": "echarts_timeseries_bar",
+                                           "filter_context": { "dashboard_id": 37, "mode": "captured", "permalink_key": "kq2Lm9PzR4x",
+                                             "data_mask": { "NATIVE_FILTER-r1": { "extraFormData": {
+                                               "filters": [{ "col": "region", "op": "IN", "val": ["EMEA"] }] } } } } },
+                               "mapping": { "x": "country", "series": ["pipeline"], "series_labels": { "pipeline": "Pipeline" } },
+                               "generatedAgainst": { "snapshot_hash": "a81f03c6e9d7", "snapshotAt": "2026-11-03T10:15:12Z" } } },
                  "provenance": { "runId": "run_01JC8Q4M6X2N7Y", "createdAt": "2026-11-03T10:15:03Z", "prompt": "Create a QBR page for EMEA" } } },
-  "data": { "provider": "superset", "allowedChartIds": [412, 413] },
+  "data": { "provider": "superset", "allowedChartIds": [412, 413], "params": {} },
   "options": { "reviewOutline": false }
 }
 ```
+
+The bindings in an edit base are **definitions only** (`kind`, `source`, `mapping`, `format`, `params`, `refresh`, `generatedAgainst`): hosts persist artifacts through `stripRuntime`, and the engine ignores any `snapshot`, `snapshotAt`, `status` or `error` it receives, because it re-resolves every binding the edited artifact references as the caller (Step 5). A `mapping` is never `{}` except for kind `embed`; mappings are derived by the engine from the catalog, never by the model ([Live Superset data](69-live-superset-data.md)).
 
 | Intent | `context.selection` | `context.document` | Version line starts at | Default apply mode |
 |---|---|---|---|---|
@@ -95,7 +130,7 @@ An `edit` sends the artifact it changes in `context.document`: the artifact appl
 | `transform` | required: `Block[]` to rewrite | optional compact digest | empty, as for `generate` | `replace` (the selection) |
 | `edit` | optional: blocks to focus on | required: the base `Artifact` | the base, as version 0 (Step 5) | `patch` |
 
-Engine run states are `queued`, `planning`, `awaiting_input`, `generating`, `resolving_data`, `completed`, `failed`, `cancelled` and `expired`; the browser machine in [React SDK and UI kit](64-react-sdk-and-ui-kit.md) adds `composing`, `submitting`, `ready`, `applying` and `applied`.
+Engine run states are `queued`, `planning`, `awaiting_input`, `generating`, `resolving_data`, `completed`, `failed`, `cancelled` and `expired`. Data resolution starts as soon as the final plan names the bindings, so it overlaps `generating`: `RunSummary.state` stays `generating` while content is still being written and becomes `resolving_data` only when nothing but bindings remains in flight. The browser machine in [React SDK and UI kit](64-react-sdk-and-ui-kit.md) adds `composing`, `submitting`, `ready`, `applying` and `applied`.
 
 The two-step form (`201`, then `GET`) gives the browser a run id before the stream connects, so a reload or a cancel button can address the run; the one-shot form is for server-to-server callers and tests.
 
@@ -119,7 +154,7 @@ Envelope fields: `v` (protocol major, `1`), `id` (gapless from 1), `runId`, `ts`
 | `run.awaiting_input` | `{kind: "outline_review", inputId, expiresAt}` | only when `options.reviewOutline` |
 | `artifact.patch` | `{baseVersion, version, ops: JsonPatchOp[]}` | primary content channel |
 | `text.delta` | `{blockId, path, delta, format, baseVersion}` | optional, inside one block |
-| `binding.resolved` | `{bindingId, snapshot, snapshotAt, status}` | per data binding |
+| `binding.resolved` | `BindingUpdate`: `{bindingId, status, snapshot?, snapshotAt?, error?, changed?, reason?}` (Step 16.4) | per data binding, from the final plan on, in section order |
 | `run.warning` | `{code, message, blockId?}` | non-fatal problems |
 | `run.completed` | `{artifactVersion, usage}` | terminal, success |
 | `run.failed` | `{code, message, retryable, retryAfterMs?, details?, completedSections?, totalSections?}` | terminal, failure or cancel |
@@ -140,8 +175,13 @@ Examples of each payload (envelope fields other than `type` omitted):
 
 {"type":"text.delta","data":{"blockId":"blk_q7x2m40100","path":"/text/0/text","delta":"Revenue grew in every ","format":"text","baseVersion":4}}
 
-{"type":"binding.resolved","data":{"bindingId":"b_c412","status":"ok","snapshotAt":"2026-11-03T10:15:11Z",
-  "snapshot":{"value":1840000,"previous":1610000}}}
+{"type":"binding.resolved","data":{"bindingId":"b_c412","status":"ok","snapshotAt":"2026-11-03T10:15:11Z","changed":false,
+  "snapshot":{"value":1840000,"previous":1610000,"previous_label":"Sep 2026",
+    "meta":{"rowcount":24,"truncated":false,"is_cached":false,"query_ts":"2026-11-03T10:15:10Z",
+            "query_context_source":"saved_query_context","resolved_by":"Xq3v9KfR2mPa7LwB",
+            "scope_hash":"e3b7c1f09a24","time_range":{"label":"Last year"},
+            "applied_filters":[{"column":"region"}],"rejected_filters":[],
+            "schema":{"x":"order_date","series":["revenue"]}}}}}
 
 {"type":"run.warning","data":{"code":"binding_dropped","message":"Chart 413 is not visible to you and was left out.","blockId":"blk_q7x2m40101"}}
 
@@ -151,6 +191,48 @@ Examples of each payload (envelope fields other than `type` omitted):
 ```
 
 `completedSections` and `totalSections` are the generalization of Smart mode's `completed_slides` and `total_slides` error metadata (`presentation.py:2258-2267`).
+
+### 3.1 Data inside a run: `binding.resolved` (protocol 1.1)
+
+`binding.resolved` carries exactly the `BindingUpdate` that the refresh protocol sends (Step 16), so one reducer in the browser serves runs and refreshes. Its `snapshot` has one normative shape per binding kind, in snake_case, the same JSON that Part VIII stores in `slide_data_bindings` ([Story 1](../delivery/42-story1-dynamic-data.md)):
+
+| Binding kind | `snapshot` | Example |
+|---|---|---|
+| `metric` | `MetricSnapshot {value, previous?, previous_label?, meta?}` | `{"value":1840000,"previous":1610000,"previous_label":"Sep 2026"}` |
+| `chart` | `ChartSnapshot {categories, series: [{name, key?, values}], meta?}` | `{"categories":["Germany","France"],"series":[{"name":"Pipeline","key":"pipeline","values":[412000,388000]}]}` |
+| `table` | `TableSnapshot {columns, labels?, coltypes?, rows, meta?}` with raw cell values | `{"columns":["country","revenue"],"labels":["Country","Revenue"],"coltypes":["string","number"],"rows":[["Germany",412000]]}` |
+| `embed` | none: a live Superset chart, never a snapshot | |
+
+`meta` is what lets a view be honest about the data: `query_ts` is the "data as of" stamp, `truncated` and `rowcount` say whether the row cap cut the result, `resolved_by` is the viewer key of whoever's row-level security view this is, `scope_hash` identifies the effective filters, `time_range` feeds the `period` token, and `applied_filters` / `rejected_filters` show which captured dashboard filters reached the query. Field-by-field definitions are in [Live Superset data](69-live-superset-data.md).
+
+| `status` | `snapshot` | `error` | Meaning |
+|---|---|---|---|
+| `ok` | present | absent | Fresh result for this viewer and scope. |
+| `stale` | absent | absent | A transient failure (`reason` holds the retryable code, for example `timeout`); the client keeps the snapshot it has and shows it as stale with Retry, or the unavailable panel with Retry when it has none. |
+| `error` | absent | `{code, message, retryable}` | No usable data; the view shows "Data unavailable" and, when `retryable`, a Retry action. |
+| `forbidden` | absent, always | `{code, message, retryable: false}` | The viewer may not read this data; nothing is shown, never another user's snapshot. |
+
+`pending` is the status a binding is stamped with before its first resolution; the engine never sends it.
+
+```json title="binding.resolved for the failure statuses"
+{"type":"binding.resolved","data":{"bindingId":"b_c414","status":"error",
+  "error":{"code":"no_query_context","message":"Open and save this chart in Superset once.","retryable":false}}}
+
+{"type":"binding.resolved","data":{"bindingId":"b_c415","status":"forbidden",
+  "error":{"code":"datasource_forbidden","message":"You do not have access to this data.","retryable":false}}}
+```
+
+How the engine produces these events during a run:
+
+1. **Start at the final plan.** As soon as `plan.proposed` with `final: true` names the bindings, the engine resolves them as the run's principal (the data token comes from a token exchange, Step 10) and appends `binding.resolved` in section order, so the first section's numbers arrive while later sections are still being written.
+2. **One code path with refresh.** Resolution goes through the same resolver as `POST /v1/data/resolve` (batches of 25 items per Story 8 call, at most 4 calls in flight, the effective scope of captured filters, parameters and pinned overrides), and the same `gck_data` mappers turn rows into snapshots.
+3. **Stamp what the text was written against.** Before `run.completed` the engine sends one `artifact.patch` that replaces each resolved binding under `/bindings/{id}` with `generatedAgainst: {snapshot_hash, snapshotAt}` set. A later refresh that returns `changed: true` against it lets a view say "Text was written against data as of ... Regenerate?".
+4. **Data errors never fail a run.** Each binding ends `ok`, `stale`, `error` or `forbidden`. The run fails with `data_forbidden` only when the target requires data and every requested binding is `forbidden` (Step 7).
+
+Data-related `run.warning` codes include `data_source_unsupported` (a catalog chart that can only be embedded, with Story 8's reason), `scope_mismatch` (the prose names a filter value no binding in that section carries) and `cross_filter_not_applied` (the captured dashboard state had cross filters, which 1.1 does not propagate).
+
+!!! warning "Gotcha"
+    `binding.resolved` is the only place numbers travel. The model never writes a number into prose, and token segments keep `text: ""` in every `artifact.patch`, so a replayed or persisted artifact holds no values that could go stale or leak to another viewer. A host that renders a token from `artifact.patch` alone, without the binding overlay, shows a placeholder, which is correct.
 
 ## Step 4: Ordering and idempotency
 
@@ -162,7 +244,7 @@ Three counters keep the client consistent, each with one job.
 | Artifact `version` | per run, increments by exactly 1 per `artifact.patch` | Apply only when `baseVersion === store.version`. If `version <= store.version`, skip (already applied). Otherwise call `GET /v1/runs/{id}/artifact` and replace the store. |
 | `planVersion` | per run | The newest `plan.proposed` wins; `final: true` locks the outline. |
 
-`text.delta`, `binding.resolved` and `run.warning` never change the artifact version. A `text.delta` whose `baseVersion` is older than its block's last replace is discarded. Binding runtime state (`snapshot`, `snapshotAt`, `status`) lives in an overlay beside the artifact, because the browser's data provider (`@gck/data-superset`) may also resolve bindings and must not fork the engine's version line.
+`text.delta`, `binding.resolved` and `run.warning` never change the artifact version. A `text.delta` whose `baseVersion` is older than its block's last replace is discarded. Binding runtime state (`snapshot`, `snapshotAt`, `status`, `error`) lives in an overlay beside the artifact, because the browser's data provider (`@gck/data-superset`) also resolves bindings after the run (Step 16) and must not fork the engine's version line. For the same reason `GET /v1/runs/{id}/artifact` returns the overlay as `bindingState` next to the artifact, and a resync keeps it (`store.reset(artifact, version, { keepBindings: true })`); at `gck.applied` the run controller copies the definitions and the overlay into the host's `BindingStore`, whose refresh controller takes over ([React SDK and UI kit](64-react-sdk-and-ui-kit.md)). Several `binding.resolved` events for one binding are applied last-writer-wins by event `id`.
 
 On the request side, `POST /v1/runs` honors an `Idempotency-Key` header (the client generates a UUID per user submission), so a retried `POST` after a network timeout cannot start two paid runs. `POST /input` is keyed by the engine-issued `inputId`. `POST /cancel` is idempotent by definition.
 
@@ -193,9 +275,20 @@ An `edit` run has no skeleton to install: the stream starts from the base artifa
 {"type":"artifact.patch","data":{"baseVersion":0,"version":1,"ops":[{"op":"replace","path":"/sections/1/blocks/0","value":{"id":"blk_q7x2m40100","type":"paragraph",
   "text":[{"text":"Pipeline hit a record, led by Germany and France."}]}}]}}
 {"type":"artifact.patch","data":{"baseVersion":1,"version":2,"ops":[{"op":"add","path":"/sections/0/blocks/-","value":{"id":"blk_q7x2m40102","type":"metric","bindingId":"b_c412","label":"Revenue","compare":"previous_period"}}]}}
-{"type":"binding.resolved","data":{"bindingId":"b_c412","status":"ok","snapshotAt":"2026-11-03T10:31:40Z","snapshot":{"value":1840000,"previous":1610000}}}
-{"type":"run.completed","data":{"artifactVersion":2,"usage":{"inputTokens":3410,"outputTokens":420,"durationMs":5210,"model":"gpt-4.1"}}}
+{"type":"binding.resolved","data":{"bindingId":"b_c412","status":"ok","snapshotAt":"2026-11-03T10:31:40Z","changed":true,
+  "snapshot":{"value":1872000,"previous":1610000,"previous_label":"Sep 2026"}}}
+{"type":"binding.resolved","data":{"bindingId":"b_c413","status":"ok","snapshotAt":"2026-11-03T10:31:41Z","changed":false,
+  "snapshot":{"categories":["Germany","France","Nordics"],"series":[{"name":"Pipeline","key":"pipeline","values":[412000,388000,251000]}]}}}
+{"type":"artifact.patch","data":{"baseVersion":2,"version":3,"ops":[
+  {"op":"replace","path":"/bindings/b_c412","value":{"kind":"metric","source":{"type":"superset_chart","chart_id":412,"dashboard_id":37,"viz_type":"big_number",
+    "filter_context":{"dashboard_id":37,"mode":"captured","permalink_key":"kq2Lm9PzR4x",
+      "data_mask":{"NATIVE_FILTER-r1":{"extraFormData":{"filters":[{"col":"region","op":"IN","val":["EMEA"]}]}}}}},
+    "mapping":{"metric":"revenue","x":"order_date","compare":"previous_period"},"format":{"number":"SMART_NUMBER","delta":"+.1%"},
+    "generatedAgainst":{"snapshot_hash":"0d4be27f81a3","snapshotAt":"2026-11-03T10:31:40Z"}}}]}}
+{"type":"run.completed","data":{"artifactVersion":3,"usage":{"inputTokens":3410,"outputTokens":420,"durationMs":5210,"model":"gpt-4.1"}}}
 ```
+
+An edit run re-resolves **every** binding the resulting artifact references, not only the one behind the new metric block, so an edited page never mixes fresh numbers with numbers from the original run. `changed` compares the new snapshot hash with the binding's `generatedAgainst`: `b_c412` moved since the page was generated, so the engine re-stamps it (the `artifact.patch` at version 3) because the rewritten text now describes the new value; `b_c413` did not move and keeps its stamp.
 
 A client therefore resets its store to the base at version 0 before it reads the stream (`createRunController` and `runToCompletion` both do). `GET /v1/runs/{runId}/artifact` on an edit run returns the base with the patches applied, and after log compaction the resync snapshot is a root replace at `baseVersion: 0` like in any other run, which replaces the store but keeps every block id.
 
@@ -233,7 +326,7 @@ When `options.reviewOutline` is true, the engine pauses after planning for the u
 
 `decision` is `approve` (no `outline`), `edit` (full replacement list: reorder, delete, rename and add are all expressed by the list) or `cancel`. New sections have `sectionId: null`; the engine assigns ids.
 
-4. The engine validates: at most `limits.maxSections` from the manifest, titles of at most 200 characters, and `bindings` a subset of what the planner offered (no chart ids outside `allowedChartIds`). Failures return `422` and leave the run waiting.
+4. The engine validates: at most `limits.maxSections` from the manifest, titles of at most 200 characters, and `bindings` a subset of what the planner offered (no chart ids outside `allowedChartIds`, no dataset ids outside `allowedDatasetIds`). Failures return `422` and leave the run waiting.
 5. On success the engine emits `plan.proposed` with `planVersion: 2, final: true` (normalized, all ids assigned), then `artifact.patch` events.
 6. If `expiresAt` passes, the run ends with `run.failed {code: "input_expired", retryable: false}`.
 
@@ -281,13 +374,24 @@ Every error, whether returned as an HTTP response body or as `run.failed`, has t
 | `context_too_large` | 413 / stream | false | Ask the user to narrow context. |
 | `model_output_invalid` | stream | true | The model failed schema validation after the engine's own retries. |
 | `model_unavailable` | 502 / 503 / stream | true | Provider down or timed out. |
-| `data_forbidden` | stream | false | A required binding is not visible to the user (row-level security). |
-| `data_unavailable` | stream | true | The data provider failed. |
+| `data_forbidden` | stream | false | The target requires data and **every** requested binding is `forbidden` for the user. One forbidden binding among others is a `binding.resolved` with `status: "forbidden"`, not a run error. |
+| `data_unavailable` | stream | true | Protocol 1.0 only. A 1.1 engine never sends it: a failing data provider becomes per-binding `stale` or `error`. |
+| `data_token_expired` | 401 / stream | true | The engine could not exchange the caller's engine token for a data token (protocol 1.1). Call the token provider with `forceRefresh: true` and retry once. |
 | `input_expired` | stream | false | Outline review timed out. |
 | `cancelled` | stream | false | Cancel endpoint or engine shutdown. |
 | `internal` | 500 / stream | true | Anything else. |
 
 For unclassified exceptions, `retryable` follows Presenton's Smart rule: true for 408, 429 and 500 or more (`presentation.py:2257-2264`). A retryable `run.failed` means "a new run with the same request may succeed"; the run itself is terminal. Transport problems (dropped connection, heartbeat timeout, proxy `502` on `GET /events`) never produce `run.failed`; the client reconnects (Step 9).
+
+Data problems are a second, smaller error model that lives **per binding**, in `binding.resolved.data.error` (`{code, message, retryable}`) or, for transient failures, in `binding.resolved.data.reason`, in runs and refreshes alike. The codes, grouped by the status they produce:
+
+| Binding `error.code` | `status` | Retryable | Client action |
+|---|---|---|---|
+| `forbidden`, `chart_forbidden`, `datasource_forbidden` | `forbidden` | no | Show nothing, never Retry. |
+| `chart_not_found`, `datasource_not_found`, `no_query_context`, `unsupported_viz`, `unsupported_viz_type`, `multi_query`, `source_unsupported`, `mapping_invalid`, `mapping_changed`, `invalid_override`, `param_invalid`, `no_data_identity`, `element_missing` | `error` | no | Explain, offer "Open in Superset" where it helps. |
+| `query_failed`, `cache_load_failed`, `invalid_query`, `analytics_error`, `missing_result`, `internal_error`, `timeout`, `analytics_unavailable` | `stale`, with the code in `reason` and no `error` | yes | Keep the snapshot the client holds, badge it, offer Retry (with backoff). |
+
+The user-facing text for each code and the 1.2 SQL codes are in [Live Superset data](69-live-superset-data.md). Two whole-request conditions of the refresh protocol, `rate_limited` and `data_token_expired`, arrive as `refresh.failed` or as an HTTP error instead (Step 16).
 
 !!! warning "Gotcha"
     Presenton's outline hook retries on a server `error` frame (`useOutlineStreaming.ts:210-229`), which re-runs the whole LLM pipeline up to three times without asking. GCK separates the two concerns: the client reconnects transparently, but it never restarts a failed run on its own. Restarting is a user action ("Try again") because it costs tokens.
@@ -320,7 +424,10 @@ The SSE standard says that a non-empty last event id is sent in a `Last-Event-ID
 1. The client remembers `lastEventId`, the highest event id it has processed (not just received).
 2. On reconnect it sends `GET /v1/runs/{id}/events` with `Last-Event-ID: 41`.
 3. The engine reads events with `seq > 41` from the event log, sends them, then tails new events live.
-4. If the log was compacted past 41, the engine first sends a synthetic root-`replace` `artifact.patch` with `baseVersion: 0`, which the client treats as "reset the store" (`isSnapshotPatch`, Step 11).
+4. If the log was compacted past 41, the engine first sends a synthetic root-`replace` `artifact.patch` with `baseVersion: 0`, which the client treats as "reset the store" (`isSnapshotPatch`, Step 11). Compaction keeps the latest `binding.resolved` row per binding, and the engine replays those rows right after the synthetic patch, so a resumed client gets its data overlay back and not only the text.
+
+!!! warning "Gotcha"
+    The event log holds the run principal's data, so it is readable only by that principal (`load_run_for_principal_or_404`, Step 13), and 24 hours after the run completes the engine rewrites every `binding.resolved` payload to `{bindingId, status, snapshot_hash}`. A replay after that window restores the text and the binding statuses but no numbers; the client's refresh controller fetches fresh ones as the viewer. Never serve a run's log to a different user to "share" a result: share the artifact, whose bindings each viewer resolves as themselves.
 
 A page reload can resume too: with a `resumeKey`, `@gck/react` keeps the active run's `{runId}` in `sessionStorage` and, after the reload, replays that run's log from the first event into a fresh store ([React SDK and UI kit](64-react-sdk-and-ui-kit.md)).
 
@@ -377,6 +484,8 @@ type TokenProvider = (opts: { forceRefresh: boolean }) => Promise<string | null>
 - On `401 token_expired` the client calls the provider once with `forceRefresh: true` and retries once.
 - Requests use `credentials: "omit"`: no cookie, so no third-party-cookie blocking and no CSRF surface.
 
+The engine token is not a data token, and the browser never holds one. When a run or a refresh needs Superset data, the engine exchanges the caller's engine token for a short-lived data token at a new Story 8 endpoint, `POST /api/v1/ai_slides/token-exchange` (RFC 8693 shape, https://www.rfc-editor.org/rfc/rfc8693: `grant_type=urn:ietf:params:oauth:grant-type:token-exchange`, the engine token as `subject_token`, `scope=ai_slides:refresh`, client authentication by `private_key_jwt`). Superset verifies the subject token, resolves the user and returns a 15-minute Bearer token with audience `analytics-data`. The engine caches it per `(sub, scope)` until 30 seconds before expiry and never logs it or writes it into an event. Every query then runs inside Superset as that user, under `override_user` (`apache/superset: superset/utils/core.py:1633`), and goes through Superset's chart data command (`apache/superset: superset/commands/chart/data/get_data_command.py:36`), so the user's permissions and row-level security apply. If the exchange fails because the subject token expired, the engine answers `data_token_expired` and the client refreshes its engine token once. Hosts without a Superset session or a shared identity provider get no data token at all; their bindings resolve to `error` with `no_data_identity`. The identity bridges per host are in [Live Superset data](69-live-superset-data.md).
+
 When the engine is cross-origin, every GCK request is preflighted (an `Authorization` header and `Last-Event-ID` are not CORS-safelisted). The engine's CORS policy should be:
 
 | Header | Value |
@@ -395,10 +504,11 @@ Presenton's policy is a single origin from `NEXT_PUBLIC_URL`, or `*` as a develo
 
 ## Step 11: `@gck/protocol` event types
 
-The protocol package is types plus JSON Schemas with zero runtime dependencies. This file covers runs and events; `Artifact`, `DataBinding` and `TargetId` come from `src/artifact.ts` and `TargetManifest` from `src/target.ts`, both specified in [Artifact Spec and targets](62-artifact-spec-and-targets.md). The package index re-exports all three files (`export * from "./artifact"`, `"./target"`, `"./run"`), so `run.ts` does not re-export `Artifact` itself. `HostContext` in `target.ts` is an alias of `RunContext` below: one JSON object, the run request's `context`, under two names.
+The protocol package is types plus JSON Schemas with zero runtime dependencies. This file covers runs and events; `Artifact`, `DataBinding` and `TargetId` come from `src/artifact.ts` and `TargetManifest` from `src/target.ts`, both specified in [Artifact Spec and targets](62-artifact-spec-and-targets.md); the protocol 1.1 data types (`BindingUpdate`, `HostDataScope`, `ParamValue` and the refresh events) come from `src/data.ts` (Step 16.4 and [Live Superset data](69-live-superset-data.md)). The package index re-exports every file (`export * from "./artifact"`, `"./target"`, `"./data"`, `"./run"`), so `run.ts` does not re-export `Artifact` itself. Protocol 1.1 is a minor, additive bump: `PROTOCOL_VERSION` (the major in `v` and in the `GCK-Protocol` header) stays `1`, and a 1.0 client that meets the new optional fields or event types ignores them. `HostContext` in `target.ts` is an alias of `RunContext` below: one JSON object, the run request's `context`, under two names.
 
 ```ts title="gck/packages/protocol/src/run.ts (new)"
-import type { Artifact, DataBinding, TargetId } from "./artifact";
+import type { Artifact, TargetId } from "./artifact";
+import type { BindingUpdate, HostDataScope, ParamValue } from "./data";   // protocol 1.1 (Step 16.4)
 import type { TargetManifest } from "./target";
 
 export const PROTOCOL_VERSION = 1 as const;
@@ -429,7 +539,14 @@ export interface RunRequest {
   prompt: string;
   target: { id: TargetId; manifestVersion: string; manifest?: TargetManifest };
   context: RunContext;
-  data?: { provider: string; allowedChartIds?: number[] };
+  data?: {
+    provider: string;
+    allowedChartIds?: number[];
+    allowedDatasetIds?: number[];       // 1.1: superset_dataset and superset_metric sources
+    scope?: HostDataScope;              // 1.1: host filter state captured at submit
+    params?: Record<string, ParamValue>;  // 1.1: viewer's values for an edit base's parameters
+    rowLimit?: number;                  // 1.1: default row_limit for stamped bindings, <= 500
+  };
   options?: { reviewOutline?: boolean; maxSections?: number; tone?: string };
 }
 
@@ -467,7 +584,8 @@ export type GckErrorCode =
   | "invalid_request" | "unauthorized" | "token_expired" | "forbidden" | "not_found"
   | "conflict" | "input_already_resolved" | "rate_limited" | "quota_exceeded"
   | "context_too_large" | "model_output_invalid" | "model_unavailable"
-  | "data_forbidden" | "data_unavailable" | "input_expired" | "cancelled" | "internal";
+  | "data_forbidden" | "data_unavailable" | "input_expired" | "cancelled" | "internal"
+  | "data_token_expired";              // 1.1; "data_unavailable" is sent by 1.0 engines only
 
 export interface GckErrorBody {
   code: GckErrorCode;
@@ -495,8 +613,7 @@ export type GckEventBody =
   | { type: "artifact.patch"; data: { baseVersion: number; version: number; ops: JsonPatchOp[] } }
   | { type: "text.delta"; data: { blockId: string; path: JsonPointer; delta: string;
                                   format: "text" | "json"; baseVersion: number } }
-  | { type: "binding.resolved"; data: { bindingId: string; snapshot: unknown;
-                                        snapshotAt: string; status: NonNullable<DataBinding["status"]> } }
+  | { type: "binding.resolved"; data: BindingUpdate }     // 1.1: same payload as the refresh protocol
   | { type: "run.warning"; data: { code: string; message: string; blockId?: string } }
   | { type: "run.completed"; data: { artifactVersion: number; usage: Usage } }
   | { type: "run.failed"; data: GckErrorBody };
@@ -681,7 +798,7 @@ export function isAbortError(err: unknown): boolean {
 ```ts title="gck/packages/client/src/client.ts (new)"
 import {
   PROTOCOL_VERSION, TERMINAL_EVENTS, isGckEvent,
-  type Artifact, type GckEvent, type OutlineDecision, type RunCreated,
+  type Artifact, type BindingUpdate, type GckEvent, type OutlineDecision, type RunCreated,
   type RunRequest, type RunSummary,
 } from "@gck/protocol";
 import { createSseParser, type SseMessage } from "./sse";
@@ -730,7 +847,8 @@ export class GckClient {
     return this.json("GET", `/v1/runs/${encodeURIComponent(runId)}`, undefined, { signal, idempotent: true });
   }
 
-  getArtifact(runId: string, signal?: AbortSignal): Promise<{ version: number; lastEventId: number; artifact: Artifact }> {
+  getArtifact(runId: string, signal?: AbortSignal): Promise<{ version: number; lastEventId: number; artifact: Artifact;
+      bindingState: Record<string, BindingUpdate> }> {                   // bindingState: protocol 1.1
     return this.json("GET", `/v1/runs/${encodeURIComponent(runId)}/artifact`, undefined, { signal, idempotent: true });
   }
 
@@ -1070,16 +1188,20 @@ sequenceDiagram
     C->>E: GET events with Bearer token
     T->>L: run.started then plan.proposed final
     L-->>C: events 1 and 2
+    Note over T: resolution starts at the final plan, as the user, via token exchange
     loop each section
         T->>L: artifact.patch add section and blocks
         T->>L: text.delta coalesced every 50 ms
+        T->>L: binding.resolved for the bindings of this section
         T->>L: artifact.patch replace finished block
-        L-->>C: patches and deltas
+        L-->>C: patches, deltas and binding updates
     end
-    T->>L: binding.resolved per binding
+    T->>L: artifact.patch generatedAgainst on resolved bindings
     T->>L: run.completed with artifactVersion
     L-->>C: run.completed
     C-->>H: iterator returns
+    H->>H: apply, then hand definitions and bindingState to the host BindingStore
+    Note over H: the refresh controller takes over, Step 16
 ```
 
 ## Step 15: Mapping to AG-UI
@@ -1095,7 +1217,7 @@ AG-UI (https://docs.ag-ui.com/concepts/events) is an open event protocol between
 | first `artifact.patch` (root replace) | `STATE_SNAPSHOT` | `snapshot` = `{artifact}`. |
 | `artifact.patch` | `STATE_DELTA` | `delta` = ops with paths prefixed by `/artifact`. Version fields go in `metadata`. |
 | `text.delta` | `CUSTOM` `{name: "gck.text.delta"}` | Not `TEXT_MESSAGE_CONTENT`: generic AG-UI chat clients would print the page as a chat reply. |
-| `binding.resolved` | `STATE_DELTA` on `/bindingState/{id}` | |
+| `binding.resolved` | `STATE_DELTA` on `/bindingState/{id}` | Refresh streams (Step 16) are not runs and are not mapped. |
 | `run.warning` | `CUSTOM` `{name: "gck.warning"}` | |
 | `run.completed` | `RUN_FINISHED` | `result` = `{artifactVersion, usage}`. |
 | `run.failed` | `RUN_ERROR` | `message`, `code`; `retryable` has no AG-UI field and goes in `metadata`. |
@@ -1106,11 +1228,278 @@ AG-UI (https://docs.ag-ui.com/concepts/events) is an open event protocol between
 !!! warning "Gotcha"
     The `outcome` field on `RUN_FINISHED` comes from AG-UI's interrupt draft; the JS SDK's `RunFinishedEvent` documents only `threadId`, `runId`, `result` and `usage`. An AG-UI client that does not implement the draft will treat `run.awaiting_input` as "the run finished" and never show the review form. Check the AG-UI client version you ship against before relying on interrupts, and keep the native GCK client as the path for outline review.
 
+## Step 16: The refresh protocol (protocol 1.1)
+
+A run ends, but its numbers must not. Every target (slides, `tiptap-doc`, `superset-dashboard`, `text`) shows Superset data fetched **as the person viewing it**, and re-fetches it after generation: when the page opens, when the viewer presses Refresh, on an interval, when the tab becomes visible again after the data went stale, when an artifact parameter or a host filter changes, before an export, and on a schedule for headless outputs. The refresh protocol is the wire contract for all of that. It is new code, it reuses this chapter's auth, SSE framing, heartbeats, CORS and error body, and it carries the same `binding.resolved` payload as a run, so one reducer in the browser serves both. Which binding refreshes when (refresh policies and per-target defaults), the Superset side of every query and the viz coverage are in [Live Superset data](69-live-superset-data.md); this step specifies the endpoints, events and types.
+
+The superset-dashboard target is the one exception on the wire: its data blocks are native Superset charts, which query Superset on open, on native filter change and on the dashboard's own refresh (`refresh_frequency`, read at `apache/superset: superset-frontend/src/dashboard/actions/hydrate.ts:411`), so nothing in the kit calls this protocol for them.
+
+### 16.1 Endpoints and triggers
+
+| Method and path | Request | Success response | Called by |
+|---|---|---|---|
+| `GET /v1/data/catalog?dashboardId=&q=&datasetIds=&cursor=` | headers `Authorization` | `200 DataCatalog`: the charts and datasets the caller can read (Story 8 catalog plus dataset metadata), each with `refreshable` and a `reason`, plus the caller's `viewerKey` | the run controller before `POST /v1/runs` (it fills `allowedChartIds` and `allowedDatasetIds`) |
+| `POST /v1/data/resolve` | `ResolveRequest` (16.4); `Accept: text/event-stream` or `application/json` | SSE stream of refresh events (16.2), or `200 {refreshId, results, summary}` | the browser's refresh controller through `@gck/data-superset`; server callers and tests use the JSON form |
+| `POST /v1/render` | `RenderRequest`: `{artifact, target: "text", profile, params?, scope?}` | `200 {output, dataAsOf, warnings}` | headless callers only: schedules, alerts, reports (16.5) |
+
+All three take the engine token from Step 10 and never a data token: the engine exchanges the caller's engine token for a short-lived data token at Story 8's token-exchange endpoint (Step 10), so every row is read inside Superset as the caller, under that user's permissions and row-level security. `ResolveRequest.bindings` holds **definitions only**: the engine ignores any `snapshot`, `snapshotAt`, `status` or `error` sent with them, so a client cannot inject numbers and a persisted artifact never needs to carry any.
+
+Every request names its `trigger`. The engine uses it for `force`, telemetry and the throttles in 16.6; the refresh controller in [React SDK and UI kit](64-react-sdk-and-ui-kit.md) picks the bindings.
+
+| `trigger` | Sent when | Bindings in the request | `force` |
+|---|---|---|---|
+| `on_open` | the controller starts on a saved page, deck or preview | every binding the view uses, `priority` = the ones in the viewport | `false` |
+| `manual` | the viewer presses Refresh, or Retry on one binding | all, or the retried id | `true`, throttled (16.6) |
+| `interval` | the controller clock fires (`intervalSec` of at least 60, plus or minus 10 percent, paused while the tab is hidden) | bindings whose policy has `interval` | `false` |
+| `on_visible` | the tab becomes visible again | bindings older than `staleAfterSec` (default 3600) | `false` |
+| `on_filter_change` | an artifact parameter or the host's filter state changed (16.3) | the dependents of that parameter, or the `follow_host` bindings of that dashboard | `false` |
+| `before_export` | the host exports a file (PPTX, PDF, HTML, email) | the bindings the export renders | `false` |
+| `on_schedule` | a headless caller re-renders for a scheduled send (16.5) | every binding of the artifact | `false` |
+| `run` | the engine resolves bindings inside a run (Step 3.1); clients never send it | the final plan's bindings | `false` |
+
+`force: true` maps to the `force` field of Superset's chart data query context ("Should the queries be forced to load from the source", `apache/superset: superset/charts/schemas.py:1687`). Every other trigger lets Superset serve a cached result when a data cache is configured (`DATA_CACHE_CONFIG`, a `NullCache` by default, `apache/superset: superset/config.py:1532`); that cache's key includes the user's row-level security clauses through `get_rls_cache_key` (`apache/superset: superset/security/manager.py:6304`), so a cached row set is never shared between viewers with different access.
+
+### 16.2 The refresh stream
+
+A refresh stream uses the run stream's frame format with one change in the envelope: `refreshId` replaces `runId`. `id` counts from 1 within the refresh, the engine writes the `: hb` heartbeat comment every 15 seconds of silence (a Story 8 batch can take up to its 30-second timeout), and the response carries the same `Cache-Control: no-cache, no-transform` and `X-Accel-Buffering: no` headers. There is **no resume**: refresh events are not written to the event log, `Last-Event-ID` is ignored, and a dropped refresh stream is simply re-requested, because a refresh is cheap to restart and the engine's 60-second per-viewer cache answers the repeat.
+
+```text title="One refresh frame on the wire"
+id: 1
+event: refresh.started
+data: {"v":1,"id":1,"refreshId":"ref_3f9c1d7a0b2e4c58a6d1e0f7b9c2a4d6","ts":"2026-11-03T11:02:00.118Z","type":"refresh.started","data":{"refreshId":"ref_3f9c1d7a0b2e4c58a6d1e0f7b9c2a4d6","total":2,"viewerKey":"Xq3v9KfR2mPa7LwB","trigger":"on_open"}}
+
+```
+
+| `type` | `data` | When |
+|---|---|---|
+| `refresh.started` | `{refreshId, total, viewerKey, trigger}` | first event; `viewerKey` is the viewer's opaque key, compared with `meta.resolved_by` by the redact policy |
+| `binding.loading` | `{bindingId}` | before the engine sends a binding's item to Superset (not for engine cache hits) |
+| `binding.resolved` | `BindingUpdate` `{bindingId, status, snapshot?, snapshotAt?, error?, changed?, reason?}` | once per binding, `priority` ids first, then artifact order |
+| `refresh.completed` | `{ok, stale, errors, forbidden, durationMs}` | terminal, the request finished (whatever each binding's status) |
+| `refresh.failed` | `GckErrorBody` (Step 7) | terminal, the whole request failed: `rate_limited`, `data_token_expired`, `unauthorized` |
+
+A full `on_open` refresh of the edit example's two bindings, one of which Superset answered too slowly (payloads only):
+
+```json title="POST /v1/data/resolve, trigger on_open (event payloads)"
+{"type":"refresh.started","data":{"refreshId":"ref_3f9c1d7a0b2e4c58a6d1e0f7b9c2a4d6","total":2,"viewerKey":"Xq3v9KfR2mPa7LwB","trigger":"on_open"}}
+{"type":"binding.loading","data":{"bindingId":"b_c412"}}
+{"type":"binding.loading","data":{"bindingId":"b_c413"}}
+{"type":"binding.resolved","data":{"bindingId":"b_c412","status":"ok","snapshotAt":"2026-11-04T08:00:03Z","changed":true,
+  "snapshot":{"value":1903000,"previous":1610000,"previous_label":"Sep 2026",
+    "meta":{"rowcount":24,"truncated":false,"is_cached":true,"query_ts":"2026-11-04T08:00:03Z",
+            "query_context_source":"saved_query_context","resolved_by":"Xq3v9KfR2mPa7LwB","scope_hash":"e3b7c1f09a24",
+            "time_range":{"label":"Last year"},"applied_filters":[{"column":"region"}],"rejected_filters":[],
+            "schema":{"x":"order_date","series":["revenue"]}}}}}
+{"type":"binding.resolved","data":{"bindingId":"b_c413","status":"stale","reason":"timeout"}}
+{"type":"refresh.completed","data":{"ok":1,"stale":1,"errors":0,"forbidden":0,"durationMs":30412}}
+```
+
+`b_c412` came back `changed: true` against its `generatedAgainst` stamp, so a view can offer "Text was written against data as of ... Regenerate?", which starts an `edit` run (Step 5). `b_c413` is `stale`: Story 8 timed out, so the update carries no `snapshot` and the client keeps the snapshot it already holds, badged as stale with a Retry action; the next trigger (Retry, interval or tab return) resolves it again. The JSON form of the same request returns the updates keyed by binding id:
+
+```json title="POST /v1/data/resolve with Accept: application/json (response, snapshot elided)"
+{ "refreshId": "ref_3f9c1d7a0b2e4c58a6d1e0f7b9c2a4d6",
+  "results": { "b_c412": { "bindingId": "b_c412", "status": "ok", "snapshotAt": "2026-11-04T08:00:03Z", "changed": true, "snapshot": {} },
+               "b_c413": { "bindingId": "b_c413", "status": "stale", "reason": "timeout" } },
+  "summary": { "ok": 1, "stale": 1, "errors": 0, "forbidden": 0, "durationMs": 30412 } }
+```
+
+!!! warning "Gotcha"
+    `isGckEvent` (Step 11) requires a `runId`, so it rejects every refresh frame. That is deliberate: a refresh event fed into a run's artifact store by mistake would be dropped, not applied against the run's version line. Refresh events go to the `BindingStore`, whose `apply` accepts both a refresh event and a run's `binding.resolved`.
+
+### 16.3 Parameter and filter changes
+
+Artifact parameters (`Artifact.parameters`, for example `p_region`) are inputs the viewer can change; their current values live in view state (host state or a URL parameter such as `?gck_p_region=APAC`), never in the artifact. A binding depends on a parameter through `params: [{param, as, column?, op?}]`. When a value changes, the refresh controller waits 400 ms for more changes, aborts any in-flight request for the dependent bindings, and sends one request with **only those bindings**, the parameter definitions and the viewer's current values. Tokens and charts over other bindings do not move.
+
+```mermaid
+sequenceDiagram
+    participant U as Viewer
+    participant B as GckParameterBar
+    participant C as RefreshController
+    participant E as GCK Engine
+    participant S as Story 8 refresh
+    U->>B: choose APAC for p_region
+    B->>C: setParams with p_region APAC
+    C->>C: debounce 400 ms, pick bindings whose params name p_region
+    C->>C: abort the in-flight request for those bindings
+    C->>E: POST /v1/data/resolve, trigger on_filter_change, dependents only
+    E->>E: merge scope layers, p_region replaces the captured region filter
+    E->>E: per-viewer cache lookup on the new scope
+    E->>S: items with the merged scope, as the viewer
+    S-->>E: rows under the viewer's row-level security
+    E-->>C: refresh.started, binding.loading, binding.resolved, refresh.completed
+    C->>U: dependent tokens and charts re-render, the others stay as they are
+```
+
+```json title="POST /v1/data/resolve after a parameter change (request body)"
+{ "trigger": "on_filter_change",
+  "bindings": {
+    "b_c413": { "kind": "chart",
+                "source": { "type": "superset_chart", "chart_id": 413, "dashboard_id": 37,
+                            "filter_context": { "dashboard_id": 37, "mode": "captured", "permalink_key": "kq2Lm9PzR4x",
+                              "data_mask": { "NATIVE_FILTER-r1": { "extraFormData": {
+                                "filters": [{ "col": "region", "op": "IN", "val": ["EMEA"] }] } } } } },
+                "mapping": { "x": "country", "series": ["pipeline"], "series_labels": { "pipeline": "Pipeline" } },
+                "params": [{ "param": "p_region", "as": "filter", "column": "region", "op": "IN" }],
+                "generatedAgainst": { "snapshot_hash": "a81f03c6e9d7", "snapshotAt": "2026-11-03T10:15:12Z" } } },
+  "parameters": {
+    "p_region": { "id": "p_region", "label": "Region", "type": "multi_select", "default": ["EMEA"], "column": "region",
+                  "options": { "from": { "dataset_id": 12, "column": "region" } } } },
+  "params": { "p_region": ["APAC"] },
+  "priority": ["b_c413"] }
+```
+
+The engine computes one effective scope per binding from four layers, lowest first: the saved query (L0), the dashboard filter context (L1, here the captured `region IN [EMEA]`), artifact parameters with the viewer's values (L2, here `region IN [APAC]`) and the binding's pinned `overrides` (L3). A higher layer **replaces** a lower layer's filter on the same column and replaces `time_range` and `time_grain_sqla`; it does not add to it, because Superset ANDs extra filters and `region IN [EMEA] AND region IN [APAC]` returns no rows. A parameter with `as: "time_range"` or `as: "time_grain"` replaces the time range or grain the same way. The result carries a new `meta.scope_hash`, so the engine's cache, the view and a later comparison can tell the two scopes apart, and `meta.applied_filters` / `meta.rejected_filters` show which filters reached the query. Every filter still passes Story 8's column and operator allowlist inside Superset. A value of the wrong shape for its parameter, or a filter on a column the dataset does not have, ends that binding with `status: "error"` and `param_invalid` or `invalid_override`; it never fails the request. Pinning and parameterizing the same column on one binding is rejected when the artifact is validated (`I12_PARAMS`), not at refresh time.
+
+Host filter changes use the same request with `scope` instead of new `params`. A binding whose `filter_context.mode` is `follow_host` follows the viewer's live dashboard filters: the host's `watchScope` (dashboard Redux `dataMask` inside Superset, or the Embedded SDK's `observeDataMask` with `dashboardUiConfig.emitDataMasks`, `apache/superset: superset-embedded-sdk/src/index.ts:44, 164-165, 613-614`) reports a new `HostDataScope`, the controller sends `{trigger: "on_filter_change", scope, bindings: <the follow_host bindings of that dashboardId>}`, and the engine replaces each binding's `data_mask` with the live one before resolving. Bindings in mode `captured` (the default) ignore `scope` and keep the filter selection the narrative was written against. Inside Superset, Story 8 resolves which native filters apply to which chart: on master with `get_dashboard_filter_context(..., active_data_mask=...)` and `apply_dashboard_filter_context` (`apache/superset: superset/charts/data/dashboard_filter_context.py:272, 365`), on 6.1 with its own resolver, because that module does not exist in 6.1.0 ([Live Superset data](69-live-superset-data.md)).
+
+Options for a `select` or `multi_select` parameter that come `from` a dataset column are loaded as the viewer through Superset's column-values route (`GET /api/v1/datasource/<type>/<id>/column/<column>/values/`, `apache/superset: superset/datasource/api.py:225-227`), so a viewer is never offered a value that row-level security hides from them.
+
+### 16.4 `@gck/protocol` refresh types
+
+The binding model (`BindingDefinition`, `BindingStatus`, `BindingError`, the snapshots, `ArtifactParameter`, `ParamValue`, `HostDataScope`, `RefreshPolicy`) lives in `src/data.ts` and is specified in [Artifact Spec and targets](62-artifact-spec-and-targets.md). The refresh protocol adds the request, the update and the events to the same file:
+
+```ts title="gck/packages/protocol/src/data.ts (new, protocol 1.1, refresh protocol excerpt)"
+import type { Artifact } from "./artifact";
+import type { GckErrorBody } from "./run";
+
+export type RefreshTrigger = "on_open" | "manual" | "interval" | "on_filter_change" | "on_visible"
+                           | "on_schedule" | "before_export" | "run";
+
+export interface ResolveRequest {
+  bindings: Record<string, BindingDefinition>;     // definitions only; any snapshot sent is ignored; max 100
+  parameters?: Record<string, ArtifactParameter>;  // the artifact's parameter definitions
+  params?: Record<string, ParamValue>;             // the viewer's current values
+  scope?: HostDataScope;                           // live host scope for follow_host bindings
+  force?: boolean;                                 // honored for trigger "manual" only
+  priority?: string[];                             // resolve these first (viewport, first section)
+  trigger: RefreshTrigger;
+  artifactId?: string;                             // telemetry only
+}
+
+/** The payload of binding.resolved, in runs (Step 3.1) and refreshes alike. */
+export interface BindingUpdate {
+  bindingId: string;
+  status: BindingStatus;                           // never "pending" on the wire
+  snapshot?: ChartSnapshot | MetricSnapshot | TableSnapshot;
+  snapshotAt?: string;
+  error?: BindingError;                            // error and forbidden
+  changed?: boolean;                               // snapshot hash differs from generatedAgainst or the last one seen
+  reason?: string;                                 // stale: the retryable code, e.g. "timeout"
+}
+
+export interface RefreshSummary { ok: number; stale: number; errors: number; forbidden: number; durationMs: number }
+
+export type DataEventBody =
+  | { type: "refresh.started"; data: { refreshId: string; total: number; viewerKey: string; trigger: RefreshTrigger } }
+  | { type: "binding.loading"; data: { bindingId: string } }
+  | { type: "binding.resolved"; data: BindingUpdate }
+  | { type: "refresh.completed"; data: RefreshSummary }
+  | { type: "refresh.failed"; data: GckErrorBody };
+
+export type DataEvent = DataEventBody & { v: 1; id: number; refreshId: string; ts: string };
+
+export interface ResolveResponse {                 // Accept: application/json
+  refreshId: string;
+  results: Record<string, BindingUpdate>;
+  summary: RefreshSummary;
+}
+
+export interface RenderRequest {                   // POST /v1/render, headless callers only
+  artifact: Artifact;                              // bindings as definitions; the engine resolves them as the caller
+  target: "text";
+  profile: "markdown" | "plain" | "html" | "email";
+  params?: Record<string, ParamValue>;
+  scope?: HostDataScope;
+}
+export interface RenderResponse {
+  output: string;                                  // ends with the "Data as of" footer
+  dataAsOf: { oldest: string | null; anyStale: boolean; anyMissing: boolean };
+  warnings: { code: string; message: string; bindingId?: string }[];
+}
+```
+
+`run.ts` imports `BindingUpdate`, `HostDataScope` and `ParamValue` from this file and `data.ts` imports `GckErrorBody` from `run.ts`; both are `import type`, which TypeScript erases, so the cycle costs nothing at runtime and the package keeps its zero-dependency rule.
+
+### 16.5 Headless resolution: `/v1/render` and `on_schedule`
+
+A schedule, an alert or a report has no browser and no viewer session, yet its text must not repeat the numbers of the day it was generated. Headless refresh needs no model: the stored definitions are re-resolved and re-rendered by the text target. The caller is the Superset-side scheduler, which resolves the schedule's executor the way Superset's own reports do (`ALERT_REPORTS_EXECUTORS`, default `[ExecutorType.EDITOR]` on master, `apache/superset: superset/config.py:2838`; executor lookup `get_executor`, `apache/superset: superset/tasks/utils.py:58`), mints an engine token for that user server side with the same signer as the host's engine-token endpoint ([Host integrations](65-host-integrations.md)), and calls `POST /v1/render` (or `POST /v1/data/resolve` with `trigger: "on_schedule"` when it renders itself). The data is therefore the executor's data, under the executor's row-level security, never a shared service account's.
+
+```json title="POST /v1/render (response)"
+{ "output": "## EMEA at a glance\n\nRevenue reached **1.9M** ...\n\nData as of 2026-11-04 08:00 UTC",
+  "dataAsOf": { "oldest": "2026-11-04T08:00:03Z", "anyStale": false, "anyMissing": false },
+  "warnings": [] }
+```
+
+```python title="gck_engine/data/render.py (new, sketch)"
+from fastapi import APIRouter, Request
+
+from gck_engine.data.router import resolve_events          # the generator behind /v1/data/resolve
+from gck_engine.spec.data import RenderRequest, ResolveRequest, with_binding_state
+from gck_engine.targets.text import data_as_of, render_text  # Python port of @gck/target-text
+
+RENDER_ROUTER = APIRouter(prefix="/v1")
+
+
+@RENDER_ROUTER.post("/render")
+async def render(body: RenderRequest, request: Request):
+    principal = request.state.auth_principal               # the schedule's executor, not a service account
+    req = ResolveRequest(bindings=body.artifact.bindings, parameters=body.artifact.parameters,
+                         params=body.params, scope=body.scope, trigger="on_schedule")
+    state, warnings = {}, []
+    async for type_, data in resolve_events(req, principal):   # raises on rate limit or token exchange failure
+        if type_ != "binding.resolved":
+            continue
+        state[data["bindingId"]] = data
+        if data["status"] != "ok":
+            warnings.append({"code": (data.get("error") or {}).get("code") or data.get("reason", "stale"),
+                             "message": f"{data['bindingId']} is {data['status']}", "bindingId": data["bindingId"]})
+    merged = with_binding_state(body.artifact, state)
+    return {"output": render_text(merged, body.profile, data_as_of="footer"),
+            "dataAsOf": data_as_of(merged), "warnings": warnings}
+```
+
+The rendered text always ends with "Data as of" the oldest `snapshotAt` it used, and says when some values could not be refreshed; `error` and `forbidden` tokens render `n/a`. Exported text is still a snapshot once it leaves the engine (an email cannot re-query), which is why the scheduler re-renders per send instead of storing the first rendering.
+
+### 16.6 Errors, limits and the Part VIII event mapping
+
+Request validation (`invalid_request`, `context_too_large` above 100 bindings) and engine-token auth are checked before the stream opens and answer with an HTTP error in the Step 7 body. Rate limiting and the token exchange happen inside the stream, so an SSE caller receives them as `refresh.failed` and a JSON caller as the HTTP status. Per-binding failures never fail the request: each binding ends `ok`, `stale`, `error` or `forbidden` with the codes of Step 7.
+
+| Limit | Value | On breach |
+|---|---|---|
+| bindings per request | 100 | `413 context_too_large` |
+| items per Story 8 call, calls in flight per request | 25, 4 | batching, not an error |
+| Story 8 call timeout | 30 s | the item ends `stale` with `reason: "timeout"` and no snapshot; the client keeps the one it holds |
+| engine result cache | 60 s, keyed by `(viewerKey, hash of source, effective scope and row limit)`, in-flight dedup on the same key | served as `binding.resolved` without `binding.loading` |
+| `force: true` | at most once per binding per viewer per 30 s | downgraded to a cached read, `meta.force_throttled: true` |
+| per-viewer rate | 60 resolve requests per minute, 600 binding resolutions per 10 minutes | `429 rate_limited` with `retryAfterMs` (as `refresh.failed` on a stream) |
+| data token | 15 minutes, cached per `(sub, scope)` until 30 s before expiry | `data_token_expired`: call `getToken({ forceRefresh: true })` once, retry |
+
+!!! warning "Gotcha: the engine cache key must start with the viewer"
+    Superset's data cache is safe across users because its key includes the user's row-level security clauses (`apache/superset: superset/security/manager.py:6304`). The engine's 60-second cache sits in front of Superset and knows nothing about row-level security, so its key starts with `viewerKey`. Without it, two viewers with different access would get each other's rows for up to a minute.
+
+Presenton decks keep Part VIII's deck-scoped refresh routes ([Story 1](../delivery/42-story1-dynamic-data.md)) as a second transport of `@gck/data-superset`. Its events translate one to one, so the same `BindingStore` reducer applies them:
+
+| Part VIII event | Refresh protocol event |
+|---|---|
+| `refresh_started {total, viewer_key}` (`viewer_key` is a Story 1 addition) | `refresh.started {total, viewerKey}` |
+| `binding_loading {binding_id, slide_id}` | `binding.loading {bindingId}` |
+| `binding_data {binding_id, element_patch, snapshot_at, changed, meta}` (plus `snapshot`, a Story 1 addition) | `binding.resolved {status: "ok", snapshot, snapshotAt, changed}` |
+| `binding_error {binding_id, code, message}` | `binding.resolved {status: "forbidden"` for `forbidden`, `chart_forbidden`, `datasource_forbidden`, else `"error"`, `error}` |
+| `binding_stale {binding_id, snapshot_at, reason}` | `binding.resolved {status: "stale", snapshotAt, reason}` |
+| `refresh_complete {ok, errors, stale, duration_ms}` | `refresh.completed` |
+
+### 16.7 The client side
+
+`GckClient` owns every engine route, so it gains two methods, `dataCatalog(query, signal)` and `resolveData(request, signal)`, built in [Live Superset data](69-live-superset-data.md). `resolveData` reuses `send` (token provider, `credentials: "omit"`, one retry on `token_expired`) and `createSseParser`, but not `stream()`'s reconnect loop: with no resume, a dropped refresh stream ends the iterator with an error, and the refresh controller retries the whole request (three attempts, 1, 2 and 4 seconds, retryable codes only, `retryAfterMs` for `rate_limited`). The browser never calls `POST /v1/render`, and never calls Superset's chart data API directly: mapping rows into snapshots happens once, server side, in the shared `gck_data` mappers.
+
+!!! warning "Gotcha"
+    A `scope` in the request moves only bindings whose `filter_context.mode` is `follow_host`; the default, `captured`, deliberately ignores it so the narrative and its numbers keep describing the same filter selection. A host that sends `scope` on every dashboard filter change and sees nothing move is looking at captured bindings. Either generate with `follow_host` (and accept that the prose can drift from the numbers, which `changed` then reports), or expose the dimension as an artifact parameter so the change is explicit.
+
 ## What you now know
 
-- A run is a background task with six endpoints; streams only observe it, so a dropped connection never restarts generation and only `POST /cancel` stops it.
-- Events have a gapless per-run `id` and patches carry `baseVersion`/`version`; the client drops duplicates, reconnects on gaps and resyncs from `GET /artifact` on mismatch.
-- Content arrives as RFC 6902 patches at block granularity starting with a root replace, with optional `text.delta` (plain text or `jsonrepair`-able JSON) inside one block.
+- A run is a background task with six endpoints; streams only observe it, so a dropped connection never restarts generation and only `POST /cancel` stops it. Three data endpoints outlive it: `/v1/data/resolve` re-resolves stored binding definitions as the viewer on open, Refresh, interval, tab return, parameter and filter changes and before export, `/v1/render` does the same headless for schedules, and `/v1/data/catalog` lists what the viewer may bind.
+- Numbers travel only in `binding.resolved`, whose `BindingUpdate` (`status`, `snapshot`, `snapshotAt`, `error`, `changed`, `reason`) is the same in runs and refreshes; data errors end one binding as `stale`, `error` or `forbidden` and never fail a refresh; a run fails with `data_forbidden` only when the target requires data and every binding is forbidden.
+- Events have a gapless per-run `id` and patches carry `baseVersion`/`version`; the client drops duplicates, reconnects on gaps and resyncs from `GET /artifact` on mismatch. Content arrives as RFC 6902 patches at block granularity starting with a root replace, with optional `text.delta` (plain text or `jsonrepair`-able JSON) inside one block.
 - Outline review is a pause inside the run (`plan.proposed`, `run.awaiting_input`, `POST /input`, `plan.proposed` with `final: true`), with server-side validation and expiry.
 - `@gck/client` replaces `EventSource` with a fetch-based reader that sends `Authorization` and `Last-Event-ID`, parses the full SSE grammar, watches heartbeats, backs off with jitter and refreshes short-lived tokens through a callback.
 - The engine persists events before emitting them, generalizing Smart mode's checkpoint-before-emit, and GCK's protocol maps onto AG-UI through an adapter rather than a dependency.

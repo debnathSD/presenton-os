@@ -158,6 +158,7 @@ nav:
       - ai-component/index.md
       - Architecture: ai-component/61-architecture.md
       - Artifact Spec and targets: ai-component/62-artifact-spec-and-targets.md
+      - Live Superset data: ai-component/69-live-superset-data.md
       - Run protocol and client: ai-component/63-run-protocol-and-client.md
       - React SDK and UI kit: ai-component/64-react-sdk-and-ui-kit.md
       - Host integrations: ai-component/65-host-integrations.md

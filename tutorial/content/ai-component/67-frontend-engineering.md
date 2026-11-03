@@ -384,6 +384,7 @@ The blueprint sets two numbers; the rest are proposals that follow from them and
 |---|---|---|---|
 | `@gck/core` incl. its `@gck/client` and `@gck/protocol` runtime | < 15 kB | blueprint | includes `jsonrepair` (the store's `format: "json"` drafts) and `d3-format` (`resolveToken`); if the budget is exceeded, `jsonrepair` is the first candidate for a dynamic `import()` on the first JSON `text.delta` |
 | `@gck/react` + `@gck/react/ui`, excluding renderers | < 40 kB | blueprint | React and react-dom excluded (peers) |
+| `@gck/data-superset` | < 6 kB | proposal | a thin `DataProvider` over `@gck/client`; the binding store and refresh controller it feeds count against the `@gck/core` budget ([Live Superset data](69-live-superset-data.md)) |
 | `@gck/target-text` | < 5 kB | proposal | pure serializers |
 | `@gck/target-tiptap` (eager part) | < 12 kB | proposal | Tiptap excluded (peer) |
 | `@gck/target-slides` (eager part: manifest + adapter) | < 8 kB | proposal | renderer and Chart.js are lazy |
@@ -400,7 +401,10 @@ size-limit measures Brotli by default; `"gzip": true` switches to gzip so the nu
 ```json title="gck/.size-limit.json (new)"
 [
   { "name": "core", "path": "packages/core/dist/index.js",
-    "import": "{ createRunController, createArtifactStore, createRegistry }", "gzip": true, "limit": "15 kB" },
+    "import": "{ createRunController, createArtifactStore, createRegistry, createBindingStore, createRefreshController }",
+    "gzip": true, "limit": "15 kB" },
+  { "name": "data-superset", "path": "packages/data-superset/dist/index.js",
+    "import": "{ createSupersetDataProvider }", "gzip": true, "limit": "6 kB", "ignore": ["@gck/client", "@gck/core"] },
   { "name": "react kit", "path": ["packages/react/dist/index.js", "packages/react/dist/ui/index.js"],
     "import": "*", "gzip": true, "limit": "40 kB",
     "ignore": ["react", "react-dom", "react/jsx-runtime"] },
@@ -1323,7 +1327,7 @@ export function replayRun(runId: string, events: RecordedEvent[], { speed = 1 } 
 }
 ```
 
-The same handlers serve Vitest (through `msw/node`), Storybook (through the browser worker) and local development of host integrations without an engine or an LLM key. Variants inject faults: cut the stream after event N (tests reconnect), duplicate an event id (tests idempotence), return `401 token_expired` once (tests the token provider's `forceRefresh` path), and emit `run.failed {retryable: true}` (tests Retry).
+The same handlers serve Vitest (through `msw/node`), Storybook (through the browser worker) and local development of host integrations without an engine or an LLM key. Variants inject faults: cut the stream after event N (tests reconnect), duplicate an event id (tests idempotence), return `401 token_expired` once (tests the token provider's `forceRefresh` path), and emit `run.failed {retryable: true}` (tests Retry). Refresh streams get the same treatment: a `replayRefresh` handler answers `POST */v1/data/resolve` from recorded refresh logs (`refresh.started`, `binding.loading`, `binding.resolved`, `refresh.completed`), with one fixture per binding status (`ok`, `stale` with `reason: "timeout"`, `error` with `mapping_changed`, `forbidden`), a `snapshot` whose `meta.resolved_by` belongs to another viewer (tests the redact skeleton), `refresh.failed` with `rate_limited` and `data_token_expired` (tests backoff and re-authentication), and a `changed: true` update (tests the narrative-outdated prompt). The data views (`GckChartView`, `GckMetricView`, `GckTableView`, `GckEmbedView`) get one story per status from those fixtures, and the contract tests of [Live Superset data](69-live-superset-data.md) (Step 16) run in the same suite.
 
 ### 10.4 Storybook stories for every state
 

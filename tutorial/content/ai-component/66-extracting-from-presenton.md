@@ -145,7 +145,7 @@ flowchart TD
 | `_normalize_presentation_structure` (`presentation.py:384-407`) | B: `normalize_layout_hints` | Deterministic fallback instead of `random.randrange` | `run.warning` when repaired |
 | `get_slide_content_from_type_and_outline` (`generate_slide_content.py:229-275`) | C: `generate_section_blocks` | Schema assembled from manifest and layout slots; output is IR blocks | `artifact.patch` |
 | `process_slide_and_fetch_assets` (`process_slides.py:173`) | D: `resolve_assets` | Walks IR image blocks, not `SlideModel.content` | `artifact.patch` |
-| Part VIII binding refresh | E: `resolve_bindings` | Same resolution, keyed by `Artifact.bindings` | `binding.resolved` |
+| Part VIII binding refresh (Story 1 `BindingRefreshService`, new code in Part VIII) | E: `resolve_bindings` | Same resolution and the same mappers, keyed by `Artifact.bindings` instead of `slide_data_bindings` rows; input is binding definitions with their scope (`filter_context`, pinned `overrides`, parameter values); identity is a data token from a token exchange (or Presenton's session data token when the engine is mounted in Presenton); 25 items per Story 8 call, 4 calls in parallel; a slow or failed call leaves the binding `pending` or `stale` instead of failing the run (Step 3.4) | `binding.resolved` with `status` `ok`, `stale`, `error` or `forbidden` |
 
 The order differs from Presenton in one deliberate way. Presenton chooses layouts in `/prepare`, after the user has reviewed outlines ([Standard generation pipeline](../presenton/08-standard-pipeline.md)). GCK runs Step B before the review so that `plan.proposed` can show each section's `layoutHint`, and after review it re-runs Step B only for sections the user changed.
 
@@ -199,6 +199,8 @@ def plan_system_prompt(target_id: str, prompt_hints: str) -> str:
 ```
 
 The user prompt keeps Presenton's "Generation Settings (authoritative)" block (`generate_presentation_outlines.py:200-215`) and adds two sections: `Host Context:` (a compact rendering of `context`, for example the dashboard title and native filters) and `Data Catalog:` (one line per allowed chart: binding id, chart name, viz type, metrics, dimensions). Reusing `DIRECT_CONTENT_VOICE_RULES` by import, rather than copying it, means an upstream improvement to the voice rules reaches GCK on the next rebase.
+
+The dashboard's native filters in `Host Context:` are there so the model can describe the scope in words, not so it can filter. The filter state itself travels as data: the host captures it as `RunRequest.data.scope` (the dashboard's `dataMask` plus a dashboard permalink), and the engine copies it onto every binding created in that context as `filter_context` with `mode: "captured"`, so the narrative and every later refresh use the same selection ([Live Superset data](69-live-superset-data.md)). When the prompt names a filter value ("for EMEA") that is a known value of a filterable column and no binding in that section carries it, the engine adds a `scope_mismatch` warning with the block id instead of trusting the prose.
 
 ### 3.2 Step B: from layout index to layout hint
 
@@ -276,6 +278,57 @@ Data Catalog entries bound to it. Generate the blocks for that {part} as JSON.
 ```
 
 `schema_text` is produced exactly as Presenton does it, with `json.dumps(..., ensure_ascii=False)` (`generate_slide_content.py:103-110`), and the call goes through the same `generate_structured_with_schema_retries` with `JSONSchemaResponse(name="response", strict=True)` as slide content does today (`generate_slide_content.py:248-272`). Presenton's speaker note field (`generate_slide_content.py:214-225`) is added only for the slides target, as a slides-only engine extension that is removed before the draft is stamped, because `gck.artifact/1` has no field for it (Step 4).
+
+### 3.4 Step E: resolve bindings by reusing Part VIII's data code
+
+Presenton itself has no data binding code: chart values are model output (Step 5). The binding and refresh code the engine needs is the code Part VIII adds to Presenton for AI Slides ([Story 1, dynamic data and refresh](../delivery/42-story1-dynamic-data.md)) and to the analytics backend ([Story 8, analytics refresh APIs and MCP](../delivery/49-story8-analytics-mcp.md)). That code is new in Part VIII too, but it exists before GCK starts, so Step E and the engine's refresh API reuse it rather than writing a second resolver. The one structural change is that Story 1's service is written around `slide_data_bindings` rows and a database session, while the engine resolves bindings that live in an Artifact, with no table behind them.
+
+| Part VIII piece (new code in Part VIII) | What it does there | Use in the engine | Change |
+|---|---|---|---|
+| `services/data_bindings/mappers.py`: `map_chart`, `map_metric`, `map_table`, `map_result`, `MappingError` (Story 1, Step 6.5) | Turns a Story 8 result (`colnames`, `coltypes`, `data`) into chart, metric or table element data | Moved into a shared Python module `gck_data`, imported by the engine and by Presenton BE, so mapping runs once, server side, for both | `map_metric` also emits `previous` and `previous_label`; `map_table` emits raw cells plus `labels` and `coltypes` (formatting moves to `write_value`); `meta` gains `scope_hash`, `schema`, `time_range`, `applied_filters`, `rejected_filters` |
+| `services/data_bindings/number_format.py`: `format_number_with_config` (vendored from Superset master, absent in 6.1) | Superset-compatible number formatting at write time | Same module inside `gck_data`; the browser uses the TypeScript port in `@gck/core` | None |
+| `AnalyticsRefreshClient`, `RefreshSettings.from_env`, `TTLCache`, `canonical_hash` (Story 1, Step 6.7) | Calls `POST /api/v1/ai_slides/refresh` with a Bearer data token, 25 items per call, 4 in parallel, 30 s timeout, 60 s per-user cache | Imported as is by the engine resolver; same environment variables (`AI_SLIDES_REFRESH_CONCURRENCY`, `AI_SLIDES_REFRESH_CACHE_TTL_SECONDS`, `AI_SLIDES_STALE_AFTER_SECONDS`) | Cache key hashes the whole effective scope (source, filter context, overrides, parameter values), not just `chart_id` and overrides |
+| `BindingRefreshService._from_result` and `_failure` | Maps a Story 8 result to `ok`, `stale`, `error` or `forbidden`; transient failures keep the last snapshot as `stale` | Same rules in a row-free resolver (`resolve_bindings` below) | No rows, no `slides.ui` writes; the engine never persists refresh results |
+| `BindingRefreshService.refresh_presentation`, `persist_bindings_from_plan`, `resolve_new_bindings_inline`, `write_value` (Story 1, Steps 5 and 6) | Creates binding rows at generation, resolves them inline, writes values into slides | Called by the slides materializer (Step 8, new step 3b) and by `POST .../slides/from-content`, so GCK decks get real binding rows | `_locate` must not fall back to a name search for repeated elements; a broken path becomes `element_missing` |
+| Deck refresh routes and events (`GET .../refresh/stream`, `binding_data`, `binding_error`, `binding_stale`, Story 1 Step 7) | Refresh on open and before export for one deck | Kept as the Presenton transport of `@gck/data-superset` (P4); event names map one to one onto `refresh.started`, `binding.loading`, `binding.resolved`, `refresh.completed` | `binding_data` also carries the `snapshot` |
+| Story 8 `POST /api/v1/ai_slides/refresh` and `GET /api/v1/ai_slides/catalog` | Resolves saved charts as the token user, inside Superset (RBAC and RLS through `ChartDataCommand`) | The only data path of the engine, for runs and for `/v1/data/resolve` | Accepts source-typed items (`superset_chart` with a filter context, `superset_dataset`, `superset_metric`) beside the legacy flat item; new `POST /api/v1/ai_slides/token-exchange` for the engine |
+| Story 4 `useDeckRefresh` | Browser refresh-on-open hook for the deck | From P4, a thin wrapper over `createRefreshController` in `@gck/core` | Gains `intervalMs` and `onVisible` |
+
+The binding itself has the same fields in both stores, so one snapshot blob serves a Part VIII row and a GCK binding:
+
+| GCK `DataBinding` field | Part VIII `slide_data_bindings` column | Notes |
+|---|---|---|
+| binding key in `Artifact.bindings` | `id` (uuid), plus `element_name` and `element_path` | GCK keys are stable strings such as `b_c412`; the slides apply path sends the key as `SlideBindingOut.binding_key` and the row is tied to its slide element by `element_name` and `element_path` |
+| `kind` (`chart`, `metric`, `table`, `embed`) | `kind` (`chart`, `metric`, `table`; `text_template` from P4) | `embed` bindings are never stored as rows: they render as native or linked charts |
+| `source` (union on `type`) | `source` JSON | Part VIII v1 stores `superset_chart` only; the other source types are additive |
+| `mapping`, `format` | `mapping`, `format` JSON | Same snake_case keys and the same format grammar; `mapping: {}` is invalid except for `embed` |
+| `params`, `refresh`, `generatedAgainst` | none | GCK only: parameters and refresh policy live in the artifact; Part VIII decks use the deck-level policy |
+| `snapshot`, `snapshotAt`, `status`, `error` (runtime state, never authored) | `snapshot`, `snapshot_at`, `snapshot_hash`, `status`, `error` | GCK keeps runtime state in a binding store beside the artifact; hosts persist definitions only, and only the deck owner's results are written into Presenton slides |
+
+```python title="NEW: servers/fastapi/gck_engine/data/resolve.py (excerpt)"
+from gck_data.mappers import MappingError, map_result          # Story 1 mappers, moved
+from services.data_bindings.refresh_service import (            # Part VIII Story 1
+    AnalyticsRefreshClient, RefreshSettings, TTLCache, canonical_hash)
+
+SETTINGS = RefreshSettings.from_env()
+CLIENT = AnalyticsRefreshClient(SETTINGS.analytics_url)
+CACHE = TTLCache(SETTINGS.cache_ttl_s)
+
+
+async def resolve_bindings(defs: dict[str, dict], *, viewer: Viewer,
+                           params: dict, scope: dict | None, force: bool = False):
+    """Yield (key, BindingUpdate) for each definition, priority keys first."""
+    token = await viewer.data_token()            # token exchange, cached until 30 s before expiry
+    items = [story8_item(key, d, params, scope, force) for key, d in defs.items()]
+    for batch in batched(items, SETTINGS.batch_size):          # 25 per Story 8 call
+        for key, result in await call_story8(CLIENT, CACHE, token, viewer.key, batch):
+            yield key, to_update(defs[key], result)            # ok, stale, error, forbidden
+```
+
+`story8_item` merges the four scope layers (saved query, dashboard filter context, artifact parameters, pinned overrides, highest wins per column) into one source-typed item; `to_update` calls `map_result` and applies Story 1's status rules. This excerpt is the core loop only. The engine's full generator is `resolve_events` in `gck_engine/data/router.py` ([Live Superset data](69-live-superset-data.md), Step 9), which adds the per-viewer rate limit, force throttling and the refresh event framing around the same steps, and the run's Step E (trigger `run`) and `POST {engine}/v1/data/resolve` both iterate it, which is why a refresh after the run and the resolution during it can never disagree.
+
+!!! warning "Gotcha: never let Step E fail the run"
+    Story 1 treats a refresh failure as a property of one binding, and so does Step E. A timeout, a forbidden chart or a mapping error ends that binding as `stale`, `error` or `forbidden` with a code, and the run still completes. The only data-related run failure is `data_forbidden`, raised when the target requires data and every requested binding is forbidden. A run that failed because one chart was slow would throw away the generated text the user just reviewed.
 
 ## Step 4: Assemble the response schema from a TargetManifest
 
@@ -360,7 +413,7 @@ The Artifact Spec rule is that the model may write numbers only inside `token`s 
 | Prompt | Plan and blocks prompts forbid numeric literals outside tokens | Steps 3.1 and 3.3 |
 | Schema | Chart, metric and table blocks have `bindingId` and display options only; no value fields exist | Step 4 |
 | Validator | Digits in text segments without a `token` are reported as `I5_NUMBERS_IN_TOKENS` before stamping and fed back through the repair loop; `validate_artifact` repeats the check on the stamped artifact | below |
-| Adapter | Values are written from `DataBinding.snapshot` by deterministic code, never by the model | Part VIII binding resolution |
+| Adapter | Values are written from `DataBinding.snapshot` by deterministic code, never by the model, and refreshed as the viewer after apply | Part VIII binding resolution (Step 3.4) |
 
 The validator plugs into the existing repair loop. Today `generate_structured_with_schema_retries` validates only against the JSON Schema and appends `structured_validation_feedback_user_message` when errors remain (`llm_utils.py:362-387`). The generalization is one keyword argument:
 
@@ -655,9 +708,10 @@ The slides target must produce exactly what the Presenton editor and exporter al
 1. Resolve the template with `_resolve_prepare_layout(layout, sql_session)`, which extracts the template id from the layout reference and returns the layout payload, the `PresentationLayoutModel` and fonts (`presentation.py:1448-1470`).
 2. For each IR section, convert blocks back to the layout's content shape by slot key (heading or paragraph segments to text, with bold and italic as Markdown emphasis so `_template_text_runs_from_markdown` can parse it, `presentation.py:1157`; list items to `text-list`; chart blocks to `{chart_type, categories, series}` filled from the binding snapshot, the shape Part VIII resolution produces ([Story 1, dynamic data and refresh](../delivery/42-story1-dynamic-data.md)); image blocks to `image_prompt` plus the resolved `image_url`).
 3. Build `SlideModel(layout_group=<template reference>, layout=<layout id>, index=i, speaker_note=<popped speakerNote>, content=..., ui=_template_slide_ui(...))` as the stream does (`presentation.py:2383-2391`), then `_hydrate_template_slide_ui` (`presentation.py:309-319`).
-4. Commit the presentation and slides in one transaction, and store `presentation_id` on the run row.
+4. Persist the bindings (new, the step that keeps a GCK deck live): for every filled chart, metric and table slot, add a `slide_data_bindings` row in the same session with the binding's `source`, `mapping`, `format`, the snapshot and its status, resolving `element_path` after hydration with Story 1's element helpers, exactly as Story 1's `persist_bindings_from_plan` does for planner decks ([Story 1, dynamic data and refresh](../delivery/42-story1-dynamic-data.md)). A slot whose binding is `pending`, `error` or `forbidden` is written empty (never template sample data and never the author's snapshot under `forbidden`), with the row status set to match.
+5. Commit the presentation, slides and binding rows in one transaction, store `presentation_id` on the run row, then run Story 1's `resolve_new_bindings_inline` so pending rows fill before the deck first opens.
 
-That path creates a new deck at the end of a run. Applying an artifact into a deck that is already open goes through the browser instead: the `@gck/target-slides` adapter's `apply` reads the `presenton.api` capability (`fetch`, `presentationId`, `afterIndex`) and posts its native slides to the one new endpoint, `POST /api/v1/ppt/presentation/{id}/slides/from-content`, which [Artifact Spec and targets](62-artifact-spec-and-targets.md) specifies and which is built from the same functions (`_template_slide_ui`, `process_slide_and_fetch_assets`, `_apply_template_content_to_ui`).
+That path creates a new deck at the end of a run. From then on the deck behaves like any Part VIII deck: it refreshes on open as the viewer, "Refresh data" forces it, and an export refreshes first and stamps "Data as of" on slides whose refresh failed. Applying an artifact into a deck that is already open goes through the browser instead: the `@gck/target-slides` adapter's `apply` reads the `presenton.api` capability (`fetch`, `presentationId`, `afterIndex`) and posts its native slides to the one new endpoint, `POST /api/v1/ppt/presentation/{id}/slides/from-content`, which [Artifact Spec and targets](62-artifact-spec-and-targets.md) specifies and which is built from the same functions (`_template_slide_ui`, `process_slide_and_fetch_assets`, `_apply_template_content_to_ui`). Its request carries `bindings` per slide (`SlideBindingOut`), and it persists them as `slide_data_bindings` rows in the same commit as the slides (step 4 above); after `gck.applied`, the Presenton host re-reads the deck's bindings and starts the refresh stream, so an inserted chart is live from the first view.
 
 The browser side of `@gck/target-slides` previews the same IR with a browser port of the hydrator and the moved renderer (`templateV2UiToHtmlFragment`, `template-v2-json-to-html.ts:172-186`), so the preview during streaming and the deck in the editor share the renderer, and a golden test keeps the ported hydrator equal to `_apply_template_content_to_ui`. Export stays exactly where it is: `POST /api/v1/ppt/presentation/{id}/export` calls `export_presentation(presentation_id, title, export_as, cookie_header)` (`presentation.py:1642-1678`, `utils/export_utils.py:43-48`) ([PPTX and PDF export](../presenton/24-export-pipeline.md)).
 
@@ -675,7 +729,7 @@ AI Slides (Part VIII) and the Presenton web UI call the existing endpoints. The 
 | `GET /api/v1/ppt/presentation/stream/{id}` (`presentation.py:2281`) | unchanged | translate `artifact.patch` into legacy `chunk` and `slide_assets` frames |
 | `POST /api/v1/ppt/presentation/generate` and `/generate/async` (`presentation.py:3169`, `:3240`) | unchanged | run as a `slides` run, keeping the response and `async_tasks` contract |
 | `POST /api/v2/ppt/presentation/generate/smart` | unchanged | unchanged (Smart is not a GCK target) |
-| Part VIII routes (bindings, refresh, prompt library) | unchanged, reused by `@gck/data-superset` | unchanged |
+| Part VIII routes (bindings, refresh, prompt library) | unchanged; the deck-scoped refresh routes become the Presenton transport of `@gck/data-superset` (P4), while other hosts reach Story 8 through the engine's `POST {engine}/v1/data/resolve`, whose resolver reuses Story 1's mappers (as `gck_data`), refresh client and cache (Step 3.4) | unchanged |
 
 The rules that keep this safe:
 
@@ -865,10 +919,10 @@ Each milestone ends with a checkpoint that is objective and can be automated. Th
 | M0 Baseline | before P0 | Fork rebased on upstream; seam list recorded; CI runs FastAPI tests (`uv run --locked python -m pytest`, [CI, tests, security](../presenton/28-ci-tests-security.md)) and `node --test` in `servers/nextjs` (`servers/nextjs/package.json:11`) | Both suites green on the fork |
 | M1 Protocol | P0 | `gck_engine.protocol` Pydantic models in the fork; `gck/` monorepo with `@gck/protocol` generated from their exported JSON Schemas | Contract test: the same recorded event logs validate with Ajv in TypeScript and with Pydantic in the engine |
 | M2 Engine skeleton | P1 | `gck_runs` and `gck_run_events`, router, `run_guard`, restart sweep, mounting and bearer JWT (Step 7) with a fake pipeline that emits scripted events | Replay test: disconnect after event 5, reconnect with `Last-Event-ID: 5`, receive 6 onward exactly once; owner B gets 404 for owner A's run; legacy integration tests unchanged |
-| M3 Text target end to end | P1 | Steps A and C for `text`; Step E with `@gck/data-superset` on the Part VIII Story 8 APIs ([Story 8, analytics refresh APIs and MCP](../delivery/49-story8-analytics-mcp.md)); `@gck/client`, `@gck/core`, `@gck/react` minimal | A recorded run replays identically in Storybook; the number-discipline validator rejects a seeded invented figure; every number in the artifact traces to a binding snapshot |
+| M3 Text target end to end | P1 | Steps A and C for `text`; Step E in the engine through `gck_data` and Story 8's source-typed refresh with a token exchange ([Story 8, analytics refresh APIs and MCP](../delivery/49-story8-analytics-mcp.md)); `POST {engine}/v1/data/resolve` and `@gck/data-superset` with a binding store and refresh controller; `@gck/client`, `@gck/core`, `@gck/react` minimal | A recorded run replays identically in Storybook; the number-discipline validator rejects a seeded invented figure; every number in the artifact traces to a binding resolved as the viewer, with the dashboard filters captured at submit; a second refresh re-resolves with the same scope; a second RLS user sees their own values, never the author's; exported text carries "Data as of" |
 | M4 Tiptap | P2 | `@gck/target-tiptap` and its extension; `transform` and `edit` intents in the engine (`context.selection`, `context.document` as version 0), sent by `submit({ intent })` and applied with `replace` and `patch` ([Host integrations](65-host-integrations.md)) | Apply is one undo step in the editor, for `patch` too; an edit run re-sends only changed blocks and keeps every other block id; round trip IR to ProseMirror JSON to IR is lossless for supported blocks |
 | M5 Dashboards | P3 | `@gck/target-superset-dashboard`, `@gck/host-superset`, Step B with a grid catalog | Applying a run creates a dashboard or tab whose charts are the bound ones; `ApplyResult.undo` restores the previous layout |
-| M6 Slides, engine side | P4 | Slides catalog from Template v2, Step B with layout ids, materializer (Step 8), compatibility rules (Step 9) | For a fixed fake LLM, a `slides` run and the legacy prepare-plus-stream path produce slides with the same `layout` ids and `ui` element types; `test_presentation_generation_flow.py` unchanged and green |
+| M6 Slides, engine side | P4 | Slides catalog from Template v2, Step B with layout ids, materializer (Step 8), compatibility rules (Step 9) | For a fixed fake LLM, a `slides` run and the legacy prepare-plus-stream path produce slides with the same `layout` ids and `ui` element types; `test_presentation_generation_flow.py` unchanged and green; every bound slot of a GCK deck has a `slide_data_bindings` row, refreshes on next open and changes in a refresh-before-export |
 | M7 Strangler S1 and S2 | P4 | Outline facade behind `NEXT_PUBLIC_GCK_OUTLINE`; renderer moved to `@gck/target-slides` with a re-export shim | Existing `template-v2-*` renderer tests in `servers/nextjs/tests/` pass against the moved renderer; outline page works with the flag on and off |
 | M8 Strangler S3 to S5 | P4 and later | `OutlineReview` in Presenton; Generate answers the run; optional legacy bridge; AI Slides on the run API | Legacy outline components deleted; Smart mode unaffected; Part VIII flows pass their own acceptance tests |
 
@@ -890,12 +944,14 @@ Two checkpoints repeat at every milestone: the legacy FastAPI integration suite 
 | Licensing or attribution gaps in published packages | Low | High | Per-package `LICENSE` and `NOTICE` generated in CI; change headers on moved files |
 | Dependence on export-core for non-slide targets | Low | High | Lint rule forbidding the import in `gck/`; native exporters per target |
 | Legacy and GCK flows maintained in parallel | Certain | Medium | Delete legacy code at each strangler stage's exit criterion |
+| Part VIII and GCK snapshots drift apart (two mappers, two formatters) | Medium | High | One `gck_data` module imported by both; a contract test pipes one recorded Story 8 response through `map_result` into Part VIII's `write_value` and GCK's `resolveToken` and asserts identical displays |
 
 ## What you now know
 
 - Which Presenton modules GCK keeps (`llmai`, provider helpers, `schema_utils`, web search, documents, auth), generalizes (the three LLM steps, structured retries, SSE, async tasks, Smart checkpoints), leaves slides-only (Template v2, hydration, Smart, the editor) or drops.
 - How `generate_ppt_outline`, `generate_presentation_structure` and slide content generation become plan, layout choice and block steps driven by a `TargetManifest`, with prompts that keep Presenton's authority and voice rules but replace invented chart data with bindings.
 - How the canonical `build_response_schema` is narrowed per section with `schema_utils`, how number discipline is enforced in prompt, schema, validator and adapter, and why the Template v2 chart schema cannot be reused as is.
+- How Step E and the engine's refresh API reuse Part VIII's mappers, refresh client and cache, why a GCK binding and a `slide_data_bindings` row share one shape, and how the slides materializer persists binding rows so generated decks stay live.
 - How `gck_runs` and `gck_run_events` generalize `AsyncTaskModel` and Smart checkpoints into a replayable log, and how the `/api/gck/v1/runs` router, nginx and `proxy.ts` fit together.
 - How to carve `@gck/*` out of `servers/nextjs`, make Presenton consume the kit through facades, keep the fork cheap to rebase with a `gck/` monorepo beside it, and meet Apache-2.0 obligations without export-core.
 
