@@ -2599,6 +2599,8 @@
       
         
       
+        
+      
     
     
     
@@ -2834,6 +2836,34 @@
     
   
     Artifact Spec and targets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../69-live-superset-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live Superset data
   
 
     
@@ -3344,13 +3374,18 @@
 </tr>
 <tr>
 <td><strong>Data</strong></td>
-<td>Where do numbers come from, and how are they refreshed?</td>
-<td>Data providers (<code>@gck/data-superset</code>) for the chart catalog and refresh; the engine resolves bindings during a run</td>
-<td>The LLM invents chart values; Part VIII adds bindings</td>
+<td>Where do numbers come from, and how are they kept current after generation?</td>
+<td>Data providers (<code>@gck/data-superset</code>) for the catalog and live refresh, a binding store and refresh controller in <code>@gck/core</code>; the engine resolves bindings during a run and on demand (<code>/v1/data/resolve</code>), always as the viewing user</td>
+<td>The LLM invents chart values; Part VIII adds bindings that refresh on open and before export</td>
 </tr>
 </tbody>
 </table>
 <p>The rule that makes this work: <strong>hosts and targets are plugins, the run layer is shared, and the only thing the model produces is the Artifact Spec</strong> (<a href="../62-artifact-spec-and-targets/">Artifact Spec and targets</a>).</p>
+<p>The data concern has one more rule: <strong>an applied artifact stores binding definitions, never frozen numbers presented as current.</strong> Every target fetches live Superset data as the person viewing it, on open, on demand, on an interval or when a filter or parameter changes, and a host that can only store static text (an exported Markdown file, an email, a downloaded PPTX) gets a stamped snapshot ("Data as of ...") plus a link to the live version. <a href="../69-live-superset-data/">Live Superset data</a> is the full contract.</p>
+<div class="admonition note">
+<p class="admonition-title">Data sources covered</p>
+<p>A binding's <code>source</code> is a discriminated union on <code>type</code>. Protocol 1.0 has <code>superset_chart</code> (a saved chart, through its stored query context). Protocol 1.1 adds <code>superset_dataset</code> (metrics and dimensions of a dataset the user can read, no saved chart needed) and <code>superset_metric</code> (one saved metric, with an optional period comparison). Protocol 1.2 adds <code>superset_sql</code> (a saved SQL Lab query, off by default behind a flag) and semantic views (Superset master only). All of them resolve inside Superset under the user's identity, so RBAC and row level security apply. Viz types that cannot be turned into a snapshot stay in the catalog as <code>embed</code> bindings and render as native Superset charts, a live chart frame, a data table or a link card, never as an image.</p>
+</div>
 <h2 id="step-2-lay-out-the-packages">Step 2: Lay out the packages<a class="headerlink" href="#step-2-lay-out-the-packages" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TB
     P["@gck/protocol: types and JSON Schemas"]
@@ -3401,7 +3436,7 @@
 <tr>
 <td><code>generate</code></td>
 <td>"Create a QBR page for EMEA from the Sales dashboard."</td>
-<td><code>context.surface</code>, host ids (for example <code>dashboardId</code>), <code>locale</code>, <code>theme</code>; chart ids in <code>data.allowedChartIds</code></td>
+<td><code>context.surface</code>, host ids (for example <code>dashboardId</code>), <code>locale</code>, <code>theme</code>; chart ids in <code>data.allowedChartIds</code>, dataset ids in <code>data.allowedDatasetIds</code> and the dashboard's current filter state in <code>data.scope</code> (protocol 1.1)</td>
 <td><code>replace</code>, <code>append</code> or <code>insert_at_cursor</code></td>
 </tr>
 <tr>
@@ -3423,7 +3458,7 @@
 <p class="admonition-title">Gotcha: <code>patch</code> needs ids that survive in the host</p>
 <p>A patch finds content in the host by block id. The Tiptap target stores every top-level node's block id in a <code>gckBlockId</code> global attribute, so an edit can replace, delete and insert single blocks in one undo step. Content the user pasted from another generated page carries that page's ids, and content typed by hand has none; both are handled by <code>fromHost</code>, which stamps fresh ids before it reads the document back, so always build <code>baseArtifact</code> with <code>fromHost</code>, never from a cached copy of the last run.</p>
 </div>
-<p>A fourth, non-AI interaction is <strong>refresh</strong>: re-resolve data bindings without calling a model. It reuses Part VIII's refresh API (<a href="../../delivery/42-story1-dynamic-data/">Story 1</a>).</p>
+<p>A fourth, non-AI interaction is <strong>refresh</strong>: re-resolve data bindings as the viewing user without calling a model, on open, on demand ("Refresh data"), on an interval of at least 60 seconds, when the tab becomes visible again, or when a host filter or an artifact parameter changes. The browser calls the engine's <code>POST {engine}/v1/data/resolve</code> with binding definitions only; the engine exchanges the viewer's engine token for a data token server side and calls Part VIII's Story 8 refresh endpoint (<code>POST /api/v1/ai_slides/refresh</code>, extended with source-typed items, <a href="../../delivery/49-story8-analytics-mcp/">Story 8</a>), so the data token never reaches the browser, as in Part VIII (<a href="../../delivery/42-story1-dynamic-data/">Story 1</a>). The refresh flow is in Step 4 and the full contract in <a href="../69-live-superset-data/">Live Superset data</a>.</p>
 <h2 id="step-4-follow-one-run-end-to-end">Step 4: Follow one run end to end<a class="headerlink" href="#step-4-follow-one-run-end-to-end" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>sequenceDiagram
     participant U as User
@@ -3434,9 +3469,9 @@
     participant S as Superset
     U-&gt;&gt;H: types /ai and a prompt
     H-&gt;&gt;K: open PromptComposer with context (doc, cursor)
-    K-&gt;&gt;S: data provider catalog of refreshable charts (as the user)
-    K-&gt;&gt;E: POST /v1/runs (intent, prompt, target manifest, context, allowedChartIds)
-    E-&gt;&gt;S: chart metadata for the data catalog (as the user)
+    K-&gt;&gt;E: GET /v1/data/catalog (charts and datasets the user can see)
+    E-&gt;&gt;S: Story 8 catalog and dataset metadata (as the user)
+    K-&gt;&gt;E: POST /v1/runs (intent, prompt, target manifest, context, allowedChartIds, scope)
     E-&gt;&gt;L: plan with schema built from the manifest and catalog
     E--&gt;&gt;K: plan.proposed, then run.awaiting_input
     K--&gt;&gt;U: OutlineReview
@@ -3447,11 +3482,31 @@
         E--&gt;&gt;K: artifact.patch (and text.delta)
         K--&gt;&gt;U: StreamingPreview updates
     end
-    E-&gt;&gt;S: resolve bindings (Part VIII refresh API, as the user)
+    E-&gt;&gt;S: resolve bindings (Story 8 refresh, as the user)
     E--&gt;&gt;K: binding.resolved per binding
     E--&gt;&gt;K: run.completed
     U-&gt;&gt;K: Apply in ApplyBar
-    K-&gt;&gt;H: target-tiptap toNative, apply as one undo step</code></pre>
+    K-&gt;&gt;H: target-tiptap toNative, apply as one undo step
+    K-&gt;&gt;H: binding definitions and their state handed to the host BindingStore</code></pre>
+<p>The run ends with the content in the host, but the data is not finished: from then on the host owns refresh. This is the same for every target that a browser renders (Tiptap pages, kit-rendered text, and later slides through the Presenton transport). It is target-neutral and mirrors Part VIII's "open a deck" flow (<a href="../../delivery/41-architecture-and-contracts/">Architecture and contracts</a>):</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant V as Viewer (any user who opens it)
+    participant H as Host
+    participant K as GCK kit (RefreshController)
+    participant E as GCK Engine
+    participant A as Analytics BE (Story 8)
+    participant S as Superset ChartDataCommand
+    V-&gt;&gt;H: opens the page
+    H-&gt;&gt;K: binding definitions (no values) and refresh policy
+    K-&gt;&gt;E: POST /v1/data/resolve (engine token, trigger on_open)
+    E-&gt;&gt;A: token exchange, then POST /api/v1/ai_slides/refresh (data token, 25 items per call)
+    A-&gt;&gt;S: query as the viewer (RBAC and RLS)
+    S--&gt;&gt;A: rows
+    A--&gt;&gt;E: raw rows per item
+    E--&gt;&gt;K: binding.resolved per binding (mapped snapshot, status)
+    K--&gt;&gt;V: charts, metrics, tables and tokens update
+    Note over K,E: Refresh data, interval, tab return, filter or parameter change repeat the call</code></pre>
+<p>Two targets do not use this path. The <code>superset-dashboard</code> target writes native Superset charts, and Superset's own frontend queries them as the viewer on open, on native filter change, on dashboard refresh and on the dashboard's <code>json_metadata.refresh_frequency</code> (<code>apache/superset: superset/dashboards/schemas.py:215</code>, read by the frontend at <code>apache/superset: superset-frontend/src/dashboard/actions/hydrate.ts:411</code>). The <code>slides</code> target in Presenton keeps Part VIII's deck routes (<code>slide_data_bindings</code> rows, refresh on open and before export) until phase P4 moves it onto the kit with a Presenton transport.</p>
 <p>What runs where:</p>
 <table>
 <thead>
@@ -3468,9 +3523,9 @@
 <td>Only the host knows the selection, cursor and current page</td>
 </tr>
 <tr>
-<td>Chart catalog (<code>allowedChartIds</code>)</td>
-<td>Browser (<code>DataProvider.catalog</code> in <code>@gck/data-superset</code>)</td>
-<td>Only charts the user can see are offered to the model</td>
+<td>Data catalog (<code>allowedChartIds</code>, <code>allowedDatasetIds</code>)</td>
+<td>Browser asks (<code>DataProvider.catalog</code> in <code>@gck/data-superset</code>); the engine answers from Story 8's catalog and dataset metadata as the user (<code>GET {engine}/v1/data/catalog</code>)</td>
+<td>Only charts and datasets the user can see are offered to the model; charts that cannot be snapshotted stay listed as <code>embed</code> entries with a reason</td>
 </tr>
 <tr>
 <td>Schema assembly from the manifest and data catalog</td>
@@ -3488,9 +3543,24 @@
 <td>The browser treats model output as untrusted</td>
 </tr>
 <tr>
-<td>Binding resolution</td>
-<td>Engine during the run (<code>resolving_data</code>, sent as <code>binding.resolved</code>); browser (<code>@gck/data-superset</code>) for later refresh</td>
-<td>Both go through the Part VIII refresh API with the user's identity; snapshots live in an overlay beside the artifact, so a browser refresh never forks the engine's version line</td>
+<td>Binding resolution during the run</td>
+<td>Engine (<code>resolving_data</code>, sent as <code>binding.resolved</code>)</td>
+<td>Goes through Story 8's refresh endpoint with the user's identity; snapshots live in an overlay beside the artifact, so a later refresh never forks the engine's version line</td>
+</tr>
+<tr>
+<td>Refresh after the run (on open, Refresh data, interval, tab return, filter or parameter change)</td>
+<td>Browser: the host's <code>RefreshController</code> (<code>@gck/core</code>) calls <code>POST {engine}/v1/data/resolve</code> through <code>@gck/data-superset</code>; the engine calls Story 8. Dashboard target: Superset's frontend. Slides: Presenton BE (Part VIII Story 1) until P4</td>
+<td>The browser never holds a data token; each viewer gets their own RLS view; the engine caches results per viewer for 60 s and caps requests per viewer</td>
+</tr>
+<tr>
+<td>Mapping rows to snapshots</td>
+<td>Server side, once, in a shared Python module <code>gck_data</code> (Part VIII Story 1's mappers, moved and extended) imported by the engine and Presenton BE</td>
+<td>One snapshot shape for Part VIII rows and GCK bindings, so both stores display the same numbers</td>
+</tr>
+<tr>
+<td>Headless refresh (scheduled reports and alert narratives)</td>
+<td>Engine <code>POST {engine}/v1/render</code> called by the scheduler as the schedule's executor</td>
+<td>No browser and no LLM call: stored definitions are re-resolved and re-rendered per send, stamped "Data as of"</td>
 </tr>
 <tr>
 <td>Conversion to native format</td>
@@ -3506,7 +3576,7 @@
 </table>
 <div class="admonition note">
 <p class="admonition-title">Headless runs</p>
-<p>Scheduled or event-triggered generation (for example, a weekly KPI page or an alert narrative) has no browser. The engine still resolves bindings itself, and <code>@gck/client</code>, <code>@gck/core</code> (with its <code>runToCompletion(client, request)</code> helper, which starts a run and resolves with the final artifact) and a target's main entry are plain TypeScript with no DOM, so they run in a small Node worker next to the (Python) engine (<a href="../65-host-integrations/">Host integrations</a>). That is a second reason <code>@gck/core</code> and the targets' main entries must stay DOM-free.</p>
+<p>Scheduled or event-triggered generation (for example, a weekly KPI page or an alert narrative) has no browser. The engine still resolves bindings itself, and <code>@gck/client</code>, <code>@gck/core</code> (with its <code>runToCompletion(client, request)</code> helper, which starts a run and resolves with the final artifact) and a target's main entry are plain TypeScript with no DOM, so they run in a small Node worker next to the (Python) engine (<a href="../65-host-integrations/">Host integrations</a>). That is a second reason <code>@gck/core</code> and the targets' main entries must stay DOM-free. A scheduled send of something already generated does not need a new run at all: it re-resolves the stored binding definitions as the schedule's executor and re-renders the text, so each email carries the data of its own send time (<a href="../69-live-superset-data/">Live Superset data</a>).</p>
 </div>
 <h2 id="step-5-record-the-decisions">Step 5: Record the decisions<a class="headerlink" href="#step-5-record-the-decisions" title="Permanent link">&para;</a></h2>
 <table>
@@ -3567,13 +3637,79 @@
 <td>Host Redux only</td>
 <td>Hosts differ; Presenton keeps its Redux, streams into the core store and touches Redux once at apply (one undo entry, one save)</td>
 </tr>
+<tr>
+<td>Live data</td>
+<td>Every target stays live after generation: hosts persist binding definitions, and values are fetched again as each viewer (on open, Refresh data, interval of at least 60 s, tab return, filter or parameter change); static outputs are stamped snapshots with a link to the live version</td>
+<td>Bake the author's numbers into the output at apply time; screenshots of charts</td>
+<td>Frozen numbers go wrong silently and leak the author's row level security view to every reader; an image cannot be refreshed, filtered or read by assistive technology</td>
+</tr>
+<tr>
+<td>Data sources</td>
+<td>One binding <code>source</code> union: saved chart (1.0), dataset and saved metric (1.1), saved SQL Lab query (1.2, flagged); all resolved inside Superset as the user</td>
+<td>Saved charts only; the model writes SQL</td>
+<td>Not every number a page needs has a saved chart, but the model must never author queries; datasets and metrics are validated against Superset's own metadata</td>
+</tr>
+<tr>
+<td>Refresh transport</td>
+<td>Browser to engine (<code>/v1/data/resolve</code>, engine token), engine to Story 8 (data token from a server-side token exchange); Presenton keeps its deck-scoped Part VIII routes as a second transport</td>
+<td>Browser calls <code>POST /api/v1/chart/data</code> directly</td>
+<td>Keeps the data token out of the browser (as Part VIII decided), maps rows once on the server, and works across origins</td>
+</tr>
+<tr>
+<td>Viz coverage</td>
+<td>Story 8's viz map decides what can be snapshotted; everything else becomes an <code>embed</code> binding (native chart on dashboards, live chart frame or link card in pages, data table plus link in slides)</td>
+<td>Drop unsupported charts from the catalog</td>
+<td>The model can still reference every chart the user can see, and the reader always reaches live data</td>
+</tr>
+</tbody>
+</table>
+<p>What "live" means for each target:</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Live while viewed?</th>
+<th>Who fetches, as whom</th>
+<th>What the host persists</th>
+<th>Frozen outputs and their stamp</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>slides</code> (Presenton)</td>
+<td>Yes</td>
+<td>Presenton BE refresh service (Part VIII Story 1) as the viewer; from P4 driven by the kit's controller through a Presenton transport</td>
+<td><code>slide_data_bindings</code> rows plus the owner's snapshot in the slide</td>
+<td>Downloaded PPTX or PDF: latest snapshot, "Data as of" footnote, link to the live deck</td>
+</tr>
+<tr>
+<td><code>tiptap-doc</code></td>
+<td>Yes</td>
+<td>The host's <code>RefreshController</code>, through the engine, as the viewer</td>
+<td>Binding definitions in node attributes, no values</td>
+<td>HTML or email export through <code>/v1/render</code>, stamped</td>
+</tr>
+<tr>
+<td><code>superset-dashboard</code></td>
+<td>Yes, natively</td>
+<td>Superset's frontend, as the viewer</td>
+<td>Native charts; numbers inside narrative become Handlebars or Big Number charts</td>
+<td>Text left in a Markdown component is qualitative, or stamped</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>Yes when the kit renders it (<code>&lt;gck-data&gt;</code>, previews)</td>
+<td>The controller, through the engine</td>
+<td>Binding definitions</td>
+<td>Exported Markdown, plain text, HTML or email: "Data as of" footer; scheduled sends re-render per send</td>
+</tr>
 </tbody>
 </table>
 <h2 id="step-6-know-the-boundaries">Step 6: Know the boundaries<a class="headerlink" href="#step-6-know-the-boundaries" title="Permanent link">&para;</a></h2>
 <p>What the kit <strong>does not</strong> do:</p>
 <ul>
 <li>It does not own the host's document. It proposes content and applies it through the host's own API.</li>
-<li>It does not store artifacts long-term by default. Hosts persist what they apply; the engine keeps the run event log for resume and audit.</li>
+<li>It does not store artifacts long-term by default. Hosts persist what they apply, and for data that means binding definitions, not values; the engine keeps the run event log for resume and audit, and never persists refresh results.</li>
 <li>It does not bypass host permissions. Data comes through the user's identity (<a href="../../delivery/49-story8-analytics-mcp/">Story 8</a>), and dashboard creation uses the user's own Superset rights.</li>
 <li>It does not replace Presenton's PPTX export. The slides target hands its output to Presenton's existing export path (<a href="../../presenton/24-export-pipeline/">PPTX and PDF export</a>).</li>
 </ul>
@@ -3586,7 +3722,8 @@
 <li>The four concerns (host, target, run, data) and the package that owns each.</li>
 <li>The package graph and the five dependency rules that keep the kit portable.</li>
 <li>The three interactions every host gets: generate, transform, edit, plus data refresh.</li>
-<li>What runs in the browser, in the engine and in the host, for one complete run.</li>
+<li>What runs in the browser, in the engine and in the host, for one complete run, and who refreshes the data afterwards in each target.</li>
+<li>Why applied content stores binding definitions instead of numbers, and which Superset data sources a binding can use.</li>
 <li>The decisions behind the design, and what the kit deliberately does not do.</li>
 </ul>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>

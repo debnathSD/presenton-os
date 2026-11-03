@@ -2599,6 +2599,8 @@
       
         
       
+        
+      
     
     
     
@@ -2699,6 +2701,34 @@
     
   
     Artifact Spec and targets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../69-live-superset-data/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Live Superset data
   
 
     
@@ -3433,7 +3463,7 @@
 <div class="chapter-meta">
 <p><strong>Reads:</strong> the earlier Part IX chapters  ·  <strong>Builds on:</strong> <a href="../61-architecture/">Architecture</a>, <a href="../../delivery/">Part VIII (AI Slides delivery plan)</a>  ·  <strong>Time:</strong> ~15 min</p>
 </div>
-<p>This chapter turns Part IX into a plan you can track. It covers five phases, each ending in something a user can try, with 27 work packages, effort estimates, dependencies and exit criteria. Each phase adds one new host or target, so the kit proves its "plug into any host" promise step by step instead of all at the end.</p>
+<p>This chapter turns Part IX into a plan you can track. It covers five phases, each ending in something a user can try, with 44 work packages, effort estimates, dependencies and exit criteria. Each phase adds one new host or target, so the kit proves its "plug into any host" promise step by step instead of all at the end. Each phase also makes its target show live Superset data, fetched as the viewing user and refreshed after generation, so no phase ships a target that freezes numbers (<a href="../69-live-superset-data/">Live Superset data</a>).</p>
 <p><a class="md-button md-button--primary" href="../../assets/gck-roadmap-tracker.csv"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm1 14-2 4h-3l2-4H9v-5h6zm-2-7V3.5L18.5 9z"/></svg></span> Download tracker (.csv)</a></p>
 <h2 id="step-1-understand-the-planning-assumptions">Step 1: Understand the planning assumptions<a class="headerlink" href="#step-1-understand-the-planning-assumptions" title="Permanent link">&para;</a></h2>
 <table>
@@ -3450,7 +3480,7 @@
 </tr>
 <tr>
 <td>Team</td>
-<td>2 frontend engineers, 1 backend engineer at about 50%, QA support in phases 2 and 3</td>
+<td>2 frontend engineers, 1 backend engineer full time (the live-data work doubles the backend share), QA support in phases 2 and 3</td>
 </tr>
 <tr>
 <td>Effort unit</td>
@@ -3466,7 +3496,7 @@
 </tr>
 </tbody>
 </table>
-<p>Totals: about 104 d of frontend work, 33 d of backend work and 8 d of QA. Two frontend engineers at 4 d per week deliver the frontend share in about 13 weeks of pure work, so 19 weeks leaves room for review, integration and surprises.</p>
+<p>Totals: about 130 d of frontend work, 69 d of backend work and 11 d of QA, 210 d in all. The 17 live-data work packages (1.8 to 1.13, 2.5 to 2.7, 3.6 to 3.8, 4.6 to 4.10) account for 65 d of it, 36 d of them backend. Two frontend engineers at 4 d per week deliver the frontend share in about 16 weeks of pure work, and one backend engineer at 4 d per week delivers the backend share in about 17 weeks, so 24 weeks leaves room for review, integration and surprises. P1 is the backend-heavy phase (30 d of backend work), which is why it is the longest; 1.8 depends only on the schema contract test (0.3), so the backend engineer can start it during P0.</p>
 <h2 id="step-2-read-the-phase-plan">Step 2: Read the phase plan<a class="headerlink" href="#step-2-read-the-phase-plan" title="Permanent link">&para;</a></h2>
 <p>Why this order:</p>
 <ol>
@@ -3497,42 +3527,42 @@
 <tr>
 <td>P1</td>
 <td>Engine and first non-slide target</td>
-<td>GCK Engine run API and the text target in Superset</td>
-<td>Weeks 4-7</td>
-<td>7</td>
-<td>40 d</td>
+<td>GCK Engine run API, live data resolution and the text target in Superset</td>
+<td>Weeks 4-11</td>
+<td>13</td>
+<td>66 d</td>
 </tr>
 <tr>
 <td>P2</td>
 <td>Tiptap pages</td>
-<td>Tiptap target and extension, transform and edit intents</td>
-<td>Weeks 8-11</td>
-<td>4</td>
-<td>25 d</td>
+<td>Tiptap target and extension, transform and edit intents, live data nodes and parameters</td>
+<td>Weeks 12-15</td>
+<td>7</td>
+<td>36 d</td>
 </tr>
 <tr>
 <td>P3</td>
 <td>Superset dashboards</td>
-<td>Dashboard target and Superset host</td>
-<td>Weeks 12-15</td>
-<td>5</td>
-<td>25 d</td>
+<td>Dashboard target and Superset host, live text charts</td>
+<td>Weeks 16-19</td>
+<td>8</td>
+<td>37 d</td>
 </tr>
 <tr>
 <td>P4</td>
 <td>Slides on the kit</td>
-<td>Presenton and AI Slides consume the kit, web component, hardening</td>
-<td>Weeks 16-19</td>
-<td>5</td>
-<td>29 d</td>
+<td>Presenton and AI Slides consume the kit, slide binding rows, web components, hardening</td>
+<td>Weeks 20-24</td>
+<td>10</td>
+<td>45 d</td>
 </tr>
 <tr>
 <td></td>
 <td><strong>Total</strong></td>
 <td></td>
 <td></td>
-<td><strong>27</strong></td>
-<td><strong>145 d</strong></td>
+<td><strong>44</strong></td>
+<td><strong>210 d</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3548,36 +3578,40 @@
 <tbody>
 <tr>
 <td>BE</td>
-<td>33 d</td>
-<td>23%</td>
+<td>69 d</td>
+<td>33%</td>
 </tr>
 <tr>
 <td>FE hosts</td>
-<td>31 d</td>
-<td>21%</td>
+<td>37 d</td>
+<td>18%</td>
 </tr>
 <tr>
 <td>FE platform</td>
-<td>28 d</td>
-<td>19%</td>
+<td>33 d</td>
+<td>16%</td>
 </tr>
 <tr>
 <td>FE targets</td>
-<td>27 d</td>
-<td>19%</td>
+<td>33 d</td>
+<td>16%</td>
 </tr>
 <tr>
 <td>FE kit</td>
-<td>18 d</td>
-<td>12%</td>
+<td>27 d</td>
+<td>13%</td>
 </tr>
 <tr>
 <td>QA</td>
-<td>8 d</td>
-<td>6%</td>
+<td>11 d</td>
+<td>5%</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Where live data sits in the plan</p>
+<p>Live data is not a phase of its own: each phase makes its own target live. The new IDs were appended after each phase's existing ones, so earlier IDs and tracker rows did not change. P1 builds the shared pieces every later target uses: Story 8's source-typed refresh and token exchange, the shared <code>gck_data</code> mappers, the engine's <code>/v1/data/*</code> API, and the binding store and refresh controller in <code>@gck/core</code> (1.8 to 1.13). P2 adds data sources beyond saved charts (datasets and saved metrics), artifact parameters and the Tiptap live nodes with the embedded-chart fallback (2.5 to 2.7). P3 turns numbers in dashboard narrative into live Handlebars and Big Number charts and adds headless re-rendering for scheduled sends (3.6 to 3.8). P4 gives GCK decks real <code>slide_data_bindings</code> rows and live numbers in slide text (4.6 to 4.10). Protocol 1.2 data work (semantic-view metrics on Superset master, the flagged <code>superset_sql</code> source, splitting <code>mixed_timeseries</code> into two dataset bindings and propagating cross filters, about 8 d of backend work) comes after P4 and is not in the 44 work packages or the totals above.</p>
+</div>
 <h3 id="p0-foundations">P0: Foundations<a class="headerlink" href="#p0-foundations" title="Permanent link">&para;</a></h3>
 <p>Monorepo, protocol, client, core state machine, mock engine. Weeks 1-3.</p>
 <table>
@@ -3643,7 +3677,7 @@
 </tbody>
 </table>
 <h3 id="p1-engine-and-first-non-slide-target">P1: Engine and first non-slide target<a class="headerlink" href="#p1-engine-and-first-non-slide-target" title="Permanent link">&para;</a></h3>
-<p>GCK Engine run API and the text target in Superset. Weeks 4-7.</p>
+<p>GCK Engine run API, live data resolution and the text target in Superset. Weeks 4-11.</p>
 <table>
 <thead>
 <tr>
@@ -3690,7 +3724,7 @@
 </tr>
 <tr>
 <td>1.5</td>
-<td>@gck/data-superset: chart catalog (<code>DataProvider</code>), binding resolution through the Part VIII refresh API</td>
+<td>@gck/data-superset: chart catalog (<code>DataProvider</code>), binding resolution through the engine (<code>/v1/data/resolve</code>) and the Part VIII refresh API</td>
 <td>FE targets</td>
 <td>4 d</td>
 <td>0.5</td>
@@ -3712,10 +3746,58 @@
 <td>1.3</td>
 <td>Not started</td>
 </tr>
+<tr>
+<td>1.8</td>
+<td>Story 8 source-typed refresh items (<code>superset_chart</code> with <code>filter_context</code>, legacy flat item kept), <code>POST /api/v1/ai_slides/token-exchange</code>, shared <code>gck_data</code> mappers and the common snapshot shape (Story 1 alignment, contract test against <code>write_value</code>)</td>
+<td>BE</td>
+<td>6 d</td>
+<td>0.3</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.9</td>
+<td>Engine data API: <code>GET /v1/data/catalog</code>, <code>POST /v1/data/resolve</code> (SSE and JSON), 60 s per-viewer cache, limits and rate limits; catalog-time <code>mapping</code> and <code>format</code> derivation per viz type, constrained <code>chartType</code></td>
+<td>BE</td>
+<td>7 d</td>
+<td>1.2, 1.8</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.10</td>
+<td>Live bindings in <code>@gck/core</code>: <code>createBindingStore</code>, <code>createRefreshController</code> with refresh policies (<code>on_open</code>, <code>manual</code>, <code>interval</code> of at least 60 s, <code>on_filter_change</code>, <code>onVisible</code>), <code>resolveArtifact</code>, <code>stripRuntime</code>, <code>dataAsOf</code>; <code>@gck/data-superset</code> over <code>/v1/data/resolve</code>; run-to-host handoff at <code>gck.applied</code></td>
+<td>FE platform</td>
+<td>5 d</td>
+<td>1.5, 1.9</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.11</td>
+<td>Dashboard filter capture: native filter <code>dataMask</code> and a dashboard permalink into <code>HostDataScope</code> (<code>RunRequest.data.scope</code>), <code>filter_context: captured</code> on bindings</td>
+<td>FE hosts</td>
+<td>3 d</td>
+<td>1.6</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.12</td>
+<td>Story 8 dashboard filter scope: <code>get_dashboard_filter_context</code> on Superset master, a local <code>native_filter_configuration</code> resolver on 6.1, <code>applied_filters</code> and <code>rejected_filters</code> in results</td>
+<td>BE</td>
+<td>3 d</td>
+<td>1.8</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>1.13</td>
+<td>@gck/target-text: "Data as of" footer (<code>dataAsOf</code> option), binding status rendering (<code>stale</code>, <code>error</code>, <code>forbidden</code>)</td>
+<td>FE targets</td>
+<td>2 d</td>
+<td>1.4</td>
+<td>Not started</td>
+</tr>
 </tbody>
 </table>
 <h3 id="p2-tiptap-pages">P2: Tiptap pages<a class="headerlink" href="#p2-tiptap-pages" title="Permanent link">&para;</a></h3>
-<p>Tiptap target and extension, transform and edit intents. Weeks 8-11.</p>
+<p>Tiptap target and extension, transform and edit intents, live data nodes and parameters. Weeks 12-15.</p>
 <table>
 <thead>
 <tr>
@@ -3760,6 +3842,30 @@
 <td>2.2</td>
 <td>Not started</td>
 </tr>
+<tr>
+<td>2.5</td>
+<td>Tiptap live data: <code>binding</code> attribute (definition only) on <code>gckChart</code>, <code>gckMetric</code>, <code>gckDataTable</code> and <code>gckToken</code>, empty token text in saved HTML and JSON, <code>GckBindingsProvider</code> with <code>live</code>, <code>GckRefreshButton</code>, <code>GckParameterBar</code>, <code>GckEmbedView</code> (<code>gckEmbed</code> node, same-site live chart frame or link card), redact policy for shared pages</td>
+<td>FE kit</td>
+<td>5 d</td>
+<td>2.1, 1.10</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.6</td>
+<td>Dataset and metric sources (<code>superset_dataset</code>, <code>superset_metric</code> on tables) in Story 8 and the engine, validated against dataset metadata; artifact parameters (<code>ArtifactParameter</code>, <code>ParamBinding</code>) and the four-layer scope merge end to end</td>
+<td>BE</td>
+<td>5 d</td>
+<td>1.9</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>2.7</td>
+<td>Dataset and metric entries in the kit catalog (<code>DataCatalog.allowedDatasetIds</code>, <code>CatalogEntryView</code>) and source pickers</td>
+<td>FE kit</td>
+<td>1 d</td>
+<td>2.6, 1.3</td>
+<td>Not started</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition note">
@@ -3767,7 +3873,7 @@
 <p>The kit side of <code>transform</code> and <code>edit</code> is part of the core and target packages, not extra P2 work: the run controller's <code>submit({ prompt, intent, selection, baseArtifact, apply })</code> (0.5) sends all three intents, and the Tiptap and text targets implement the <code>patch</code> apply mode through <code>applyPatch</code> (2.1, 1.4), see <a href="../64-react-sdk-and-ui-kit/">React SDK and UI kit</a> and <a href="../62-artifact-spec-and-targets/">Artifact Spec and targets</a>. P2 wires them into the editor (2.2) and teaches the engine to answer them (2.3). Slides and dashboards keep <code>replace</code> for edits in v1.</p>
 </div>
 <h3 id="p3-superset-dashboards">P3: Superset dashboards<a class="headerlink" href="#p3-superset-dashboards" title="Permanent link">&para;</a></h3>
-<p>Dashboard target and Superset host. Weeks 12-15.</p>
+<p>Dashboard target and Superset host, live text charts. Weeks 16-19.</p>
 <table>
 <thead>
 <tr>
@@ -3820,10 +3926,34 @@
 <td>3.3</td>
 <td>Not started</td>
 </tr>
+<tr>
+<td>3.6</td>
+<td>Dashboard live text in <code>toPositions</code>: numbers in narrative become Handlebars charts (one dataset) or Big Number charts (<code>big_number_total</code>, <code>big_number</code>, <code>pop_kpi</code>), derived charts for pinned scope, new chart ids added to native filter scope, parameters as native filters, <code>json_metadata.refresh_frequency</code> from the refresh policy (at least 60 s)</td>
+<td>FE targets</td>
+<td>4 d</td>
+<td>3.1, 3.3</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.7</td>
+<td>Engine <code>POST /v1/render</code>: Python port of the text target (parity fixtures with <code>@gck/target-text</code>), headless refresh as the schedule executor for scheduled reports and alert narratives, stamped "Data as of"</td>
+<td>BE</td>
+<td>5 d</td>
+<td>1.9, 1.13</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>3.8</td>
+<td>Live-data test tier: two RLS users per target, filter capture and <code>follow_host</code>, parameters, limits and rate limits, <code>mapping_changed</code> drift</td>
+<td>QA</td>
+<td>3 d</td>
+<td>3.6, 2.5</td>
+<td>Not started</td>
+</tr>
 </tbody>
 </table>
 <h3 id="p4-slides-on-the-kit">P4: Slides on the kit<a class="headerlink" href="#p4-slides-on-the-kit" title="Permanent link">&para;</a></h3>
-<p>Presenton and AI Slides consume the kit, web component, hardening. Weeks 16-19.</p>
+<p>Presenton and AI Slides consume the kit, slide binding rows, web components, hardening. Weeks 20-24.</p>
 <table>
 <thead>
 <tr>
@@ -3876,6 +4006,46 @@
 <td>4.2, 4.4</td>
 <td>Not started</td>
 </tr>
+<tr>
+<td>4.6</td>
+<td>Slides binding rows: <code>SlideOut.bindings</code> persisted as <code>slide_data_bindings</code> rows by <code>POST .../slides/from-content</code> and the engine deck materializer in the same commit, status handling at fill time (never template sample data), refresh-on-open parity with Part VIII</td>
+<td>BE</td>
+<td>4 d</td>
+<td>4.3, 1.8</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.7</td>
+<td>Presenton transport for <code>@gck/data-superset</code> over the deck-scoped refresh routes; Story 4 <code>useDeckRefresh</code> as a thin wrapper over <code>createRefreshController</code> (gains <code>intervalMs</code>, <code>onVisible</code>)</td>
+<td>FE hosts</td>
+<td>3 d</td>
+<td>4.2, 1.10</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.8</td>
+<td><code>text_template</code> binding kind in Part VIII: live numbers in slide text, re-rendered through <code>gck_data.tokens.resolve_token</code></td>
+<td>BE</td>
+<td>3 d</td>
+<td>4.6</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.9</td>
+<td><code>&lt;gck-data&gt;</code> and <code>&lt;gck-artifact&gt;</code> live web components (<code>refresh()</code> method, <code>refresh-interval</code> attribute of at least 60)</td>
+<td>FE kit</td>
+<td>3 d</td>
+<td>4.4, 1.10</td>
+<td>Not started</td>
+</tr>
+<tr>
+<td>4.10</td>
+<td>PPTX native-chart acceptance test (one <code>ppt/charts/chart*.xml</code> per bound chart), python-pptx post-processor from the binding snapshot if needed</td>
+<td>BE</td>
+<td>3 d</td>
+<td>4.6</td>
+<td>Not started</td>
+</tr>
 </tbody>
 </table>
 <h2 id="step-3-check-each-phases-exit-criteria">Step 3: Check each phase's exit criteria<a class="headerlink" href="#step-3-check-each-phases-exit-criteria" title="Permanent link">&para;</a></h2>
@@ -3893,19 +4063,19 @@
 </tr>
 <tr>
 <td>P1</td>
-<td>In Superset, a user writes "summarize this dashboard for leadership" and gets a Markdown component whose numbers come from data tokens resolved against bound charts (Markdown is static text, so they are frozen at <code>snapshotAt</code> and shown with an "as of" date, see <a href="../65-host-integrations/">Host integrations</a>)</td>
+<td>In Superset, a user writes "summarize this dashboard for leadership" and every data token in the generated text comes from a binding resolved as the viewer, with the dashboard's native filters captured at submit; text the kit renders refreshes on open and on "Refresh data" with the same scope, and static outputs (a Markdown component, exported Markdown or email) carry "Data as of" (<a href="../69-live-superset-data/">Live Superset data</a>)</td>
 </tr>
 <tr>
 <td>P2</td>
-<td>In a Tiptap page, <code>/ai</code> generates a page with a live chart node; selecting text and choosing "turn into chart" replaces the selection (<code>transform</code>); "Edit page" changes only the affected blocks (<code>edit</code> with <code>patch</code>); one undo reverts each of them</td>
+<td>In a Tiptap page, <code>/ai</code> generates a page with a live chart node; selecting text and choosing "turn into chart" replaces the selection (<code>transform</code>); "Edit page" changes only the affected blocks (<code>edit</code> with <code>patch</code>); one undo reverts each of them. Reopening the page refreshes every data node as the viewer, "Refresh data" forces it, a viewer without access sees no numbers, copy-paste keeps nodes refreshable, and changing a parameter re-resolves only the nodes that depend on it</td>
 </tr>
 <tr>
 <td>P3</td>
-<td>From a dashboard, "create an EMEA tab with revenue and churn" produces a new tab that uses existing charts, respects permissions and can be reverted</td>
+<td>From a dashboard, "create an EMEA tab with revenue and churn" produces a new tab that uses existing charts, respects permissions and can be reverted; its charts are filtered to the prompt's scope and react to native filter changes, and numbers in its narrative are live charts (Handlebars or Big Number) or stamped</td>
 </tr>
 <tr>
 <td>P4</td>
-<td>Presenton's own outline and streaming screens run on the kit with no user-visible regression; the <code>&lt;gck-generate&gt;</code> web component works in a plain HTML page; version 1.0 is published</td>
+<td>Presenton's own outline and streaming screens run on the kit with no user-visible regression; a GCK deck has <code>slide_data_bindings</code> rows, refreshes on open (Story 4 AC1 to AC6), bakes fresh data into export (Story 1 AC6) and its PPTX charts carry native data; the <code>&lt;gck-generate&gt;</code> web component works in a plain HTML page; version 1.0 is published</td>
 </tr>
 </tbody>
 </table>
@@ -3944,24 +4114,59 @@
 <td>Duplicate work, divergent bindings model</td>
 <td>Share the bindings model and refresh API from Part VIII; one owner for <code>@gck/protocol</code> across both teams</td>
 </tr>
+<tr>
+<td>Data identity outside Superset (no shared session or identity provider)</td>
+<td>Tiptap pages and web components on another origin show no live data</td>
+<td>Token-exchange contract test; <code>no_data_identity</code> fallback in every view; documented identity bridges (<a href="../69-live-superset-data/">Live Superset data</a>)</td>
+</tr>
+<tr>
+<td>Author and viewer row level security differ</td>
+<td>A shared page leaks the author's numbers</td>
+<td>Per-viewer resolution, redact policy for snapshots resolved by someone else, two-user tests in 3.8</td>
+</tr>
+<tr>
+<td>Superset 6.1 lacks <code>get_dashboard_filter_context</code>, <code>apply_dashboard_filter_context</code>, the form-data rebuild and <code>number_format.py</code></td>
+<td>Filters and formats differ between 6.1 and master</td>
+<td>Story 8's local 6.1 scope resolver with per-viz tests (1.12); vendored formatter; <code>no_query_context</code> fallback</td>
+</tr>
+<tr>
+<td>Superset dashboard auto refresh defaults to force mode (<code>DASHBOARD_AUTO_REFRESH_MODE = "force"</code>)</td>
+<td>Every interval bypasses the cache and loads the database</td>
+<td>The dashboard target writes no interval below 60 s, recommends 300 s or more, or <code>fetch</code> mode per deployment</td>
+</tr>
+<tr>
+<td>Handlebars number formatting differs from d3</td>
+<td>Live dashboard text formats numbers differently from charts</td>
+<td><code>format_approximated</code> warning; Big Number charts for single KPIs</td>
+</tr>
+<tr>
+<td>export-core may rasterize charts in PPTX</td>
+<td>Exported decks lose native chart data</td>
+<td>PPTX acceptance test plus python-pptx post-processor (4.10)</td>
+</tr>
+<tr>
+<td>Static hosts show old numbers</td>
+<td>Readers trust stale figures</td>
+<td>Mandatory "Data as of" stamps; scheduled sends re-render per send (3.7)</td>
+</tr>
 </tbody>
 </table>
 <h2 id="step-5-decide-how-to-run-it-alongside-ai-slides">Step 5: Decide how to run it alongside AI Slides<a class="headerlink" href="#step-5-decide-how-to-run-it-alongside-ai-slides" title="Permanent link">&para;</a></h2>
 <p>Two workable options:</p>
 <ul>
 <li><strong>Sequential (recommended for a small team).</strong> Finish the AI Slides pilot, then start P0 with the same people. The Part VIII code (bindings, refresh API, harness planner) becomes the engine's data layer, and nothing is built twice.</li>
-<li><strong>Parallel.</strong> A separate pair of frontend engineers starts P0 and P1 while AI Slides continues. This works only if <code>@gck/protocol</code> adopts Part VIII's binding shape unchanged and one person owns the protocol across both teams.</li>
+<li><strong>Parallel.</strong> A separate pair of frontend engineers starts P0 and P1 while AI Slides continues. This works only if <code>@gck/protocol</code> and Part VIII share one binding shape and one person owns the protocol across both teams. The shapes are aligned field by field (a GCK <code>DataBinding</code> maps onto a <code>slide_data_bindings</code> row, see <a href="../66-extracting-from-presenton/">Extracting the engine from Presenton</a>), both stores use the snapshot JSON produced by the shared <code>gck_data</code> mappers (1.8), and a contract test pipes one recorded Story 8 response through <code>gck_data.map_result</code> into Part VIII's <code>write_value</code> and GCK's <code>resolveToken</code> and asserts identical displays.</li>
 </ul>
 <h2 id="step-6-keep-the-tracker-current">Step 6: Keep the tracker current<a class="headerlink" href="#step-6-keep-the-tracker-current" title="Permanent link">&para;</a></h2>
 <p>The tables above and the CSV download are generated by <code>tutorial/scripts/gen_gck_roadmap.py</code> from one work-package list. To re-plan, edit the list and regenerate:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>tutorial/scripts/gen_gck_roadmap.py<span class="w"> </span>/tmp/gck-tables.md<span class="w"> </span>tutorial/content/assets/gck-roadmap-tracker.csv
 </span></code></pre></div>
-<p>Paste the regenerated tables into this page. The script holds the short work-package names; the descriptions on this page add the package and API names from chapters 62 to 67 (for example <code>RUNS_ROUTER</code> or <code>toPositions</code>), so carry those over when you paste. IDs, areas, effort and dependencies must match the script exactly. The CSV has empty Owner, Start week and End week columns, ready to fill in the team sheet.</p>
+<p>Paste the regenerated tables into this page. The script holds the short work-package names; the descriptions on this page add the package and API names from chapters 62 to 69 (for example <code>RUNS_ROUTER</code> or <code>toPositions</code>), so carry those over when you paste. IDs, areas, effort and dependencies must match the script exactly. The CSV has empty Owner, Start week and End week columns, ready to fill in the team sheet.</p>
 <p>Feature flags introduced by the kit (see <a href="../67-frontend-engineering/">Frontend engineering and quality</a>) each get a removal date: record it in the tracker against the work package that introduces the flag.</p>
 <h2 id="what-you-now-know">What you now know<a class="headerlink" href="#what-you-now-know" title="Permanent link">&para;</a></h2>
 <ul>
-<li>The five phases, why they come in this order, and what each one demonstrates.</li>
-<li>The 27 work packages, their effort, area and dependencies, about 145 person-days in total.</li>
+<li>The five phases, why they come in this order, and what each one demonstrates, including how each phase makes its own target show live Superset data.</li>
+<li>The 44 work packages, their effort, area and dependencies, about 210 person-days in total, 65 of them for live Superset data.</li>
 <li>The team shape and capacity assumptions behind the indicative windows.</li>
 <li>The main risks and how to run this work alongside AI Slides.</li>
 </ul>

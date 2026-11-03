@@ -9,7 +9,7 @@ ID,Phase,Phase name,Work package,Area,Effort (person-days),Depends on,Owner,Star
 1.2,P1,Engine and first non-slide target,Engine: manifest-driven schema assembly and generalized plan and content steps,BE,8,1.1,,,,Not started
 1.3,P1,Engine and first non-slide target,"@gck/react: provider, hooks, PromptComposer, OutlineReview, StreamingPreview, ApplyBar",FE kit,10,0.5,,,,Not started
 1.4,P1,Engine and first non-slide target,"@gck/target-text: Markdown, plain text, sanitized HTML",FE targets,3,0.5,,,,Not started
-1.5,P1,Engine and first non-slide target,"@gck/data-superset: catalog, binding resolution through the Part VIII refresh API",FE targets,4,0.5,,,,Not started
+1.5,P1,Engine and first non-slide target,"@gck/data-superset: catalog, binding resolution through the engine and the Part VIII refresh API",FE targets,4,0.5,,,,Not started
 1.6,P1,Engine and first non-slide target,Superset text host: Markdown component and SQL Lab narrative panel,FE hosts,5,"1.3, 1.4",,,,Not started
 1.7,P1,Engine and first non-slide target,"Theming tokens from Superset, i18n, accessibility pass",FE kit,4,1.3,,,,Not started
 2.1,P2,Tiptap pages,"@gck/target-tiptap: Artifact <-> ProseMirror JSON, gckChart, gckMetric, gckDataTable, gckToken nodes",FE targets,8,0.5,,,,Not started
@@ -26,3 +26,20 @@ ID,Phase,Phase name,Work package,Area,Effort (person-days),Depends on,Owner,Star
 4.3,P4,Slides on the kit,"Engine: slides target behind /v1/runs, compatibility with existing Presenton endpoints",BE,6,1.2,,,,Not started
 4.4,P4,Slides on the kit,@gck/element web component and iframe fallback,FE kit,4,1.3,,,,Not started
 4.5,P4,Slides on the kit,"Security review, bundle budgets, docs site, 1.0 release",FE platform,5,"4.2, 4.4",,,,Not started
+1.8,P1,Engine and first non-slide target,"Story 8 source-typed refresh items, token exchange, shared gck_data mappers and snapshot shape",BE,6,0.3,,,,Not started
+1.9,P1,Engine and first non-slide target,"Engine data API: /v1/data/catalog and /v1/data/resolve, cache, limits, catalog-time mapping and format",BE,7,"1.2, 1.8",,,,Not started
+1.10,P1,Engine and first non-slide target,"Live bindings in @gck/core: binding store, refresh controller, refresh policies; @gck/data-superset over the engine",FE platform,5,"1.5, 1.9",,,,Not started
+1.11,P1,Engine and first non-slide target,"Dashboard filter capture: dataMask and permalink into HostDataScope, filter_context on bindings",FE hosts,3,1.6,,,,Not started
+1.12,P1,Engine and first non-slide target,"Story 8 dashboard filter scope: master filter context, 6.1 local resolver",BE,3,1.8,,,,Not started
+1.13,P1,Engine and first non-slide target,Text target: Data as of footer and binding status rendering,FE targets,2,1.4,,,,Not started
+2.5,P2,Tiptap pages,"Tiptap live data: binding node attrs, live provider, Refresh button, parameter bar, embed view, redact policy",FE kit,5,"2.1, 1.10",,,,Not started
+2.6,P2,Tiptap pages,"Dataset and metric sources (superset_dataset, superset_metric) and artifact parameters end to end",BE,5,1.9,,,,Not started
+2.7,P2,Tiptap pages,Dataset and metric entries in the kit catalog and source pickers,FE kit,1,"2.6, 1.3",,,,Not started
+3.6,P3,Superset dashboards,"Dashboard live text: Handlebars and Big Number charts, derived charts, filter scope, refresh_frequency",FE targets,4,"3.1, 3.3",,,,Not started
+3.7,P3,Superset dashboards,"Engine /v1/render: Python text target port, headless refresh as the schedule executor",BE,5,"1.9, 1.13",,,,Not started
+3.8,P3,Superset dashboards,"Live-data test tier: two RLS users per target, filter capture and follow, limits, drift",QA,3,"3.6, 2.5",,,,Not started
+4.6,P4,Slides on the kit,"Slides binding rows in from-content and the materializer, status handling, refresh-on-open parity",BE,4,"4.3, 1.8",,,,Not started
+4.7,P4,Slides on the kit,Presenton transport for @gck/data-superset; useDeckRefresh over the refresh controller,FE hosts,3,"4.2, 1.10",,,,Not started
+4.8,P4,Slides on the kit,text_template binding kind in Part VIII: live numbers in slide text,BE,3,4.6,,,,Not started
+4.9,P4,Slides on the kit,<gck-data> and <gck-artifact> live web components,FE kit,3,"4.4, 1.10",,,,Not started
+4.10,P4,Slides on the kit,"PPTX native-chart acceptance test, python-pptx post-processor if needed",BE,3,4.6,,,,Not started
