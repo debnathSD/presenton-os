@@ -1,0 +1,28 @@
+ID,Phase,Phase name,Work package,Area,Effort (person-days),Depends on,Owner,Start week,End week,Status
+0.1,P0,Foundations,"Monorepo with pnpm workspaces, Turborepo, tsup builds, size-limit, changesets",FE platform,4,,,,,Not started
+0.2,P0,Foundations,"@gck/protocol: Artifact Spec, events, manifests as TS types and JSON Schemas",FE platform,5,,,,,Not started
+0.3,P0,Foundations,Schema contract test shared with the engine (Pydantic <-> JSON Schema),BE,3,0.2,,,,Not started
+0.4,P0,Foundations,"@gck/client: fetch-based streaming, reconnect with Last-Event-ID, cancel",FE platform,5,0.2,,,,Not started
+0.5,P0,Foundations,"@gck/core: run state machine, artifact store with JSON Patch, plugin registry",FE platform,6,0.2,,,,Not started
+0.6,P0,Foundations,Mock engine (MSW) replaying recorded event logs; Storybook setup,FE platform,3,0.4,,,,Not started
+1.1,P1,Engine and first non-slide target,"Engine: /v1/runs router, run event log, cancel, resume",BE,6,0.3,,,,Not started
+1.2,P1,Engine and first non-slide target,Engine: manifest-driven schema assembly and generalized plan and content steps,BE,8,1.1,,,,Not started
+1.3,P1,Engine and first non-slide target,"@gck/react: provider, hooks, PromptComposer, OutlineReview, StreamingPreview, ApplyBar",FE kit,10,0.5,,,,Not started
+1.4,P1,Engine and first non-slide target,"@gck/target-text: Markdown, plain text, sanitized HTML",FE targets,3,0.5,,,,Not started
+1.5,P1,Engine and first non-slide target,"@gck/data-superset: catalog, binding resolution through the Part VIII refresh API",FE targets,4,0.5,,,,Not started
+1.6,P1,Engine and first non-slide target,Superset text host: Markdown component and SQL Lab narrative panel,FE hosts,5,"1.3, 1.4",,,,Not started
+1.7,P1,Engine and first non-slide target,"Theming tokens from Superset, i18n, accessibility pass",FE kit,4,1.3,,,,Not started
+2.1,P2,Tiptap pages,"@gck/target-tiptap: Artifact <-> ProseMirror JSON, gckChart, gckMetric, gckDataTable, gckToken nodes",FE targets,8,0.5,,,,Not started
+2.2,P2,Tiptap pages,"Tiptap extension: /ai slash command, bubble actions, streaming insert, single undo step",FE hosts,7,"2.1, 1.3",,,,Not started
+2.3,P2,Tiptap pages,"Engine: transform and edit intents (selection import, patch generation)",BE,6,1.2,,,,Not started
+2.4,P2,Tiptap pages,Tiptap demo app and Playwright end-to-end tests,QA,4,2.2,,,,Not started
+3.1,P3,Superset dashboards,@gck/target-superset-dashboard: position_json and json_metadata builder,FE targets,6,0.5,,,,Not started
+3.2,P3,Superset dashboards,"@gck/host-superset: extension commands, menus, dashboard context provider",FE hosts,6,1.3,,,,Not started
+3.3,P3,Superset dashboards,"Apply flow: new dashboard or new tab through the Superset REST API, with revert",FE hosts,5,"3.1, 3.2",,,,Not started
+3.4,P3,Superset dashboards,Engine: dashboard layout planning with the 12-column grid,BE,4,1.2,,,,Not started
+3.5,P3,Superset dashboards,"Superset dev instance end-to-end tests, RLS and permission cases",QA,4,3.3,,,,Not started
+4.1,P4,Slides on the kit,"@gck/target-slides on Template v2, lazy-loaded renderer",FE targets,6,0.5,,,,Not started
+4.2,P4,Slides on the kit,Presenton consumes the kit: replace outline and streaming hooks (strangler),FE hosts,8,"4.1, 1.3",,,,Not started
+4.3,P4,Slides on the kit,"Engine: slides target behind /v1/runs, compatibility with existing Presenton endpoints",BE,6,1.2,,,,Not started
+4.4,P4,Slides on the kit,@gck/element web component and iframe fallback,FE kit,4,1.3,,,,Not started
+4.5,P4,Slides on the kit,"Security review, bundle budgets, docs site, 1.0 release",FE platform,5,"4.2, 4.4",,,,Not started

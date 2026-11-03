@@ -154,6 +154,16 @@ nav:
       - "Story 7: Harness presentation planner": delivery/48-story7-harness-planner.md
       - "Story 8: Analytics refresh APIs and MCP": delivery/49-story8-analytics-mcp.md
       - "Story 9: Deployment": delivery/50-story9-infra.md
+  - "Part IX · Generative Content Kit":
+      - ai-component/index.md
+      - Architecture: ai-component/61-architecture.md
+      - Artifact Spec and targets: ai-component/62-artifact-spec-and-targets.md
+      - Run protocol and client: ai-component/63-run-protocol-and-client.md
+      - React SDK and UI kit: ai-component/64-react-sdk-and-ui-kit.md
+      - Host integrations: ai-component/65-host-integrations.md
+      - Extracting the engine from Presenton: ai-component/66-extracting-from-presenton.md
+      - Frontend engineering and quality: ai-component/67-frontend-engineering.md
+      - Roadmap and tracker: ai-component/68-roadmap.md
   - Appendix:
       - Glossary: appendix-glossary.md
       - Endpoint index: appendix-endpoints.md
