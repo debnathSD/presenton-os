@@ -16,18 +16,14 @@ copyright: >-
 theme:
   name: material
   language: en
+  custom_dir: overrides
   features:
-    - navigation.tabs
-    - navigation.tabs.sticky
-    - navigation.sections
     - navigation.indexes
+    - navigation.path
     - navigation.top
     - navigation.footer
     - navigation.tracking
     - toc.follow
-    - search.suggest
-    - search.highlight
-    - search.share
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
@@ -35,15 +31,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: deep purple
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -55,6 +51,13 @@ theme:
 
 extra_css:
   - stylesheets/extra.css
+  - assets/spotlight/spotlight.css
+
+extra_javascript:
+  - assets/spotlight/spotlight.js
+
+hooks:
+  - hooks/spotlight_index.py
 
 markdown_extensions:
   - abbr
@@ -88,18 +91,19 @@ markdown_extensions:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
-plugins:
-  - search
+# Material's built-in search is replaced by the Spotlight search (hooks/spotlight_index.py
+# builds the index, assets/spotlight/ holds the UI and the ranking worker).
+plugins: []
 
 nav:
   - Home: index.md
-  - "Part I · Orientation":
+  - "Part I: Orientation":
       - presenton/index.md
       - What Presenton is: presenton/01-what-is-presenton.md
       - Repository tour: presenton/02-repository-tour.md
       - Runtime topology: presenton/03-runtime-topology.md
       - Running it locally: presenton/04-running-locally.md
-  - "Part II · Backend":
+  - "Part II: Backend internals":
       - FastAPI app and startup: presenton/05-fastapi-startup.md
       - Configuration and LLM providers: presenton/06-configuration-and-providers.md
       - Data model: presenton/07-data-model.md
@@ -111,24 +115,24 @@ nav:
       - Smart mode: presenton/13-smart-mode.md
       - Editing and chat assistant: presenton/14-editing-and-chat.md
       - REST API, async tasks, webhooks, MCP: presenton/15-api-async-mcp.md
-  - "Part III · Templates":
+  - "Part III: Templates":
       - Template v2 format: presenton/16-template-v2-format.md
       - From template to schema to slide: presenton/17-template-to-slide.md
       - Custom templates from PPTX: presenton/18-custom-templates.md
       - Themes and fonts: presenton/19-themes-and-fonts.md
-  - "Part IV · Frontend":
+  - "Part IV: Frontend":
       - Next.js architecture: presenton/20-nextjs-architecture.md
       - User journey: presenton/21-user-journey.md
       - Slide editor: presenton/22-slide-editor.md
       - Settings, onboarding, auth UI: presenton/23-settings-and-auth-ui.md
-  - "Part V · Export":
+  - "Part V: Export":
       - PPTX and PDF export: presenton/24-export-pipeline.md
-  - "Part VI · Auth, infra, ops":
+  - "Part VI: Auth, infra and ops":
       - Auth and multi-user: presenton/25-auth-and-multiuser.md
       - Docker build and deployment: presenton/26-docker-and-deployment.md
       - Electron desktop app: presenton/27-electron.md
       - CI, tests, security: presenton/28-ci-tests-security.md
-  - "Part VII · Superset integration":
+  - "Part VII: Superset integration design":
       - superset/index.md
       - Vision and requirements: superset/30-vision.md
       - Superset landscape (6.1): superset/31-superset-landscape.md
@@ -141,7 +145,7 @@ nav:
       - Security, RLS, auth: superset/38-security.md
       - Scheduling and live refresh: superset/39-scheduling-and-refresh.md
       - Roadmap: superset/40-roadmap.md
-  - "Part VIII · AI Slides delivery":
+  - "Part VIII: AI Slides delivery plan":
       - delivery/index.md
       - Release plan and tracker: delivery/51-release-plan.md
       - Architecture and contracts: delivery/41-architecture-and-contracts.md
@@ -154,7 +158,7 @@ nav:
       - "Story 7: Harness presentation planner": delivery/48-story7-harness-planner.md
       - "Story 8: Analytics refresh APIs and MCP": delivery/49-story8-analytics-mcp.md
       - "Story 9: Deployment": delivery/50-story9-infra.md
-  - "Part IX · Generative Content Kit":
+  - "Part IX: Generative Content Kit":
       - ai-component/index.md
       - Architecture: ai-component/61-architecture.md
       - Artifact Spec and targets: ai-component/62-artifact-spec-and-targets.md
@@ -165,7 +169,7 @@ nav:
       - Extracting the engine from Presenton: ai-component/66-extracting-from-presenton.md
       - Frontend engineering and quality: ai-component/67-frontend-engineering.md
       - Roadmap and tracker: ai-component/68-roadmap.md
-  - Appendix:
+  - "Appendix: reference":
       - Glossary: appendix-glossary.md
       - Endpoint index: appendix-endpoints.md
       - File index: appendix-files.md

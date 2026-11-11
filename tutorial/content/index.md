@@ -1,53 +1,182 @@
-# Presenton OS Internals
+---
+title: Home
+hide:
+  - navigation
+  - toc
+---
 
-<div class="chapter-meta" markdown>
-**Source snapshot:** `presenton/presenton` at the commit mirrored in this repository (v0.9.12-beta line, November 2026)  ·  **Tutorial repository:** [debnathSD/presenton-os](https://github.com/debnathSD/presenton-os)
+<div class="home-hero" markdown>
+<span class="home-hero__eyebrow">Code-level tutorial · Presenton + Apache Superset</span>
+
+# How Presenton works, and how to build it into Superset
+
+<p class="home-hero__lead">A step-by-step walkthrough of Presenton, the open-source AI presentation generator, read file by file, plus designs and delivery plans for bringing prompt-to-deck generation with live data into Apache Superset and any editor.</p>
+
+<button type="button" class="home-search" data-spotlight-open aria-haspopup="dialog">
+<span class="spx__sr">Search the tutorial.</span>
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l5.45 5.44-1.42 1.42-5.44-5.45A6.5 6.5 0 1 1 9.5 3m0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9"/></svg>
+<span>Ask anything, for example “how is context passed to each slide?”</span>
+<kbd aria-hidden="true"><span data-spx-mod>⌘</span>K</kbd>
+</button>
+
+<div class="home-hero__chips" role="group" aria-label="Example questions">
+<button type="button" class="home-chip" data-spotlight-open aria-haspopup="dialog" data-spotlight-query="How does Presenton pass context to each slide?">Context per slide</button>
+<button type="button" class="home-chip" data-spotlight-open aria-haspopup="dialog" data-spotlight-query="How is a template turned into a JSON schema?">Template to schema</button>
+<button type="button" class="home-chip" data-spotlight-open aria-haspopup="dialog" data-spotlight-query="How does PPTX export work?">PPTX export</button>
+<button type="button" class="home-chip" data-spotlight-open aria-haspopup="dialog" data-spotlight-query="How do slides get live Superset data?">Live Superset data</button>
+<button type="button" class="home-chip" data-spotlight-open aria-haspopup="dialog" data-spotlight-query="AI Slides release plan">Release plan</button>
 </div>
 
-This site is a code-level tutorial on **Presenton**, the open-source AI presentation generator, followed by a complete engineering design for bringing the same "prompt plus template, out comes a deck" workflow to **Apache Superset** with slides that are bound to live data instead of screenshots.
+<div class="home-hero__actions" markdown>
+[Start reading :material-arrow-right:](presenton/01-what-is-presenton.md){ .md-button .md-button--primary }
+[See the Superset plan](delivery/index.md){ .md-button }
+</div>
+</div>
 
-It was written by reading the repository file by file. Every chapter cites the exact source paths (and line numbers where they matter) so you can open the code next to the text and verify each claim.
+## Choose your path
 
-## How the book is organised
+<div class="grid cards" markdown>
 
-| Part | What it covers | Read it if you want to |
-| --- | --- | --- |
-| **I · Orientation** | What Presenton is, repository layout, the process topology in Docker and Electron, running it locally | Get a mental map before touching code |
-| **II · Backend** | FastAPI startup, configuration precedence, the data model, the Standard generation pipeline, prompts, SSE streaming, document ingestion, images/icons/web search, Smart mode, editing and chat, the REST/MCP API surface | Change how decks are generated |
-| **III · Templates** | The Template v2 JSON format, how a template becomes a JSON schema for the LLM and a rendered slide, custom templates from PPTX, themes and fonts | Add or modify designs |
-| **IV · Frontend** | Next.js app architecture, the user journey, the slide editor, settings and auth UI | Change the UI |
-| **V · Export** | How slides become an editable PPTX and a PDF | Change the output files |
-| **VI · Auth, infra, ops** | Authentication and multi-user isolation, Docker image, Electron app, CI and security | Deploy or operate it |
-| **VII · Superset integration** | A step-by-step design for a Superset extension plus a generation service that produces data-bound decks, pages and documents from prompts and templates | Build the same thing for Superset |
+-   :material-school-outline:{ .lg .middle } __I want to understand Presenton__
 
-## Reading paths
+    ---
 
-- **"I just want to know how a prompt becomes a PPTX."** Read [What Presenton is](presenton/01-what-is-presenton.md), [Runtime topology](presenton/03-runtime-topology.md), then [Standard generation pipeline](presenton/08-standard-pipeline.md), [From template to schema to slide](presenton/17-template-to-slide.md) and [PPTX and PDF export](presenton/24-export-pipeline.md).
-- **"I want to add a new template."** Read Part III in order.
-- **"I want to integrate Presenton-style generation into my own product."** Read [REST API, async tasks, webhooks, MCP](presenton/15-api-async-mcp.md) and then all of Part VII.
-- **"I am going to build the Superset version."** Read Parts I, II, III and V first; Part VII assumes them.
+    How a prompt becomes an outline, slide layouts, streamed content and an editable PPTX.
 
-## Conventions
+    [:material-arrow-right: What Presenton is](presenton/01-what-is-presenton.md) · [Standard pipeline](presenton/08-standard-pipeline.md)
 
-- Paths are relative to the repository root, for example `servers/fastapi/api/main.py`.
-- `path:line` references point at the mirrored snapshot. Line numbers drift as upstream changes, so treat them as "near here".
-- Diagrams are Mermaid; sequence diagrams show request flows, flowcharts show data flows.
-- Blocks marked **Gotcha** describe behaviour that is easy to get wrong when modifying the code.
+-   :material-presentation-play:{ .lg .middle } __I am building AI Slides in Superset__
+
+    ---
+
+    The nine stories with architecture, code, owners, effort and weekly release dates.
+
+    [:material-arrow-right: AI Slides delivery plan](delivery/index.md) · [Release tracker](delivery/51-release-plan.md)
+
+-   :material-puzzle-outline:{ .lg .middle } __I want one AI component for any editor__
+
+    ---
+
+    The Generative Content Kit: slides, Tiptap pages, Superset dashboards and text from natural language, with live data.
+
+    [:material-arrow-right: Generative Content Kit](ai-component/index.md) · [Live Superset data](ai-component/69-live-superset-data.md)
+
+-   :material-chart-box-outline:{ .lg .middle } __I am designing the Superset-native version__
+
+    ---
+
+    Data-bound documents: native charts, no screenshots, refresh as the viewer.
+
+    [:material-arrow-right: Superset integration design](superset/index.md)
+
+</div>
+
+## Browse all parts
+
+<div class="grid cards" markdown>
+
+-   __Part I: Orientation__
+
+    <span class="part-meta">5 pages</span>
+
+    What Presenton is, the repository, the running processes and how to run it locally.
+
+    [:material-arrow-right: Open Part I](presenton/index.md)
+
+-   __Part II: Backend internals__
+
+    <span class="part-meta">11 chapters</span>
+
+    FastAPI startup, providers, data model, the generation pipeline, prompts, streaming, documents, Smart mode, chat and the API.
+
+    [:material-arrow-right: Open Part II](presenton/05-fastapi-startup.md)
+
+-   __Part III: Templates__
+
+    <span class="part-meta">4 chapters</span>
+
+    The Template v2 format, how a template becomes a schema and a slide, custom templates from PPTX, themes and fonts.
+
+    [:material-arrow-right: Open Part III](presenton/16-template-v2-format.md)
+
+-   __Part IV: Frontend__
+
+    <span class="part-meta">4 chapters</span>
+
+    Next.js architecture, the user journey, the slide editor, settings and auth screens.
+
+    [:material-arrow-right: Open Part IV](presenton/20-nextjs-architecture.md)
+
+-   __Part V: Export__
+
+    <span class="part-meta">1 chapter</span>
+
+    How slides become an editable PPTX and a PDF.
+
+    [:material-arrow-right: Open Part V](presenton/24-export-pipeline.md)
+
+-   __Part VI: Auth, infra and ops__
+
+    <span class="part-meta">4 chapters</span>
+
+    Multi-user auth, the Docker image, the Electron app, CI, tests and security.
+
+    [:material-arrow-right: Open Part VI](presenton/25-auth-and-multiuser.md)
+
+-   __Part VII: Superset integration design__
+
+    <span class="part-meta">12 pages</span>
+
+    The long-term, Superset-native design for data-bound decks, documents, text and pages.
+
+    [:material-arrow-right: Open Part VII](superset/index.md)
+
+-   __Part VIII: AI Slides delivery plan__
+
+    <span class="part-meta">13 pages</span>
+
+    The architect's nine stories turned into implementation guides, with a release tracker.
+
+    [:material-arrow-right: Open Part VIII](delivery/index.md)
+
+-   __Part IX: Generative Content Kit__
+
+    <span class="part-meta">11 pages</span>
+
+    A host-agnostic AI component extracted from Presenton, with live Superset data for every target.
+
+    [:material-arrow-right: Open Part IX](ai-component/index.md)
+
+-   __Appendix: reference__
+
+    <span class="part-meta">3 pages</span>
+
+    Glossary, every API endpoint and an annotated file index.
+
+    [:material-arrow-right: Glossary](appendix-glossary.md) · [Endpoints](appendix-endpoints.md) · [Files](appendix-files.md)
+
+</div>
+
+## How to get around
+
+<div class="home-steps">
+<div class="home-step"><strong>Search anything</strong>Press <kbd><span data-spx-mod>⌘</span>K</kbd> or <kbd>/</kbd>, or use the search box at the top. Ask in plain words or type a file or function name.</div>
+<div class="home-step"><strong>Use the left sidebar</strong>Every Part is a group you can open and close. The Part you are reading stays highlighted.</div>
+<div class="home-step"><strong>Follow the breadcrumbs</strong>The path above each page title shows where you are and links back up.</div>
+<div class="home-step"><strong>Read in order</strong>Each chapter ends with a Next link, and the footer has Previous and Next buttons.</div>
+</div>
 
 ## Where the code is
 
-The mirrored source lives in this same repository, one directory above this tutorial:
+The mirrored Presenton source lives in the [debnathSD/presenton-os](https://github.com/debnathSD/presenton-os) repository, next to this tutorial. Chapters cite code as `path:line` against snapshot `571461f`; line numbers drift as upstream changes, so treat them as "near here".
 
 ```text
 presenton-os/
 ├── servers/fastapi/     Python backend (FastAPI, SQLModel, llmai, python-pptx)
-├── servers/nextjs/      Next.js 16 frontend (React 19, Redux Toolkit, Tiptap, Konva)
-├── templates/           16 built-in Template v2 designs (template.json + static assets)
+├── servers/nextjs/      Next.js frontend (React, Redux Toolkit, Tiptap, Konva)
+├── templates/           16 built-in Template v2 designs
 ├── electron/            Desktop app wrapper
 ├── scripts/             Build, sync and security helper scripts
 ├── start.js             Process supervisor used inside the Docker image
-├── Dockerfile, docker-compose.yml, nginx.conf
 └── tutorial/            This site (MkDocs Material)
 ```
-
-Start with [Part I · Orientation](presenton/index.md).
