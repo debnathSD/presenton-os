@@ -1,0 +1,12 @@
+{
+  "frozenAt": "after markdown adapter, before plain-text adapter",
+  "files": {
+    "adapter.ts": "63437c4c0e52228d",
+    "conformance.mjs": "21e0f48643fe82d7",
+    "fixtures.mjs": "80ba6f5f44aa2956",
+    "negotiate.mjs": "5170aa3deea3da4e",
+    "registry.mjs": "0daa70e9ee258580",
+    "udm-runtime.mjs": "c98fb4410116090f",
+    "udm.ts": "e005c13b40e9704e"
+  }
+}

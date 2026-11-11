@@ -169,6 +169,15 @@ nav:
       - Extracting the engine from Presenton: ai-component/66-extracting-from-presenton.md
       - Frontend engineering and quality: ai-component/67-frontend-engineering.md
       - Roadmap and tracker: ai-component/68-roadmap.md
+  - "Part X: Final approach":
+      - final/index.md
+      - Feasibility analysis: final/71-feasibility.md
+      - Unified Document Model: final/72-unified-document-model.md
+      - PPT adapter (Presenton JSON): final/73-ppt-adapter.md
+      - Tiptap adapter (tiptap.json): final/74-tiptap-adapter.md
+      - Adding any new target: final/77-adding-a-new-target.md
+      - Code changes in Presenton: final/75-presenton-code-changes.md
+      - Plan and tracker: final/76-plan-and-tracker.md
   - "Appendix: reference":
       - Glossary: appendix-glossary.md
       - Endpoint index: appendix-endpoints.md

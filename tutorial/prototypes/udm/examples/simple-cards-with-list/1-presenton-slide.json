@@ -1,0 +1,346 @@
+{
+  "templateId": "dynamic",
+  "slides": [
+    {
+      "layout_group": "dynamic",
+      "layout": "center_title_cards_4771",
+      "ui": {
+        "id": "center_title_cards_4771",
+        "description": "Dark full-slide background with a centered headline area and equal rounded cards arranged across the lower half.",
+        "components": [
+          {
+            "id": "full_bleed_background",
+            "description": "A full-slide decorative image fills the canvas and provides the dark textured backdrop with warm lower accent.",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "elements": [
+              {
+                "type": "image",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "size": {
+                  "width": 1280,
+                  "height": 720
+                },
+                "data": "static/image6-67ec4cfdc5cc.jpeg",
+                "fit": "cover",
+                "decorative": true,
+                "name": "background_texture",
+                "is_icon": false
+              }
+            ]
+          },
+          {
+            "id": "top_center_header",
+            "description": "Centered title and subtitle text block positioned above the card row with generous horizontal margins.",
+            "position": {
+              "x": 169.98,
+              "y": 69.33
+            },
+            "elements": [
+              {
+                "type": "text",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "size": {
+                  "width": 940.05,
+                  "height": 79.47
+                },
+                "font": {
+                  "size": 64,
+                  "family": "Montserrat Medium",
+                  "color": "#FFFFFF",
+                  "bold": true,
+                  "line_height": 1.25,
+                  "letter_spacing": -0.64
+                },
+                "alignment": {
+                  "horizontal": "center",
+                  "vertical": "top"
+                },
+                "runs": [
+                  {
+                    "text": "LOREM IPSUM DOLOR C",
+                    "font": {
+                      "size": 64,
+                      "family": "Montserrat Medium",
+                      "color": "#FFFFFF",
+                      "bold": true,
+                      "line_height": 1.25,
+                      "letter_spacing": -0.64
+                    }
+                  }
+                ],
+                "decorative": false,
+                "name": "main_header_text",
+                "max_length": 25,
+                "min_length": 10
+              },
+              {
+                "type": "text",
+                "position": {
+                  "x": 14.87,
+                  "y": 81.52
+                },
+                "size": {
+                  "width": 877.33,
+                  "height": 62.27
+                },
+                "rotation": 0,
+                "font": {
+                  "size": 21.33,
+                  "family": "Montserrat",
+                  "color": "#D9D9D9",
+                  "line_height": 1.5,
+                  "letter_spacing": -0.21
+                },
+                "alignment": {
+                  "horizontal": "center",
+                  "vertical": "top"
+                },
+                "runs": [
+                  {
+                    "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et",
+                    "font": {
+                      "size": 21.33,
+                      "family": "Montserrat",
+                      "color": "#D9D9D9",
+                      "line_height": 1.5,
+                      "letter_spacing": -0.21
+                    }
+                  }
+                ],
+                "decorative": false,
+                "name": "supporting_header_text",
+                "max_length": 78,
+                "min_length": 52
+              }
+            ]
+          },
+          {
+            "id": "three_card_row",
+            "description": "Three matching rounded information cards are evenly distributed in one horizontal row with consistent internal text hierarchy.",
+            "position": {
+              "x": 102.94,
+              "y": 233.79
+            },
+            "elements": [
+              {
+                "type": "flex",
+                "name": "flx_card_elements",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "size": {
+                  "width": 1074.12,
+                  "height": 414.21
+                },
+                "direction": "row",
+                "gap": 12,
+                "justify_content": "center",
+                "min_children": 1,
+                "max_children": 3,
+                "children": [
+                  {
+                    "type": "group",
+                    "size": {
+                      "width": 329.52,
+                      "height": 414.21
+                    },
+                    "children": [
+                      {
+                        "type": "image",
+                        "position": {
+                          "x": 0,
+                          "y": 0
+                        },
+                        "size": {
+                          "width": 329.52,
+                          "height": 414.21
+                        },
+                        "data": "static/freeform_4-76dbf710432f.svg",
+                        "fit": "fill",
+                        "decorative": true,
+                        "name": "card_background_panel",
+                        "is_icon": false
+                      },
+                      {
+                        "type": "text",
+                        "position": {
+                          "x": 50.77,
+                          "y": 44.41
+                        },
+                        "size": {
+                          "width": 230.04,
+                          "height": 31.96
+                        },
+                        "rotation": 0,
+                        "font": {
+                          "size": 23.53,
+                          "family": "Montserrat Semi-Bold",
+                          "color": "#FFFFFF",
+                          "bold": true,
+                          "line_height": 1.4,
+                          "letter_spacing": -0.23
+                        },
+                        "alignment": {
+                          "horizontal": "left",
+                          "vertical": "top"
+                        },
+                        "runs": [
+                          {
+                            "text": "Heading",
+                            "font": {
+                              "size": 23.53,
+                              "family": "Montserrat Semi-Bold",
+                              "color": "#FFFFFF",
+                              "bold": true,
+                              "line_height": 1.4,
+                              "letter_spacing": -0.23
+                            }
+                          }
+                        ],
+                        "decorative": false,
+                        "name": "card_heading_text",
+                        "max_length": 17,
+                        "min_length": 4
+                      },
+                      {
+                        "type": "text",
+                        "position": {
+                          "x": 50.77,
+                          "y": 78.7
+                        },
+                        "size": {
+                          "width": 255.54,
+                          "height": 62.59
+                        },
+                        "rotation": 0,
+                        "font": {
+                          "size": 47.06,
+                          "family": "Montserrat Medium",
+                          "color": "#FD7536",
+                          "bold": true,
+                          "line_height": 1.4,
+                          "letter_spacing": -0.46
+                        },
+                        "alignment": {
+                          "horizontal": "left",
+                          "vertical": "top"
+                        },
+                        "runs": [
+                          {
+                            "text": "$1 / Month",
+                            "font": {
+                              "size": 47.06,
+                              "family": "Montserrat Medium",
+                              "color": "#FD7536",
+                              "bold": true,
+                              "line_height": 1.4,
+                              "letter_spacing": -0.46
+                            }
+                          }
+                        ],
+                        "decorative": false,
+                        "name": "card_large_value",
+                        "max_length": 9,
+                        "min_length": 5
+                      },
+                      {
+                        "type": "text-list",
+                        "position": {
+                          "x": 46,
+                          "y": 155.32
+                        },
+                        "size": {
+                          "width": 230.45,
+                          "height": 208.66
+                        },
+                        "font": {
+                          "size": 16.68,
+                          "family": "Montserrat",
+                          "color": "#D9D9D9",
+                          "line_height": 1.35,
+                          "letter_spacing": -0.16
+                        },
+                        "marker": "bullet",
+                        "items": [
+                          [
+                            {
+                              "text": "Lorem ipsum dolor sit amet, consectetur",
+                              "font": {
+                                "size": 16.68,
+                                "family": "Montserrat",
+                                "color": "#D9D9D9",
+                                "line_height": 1.35,
+                                "letter_spacing": -0.16
+                              }
+                            }
+                          ],
+                          [
+                            {
+                              "text": "Ncididunt ut labore et dolore",
+                              "font": {
+                                "size": 16.68,
+                                "family": "Montserrat",
+                                "color": "#D9D9D9",
+                                "line_height": 1.35,
+                                "letter_spacing": -0.16
+                              }
+                            }
+                          ],
+                          [
+                            {
+                              "text": "Adipiscing elit, sed do eiusmod tempor",
+                              "font": {
+                                "size": 16.68,
+                                "family": "Montserrat",
+                                "color": "#D9D9D9",
+                                "line_height": 1.35,
+                                "letter_spacing": -0.16
+                              }
+                            }
+                          ],
+                          [
+                            {
+                              "text": "Ncididunt ut labore et dolore",
+                              "font": {
+                                "size": 16.68,
+                                "family": "Montserrat",
+                                "color": "#D9D9D9",
+                                "line_height": 1.35,
+                                "letter_spacing": -0.16
+                              }
+                            }
+                          ]
+                        ],
+                        "decorative": false,
+                        "name": "card_feature_list",
+                        "max_items": 4,
+                        "min_items": 1,
+                        "max_item_length": 40,
+                        "min_item_length": 28
+                      }
+                    ],
+                    "name": "information_card",
+                    "position": {
+                      "x": 0,
+                      "y": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

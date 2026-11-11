@@ -61,6 +61,14 @@ hide:
 
     [:material-arrow-right: Generative Content Kit](ai-component/index.md) · [Live Superset data](ai-component/69-live-superset-data.md)
 
+-   :material-swap-horizontal-bold:{ .lg .middle } __I want the final approach: one model, PPT and Tiptap__
+
+    ---
+
+    One generic Unified Document Model with pluggable adapters: Presenton PPT and Tiptap today, any module tomorrow, with the exact code changes in Presenton.
+
+    [:material-arrow-right: Part X: Final approach](final/index.md)
+
 -   :material-chart-box-outline:{ .lg .middle } __I am designing the Superset-native version__
 
     ---
@@ -146,6 +154,14 @@ hide:
     A host-agnostic AI component extracted from Presenton, with live Superset data for every target.
 
     [:material-arrow-right: Open Part IX](ai-component/index.md)
+
+-   __Part X: Final approach__
+
+    <span class="part-meta">8 pages</span>
+
+    The consolidated decision: one generic Unified Document Model with pluggable adapters (Presenton PPT, Tiptap, Markdown and any future module), proven with a prototype.
+
+    [:material-arrow-right: Open Part X](final/index.md)
 
 -   __Appendix: reference__
 

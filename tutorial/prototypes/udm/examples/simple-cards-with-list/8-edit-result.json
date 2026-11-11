@@ -1,0 +1,38 @@
+{
+  "slotsWritten": [
+    {
+      "slot": "components.1.elements.1",
+      "name": "supporting_header_text",
+      "before": [
+        {
+          "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et",
+          "bold": false
+        }
+      ],
+      "after": [
+        {
+          "text": "Edited in the document: ",
+          "bold": false
+        },
+        {
+          "text": "traction doubled",
+          "bold": true
+        },
+        {
+          "text": " this year.",
+          "bold": false
+        }
+      ]
+    }
+  ],
+  "slotsUnchanged": 4,
+  "loss": [],
+  "validation": [
+    {
+      "level": "warning",
+      "code": "max_length",
+      "path": "slides.0.components.2.elements.0.children.0.children.2",
+      "message": "10 > 9"
+    }
+  ]
+}

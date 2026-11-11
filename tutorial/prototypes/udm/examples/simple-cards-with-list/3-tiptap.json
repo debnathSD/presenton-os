@@ -1,0 +1,178 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2,
+        "udmKind": "section",
+        "udmId": "sec_0gpf83k",
+        "udmMeta": {
+          "role": "content",
+          "artifact": {
+            "id": "art_1acm3z3",
+            "provenance": {
+              "origin": "imported",
+              "importedFrom": {
+                "adapter": "presenton.slides",
+                "adapterVersion": "0.1.0"
+              }
+            },
+            "ext": {
+              "presenton.slides": {
+                "templateId": "dynamic"
+              }
+            }
+          }
+        },
+        "udmExt": {
+          "presenton.slides": {
+            "templateId": "dynamic",
+            "layoutId": "center_title_cards_4771",
+            "titleSlot": "components.1.elements.0"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "LOREM IPSUM DOLOR C"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "udmId": "blk_0ngb306",
+        "udmRole": "subtitle",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.1.elements.1",
+            "name": "supporting_header_text",
+            "element": "text"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 4,
+        "udmId": "blk_07lloaf",
+        "udmGroup": "grp_0ty4yu0",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.2.elements.0.children.0.children.1",
+            "name": "card_heading_text",
+            "element": "text"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Heading"
+        }
+      ]
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "udmId": "blk_07vl9ze",
+        "udmGroup": "grp_0ty4yu0",
+        "udmRole": "kpi",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.2.elements.0.children.0.children.2",
+            "name": "card_large_value",
+            "element": "text"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "$1 / Month"
+        }
+      ]
+    },
+    {
+      "type": "bulletList",
+      "attrs": {
+        "udmId": "blk_085kvod",
+        "udmGroup": "grp_0ty4yu0",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.2.elements.0.children.0.children.3",
+            "name": "card_feature_list",
+            "element": "text-list"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Lorem ipsum dolor sit amet, consectetur"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Ncididunt ut labore et dolore"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Adipiscing elit, sed do eiusmod tempor"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "listItem",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Ncididunt ut labore et dolore"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "version": "gck.artifact/1",
+  "profile": "udm/1.3",
+  "id": "art_1acm3z3",
+  "provenance": {
+    "origin": "imported",
+    "importedFrom": {
+      "adapter": "presenton.slides",
+      "adapterVersion": "0.1.0"
+    }
+  },
+  "sections": [
+    {
+      "id": "sec_0gpf83k",
+      "role": "content",
+      "blocks": [
+        {
+          "id": "blk_0ngb306",
+          "role": "subtitle",
+          "type": "paragraph",
+          "text": [
+            {
+              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et"
+            }
+          ],
+          "ext": {
+            "presenton.slides": {
+              "slot": "components.1.elements.1",
+              "name": "supporting_header_text",
+              "element": "text"
+            }
+          }
+        },
+        {
+          "id": "blk_07lloaf",
+          "group": "grp_0ty4yu0",
+          "type": "heading",
+          "level": 2,
+          "text": [
+            {
+              "text": "Heading"
+            }
+          ],
+          "ext": {
+            "presenton.slides": {
+              "slot": "components.2.elements.0.children.0.children.1",
+              "name": "card_heading_text",
+              "element": "text"
+            }
+          }
+        },
+        {
+          "id": "blk_07vl9ze",
+          "group": "grp_0ty4yu0",
+          "role": "kpi",
+          "type": "paragraph",
+          "text": [
+            {
+              "text": "$1 / Month"
+            }
+          ],
+          "ext": {
+            "presenton.slides": {
+              "slot": "components.2.elements.0.children.0.children.2",
+              "name": "card_large_value",
+              "element": "text"
+            }
+          }
+        },
+        {
+          "id": "blk_085kvod",
+          "group": "grp_0ty4yu0",
+          "type": "list",
+          "ordered": false,
+          "items": [
+            [
+              {
+                "text": "Lorem ipsum dolor sit amet, consectetur"
+              }
+            ],
+            [
+              {
+                "text": "Ncididunt ut labore et dolore"
+              }
+            ],
+            [
+              {
+                "text": "Adipiscing elit, sed do eiusmod tempor"
+              }
+            ],
+            [
+              {
+                "text": "Ncididunt ut labore et dolore"
+              }
+            ]
+          ],
+          "ext": {
+            "presenton.slides": {
+              "slot": "components.2.elements.0.children.0.children.3",
+              "name": "card_feature_list",
+              "element": "text-list"
+            }
+          }
+        }
+      ],
+      "title": "LOREM IPSUM DOLOR C",
+      "ext": {
+        "presenton.slides": {
+          "templateId": "dynamic",
+          "layoutId": "center_title_cards_4771",
+          "titleSlot": "components.1.elements.0"
+        }
+      }
+    }
+  ],
+  "bindings": {},
+  "ext": {
+    "presenton.slides": {
+      "templateId": "dynamic"
+    }
+  }
+}

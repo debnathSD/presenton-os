@@ -1,0 +1,109 @@
+{
+  "slotsWritten": [
+    {
+      "slot": "components.2.elements.1",
+      "name": "line_chart_area",
+      "before": {
+        "categories": [
+          "2020",
+          "2021",
+          "2022",
+          "2023"
+        ],
+        "series": [
+          {
+            "name": "Artificial Intelligence",
+            "values": [
+              5,
+              10,
+              20,
+              28
+            ]
+          },
+          {
+            "name": "Internet of Things",
+            "values": [
+              10,
+              20,
+              30,
+              38
+            ]
+          },
+          {
+            "name": "Other Technology",
+            "values": [
+              8,
+              15,
+              22,
+              29
+            ]
+          }
+        ]
+      },
+      "after": {
+        "categories": [
+          "2020",
+          "2021",
+          "2022",
+          "2023"
+        ],
+        "series": [
+          {
+            "name": "Artificial Intelligence",
+            "values": [
+              10,
+              20,
+              40,
+              56
+            ]
+          },
+          {
+            "name": "Internet of Things",
+            "values": [
+              10,
+              20,
+              30,
+              38
+            ]
+          },
+          {
+            "name": "Other Technology",
+            "values": [
+              8,
+              15,
+              22,
+              29
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "slot": "components.3.elements.0",
+      "name": "intro_paragraph",
+      "before": [
+        {
+          "text": "Traction is a period where the company is feeling momentum during its development period. If traction momentum is not harnessed, sales figures can decline and the customer base can shrink. In general, companies will judge success by the amount of revenue and new customers they receive.",
+          "bold": false
+        }
+      ],
+      "after": [
+        {
+          "text": "Edited in the document: ",
+          "bold": false
+        },
+        {
+          "text": "traction doubled",
+          "bold": true
+        },
+        {
+          "text": " this year.",
+          "bold": false
+        }
+      ]
+    }
+  ],
+  "slotsUnchanged": 2,
+  "loss": [],
+  "validation": []
+}

@@ -1,0 +1,559 @@
+{
+  "templateId": "general",
+  "slides": [
+    {
+      "index": 0,
+      "layout_group": "general",
+      "layout": "title_table_description",
+      "ui": {
+        "id": "title_table_description",
+        "description": "A centered presentation layout with subtle side accents, prominent heading, rounded comparison card, and explanatory note beneath.",
+        "components": [
+          {
+            "id": "background_accents",
+            "description": "Full-slide background with white base and subtle decorative vertical side artwork framing the central content.",
+            "position": {
+              "x": 0,
+              "y": 0
+            },
+            "elements": [
+              {
+                "type": "vector",
+                "shape": "polygon",
+                "fill": {
+                  "color": "#FFFFFF",
+                  "opacity": 1
+                },
+                "points": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 1280,
+                    "y": 0
+                  },
+                  {
+                    "x": 1280,
+                    "y": 720
+                  },
+                  {
+                    "x": 0,
+                    "y": 720
+                  }
+                ],
+                "closed": true
+              },
+              {
+                "type": "image",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "size": {
+                  "width": 256,
+                  "height": 720
+                },
+                "rotation": 0,
+                "opacity": 1,
+                "data": "static/image20-6875b30b26c2.png",
+                "fit": "fill",
+                "decorative": true,
+                "name": "left_background_accent",
+                "is_icon": false
+              },
+              {
+                "type": "image",
+                "position": {
+                  "x": 1024,
+                  "y": 0
+                },
+                "size": {
+                  "width": 256,
+                  "height": 720
+                },
+                "rotation": 0,
+                "opacity": 1,
+                "data": "static/image21-f2b82e740bc2.png",
+                "fit": "fill",
+                "decorative": true,
+                "name": "right_background_accent",
+                "is_icon": false
+              }
+            ]
+          },
+          {
+            "id": "title_header",
+            "description": "Centered title section with a large bold heading and small purple underline accent directly below.",
+            "position": {
+              "x": 80,
+              "y": 48
+            },
+            "elements": [
+              {
+                "type": "text",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "size": {
+                  "width": 1122,
+                  "height": 60
+                },
+                "font": {
+                  "size": 60,
+                  "family": "Poppins",
+                  "color": "#111827",
+                  "bold": true,
+                  "italic": false,
+                  "line_height": 0.8
+                },
+                "alignment": {
+                  "horizontal": "center",
+                  "vertical": "middle"
+                },
+                "runs": [
+                  {
+                    "text": "Why we are moving to usage pricing",
+                    "font": {
+                      "size": 60,
+                      "family": "Poppins",
+                      "color": "#111827",
+                      "bold": true,
+                      "italic": false,
+                      "line_height": 0.8,
+                      "underline": false
+                    }
+                  }
+                ],
+                "decorative": false,
+                "name": "main_title",
+                "max_length": 17,
+                "min_length": 9
+              },
+              {
+                "type": "vector",
+                "shape": "polygon",
+                "fill": {
+                  "color": "#9333EA",
+                  "opacity": 1
+                },
+                "points": [
+                  {
+                    "x": 520,
+                    "y": 76
+                  },
+                  {
+                    "x": 600,
+                    "y": 76
+                  },
+                  {
+                    "x": 600,
+                    "y": 80
+                  },
+                  {
+                    "x": 520,
+                    "y": 80
+                  }
+                ],
+                "closed": true
+              }
+            ]
+          },
+          {
+            "id": "comparison_table_card",
+            "description": "Central rounded card holding a four-column comparison matrix with purple header and alternating light-gray cell backgrounds.",
+            "position": {
+              "x": 192,
+              "y": 242
+            },
+            "elements": [
+              {
+                "type": "vector",
+                "shape": "polygon",
+                "fill": {
+                  "color": "#E5E7EB",
+                  "opacity": 1
+                },
+                "stroke": {
+                  "color": "#E5E7EB",
+                  "opacity": 1,
+                  "width": 1
+                },
+                "shadow": {
+                  "color": "#000000",
+                  "blur": 15,
+                  "opacity": 0.1,
+                  "offset_x": 0,
+                  "offset_y": 10
+                },
+                "points": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 896,
+                    "y": 0
+                  },
+                  {
+                    "x": 896,
+                    "y": 285
+                  },
+                  {
+                    "x": 0,
+                    "y": 285
+                  }
+                ],
+                "closed": true,
+                "corner_radii": [
+                  8,
+                  8,
+                  8,
+                  8
+                ]
+              },
+              {
+                "type": "table",
+                "position": {
+                  "x": 1,
+                  "y": 1
+                },
+                "size": {
+                  "width": 894,
+                  "height": 284
+                },
+                "font": {
+                  "size": 16,
+                  "family": "Poppins",
+                  "color": "#4B5563",
+                  "bold": false,
+                  "italic": false,
+                  "line_height": 1.2
+                },
+                "columns": [
+                  {
+                    "color": {
+                      "color": "#9333EA",
+                      "opacity": 1
+                    },
+                    "font": {
+                      "size": 16,
+                      "family": "Poppins",
+                      "color": "#FFFFFF",
+                      "bold": false,
+                      "italic": false,
+                      "line_height": 1.2
+                    },
+                    "alignment": "center",
+                    "runs": [
+                      {
+                        "text": "Plan",
+                        "font": {
+                          "size": 16,
+                          "family": "Poppins",
+                          "color": "#FFFFFF",
+                          "bold": false,
+                          "italic": false,
+                          "line_height": 1.2
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "color": {
+                      "color": "#9333EA",
+                      "opacity": 1
+                    },
+                    "font": {
+                      "size": 16,
+                      "family": "Poppins",
+                      "color": "#FFFFFF",
+                      "bold": false,
+                      "italic": false,
+                      "line_height": 1.2
+                    },
+                    "alignment": "center",
+                    "runs": [
+                      {
+                        "text": "Today",
+                        "font": {
+                          "size": 16,
+                          "family": "Poppins",
+                          "color": "#FFFFFF",
+                          "bold": false,
+                          "italic": false,
+                          "line_height": 1.2
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "color": {
+                      "color": "#9333EA",
+                      "opacity": 1
+                    },
+                    "font": {
+                      "size": 16,
+                      "family": "Poppins",
+                      "color": "#FFFFFF",
+                      "bold": false,
+                      "italic": false,
+                      "line_height": 1.2
+                    },
+                    "alignment": "center",
+                    "runs": [
+                      {
+                        "text": "Proposed",
+                        "font": {
+                          "size": 16,
+                          "family": "Poppins",
+                          "color": "#FFFFFF",
+                          "bold": false,
+                          "italic": false,
+                          "line_height": 1.2
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "rows": [
+                  [
+                    {
+                      "color": {
+                        "color": "#E5E7EB",
+                        "opacity": 1
+                      },
+                      "alignment": "center",
+                      "runs": [
+                        {
+                          "text": "Starter",
+                          "font": {
+                            "size": 16,
+                            "family": "Poppins",
+                            "color": "#4B5563",
+                            "bold": false,
+                            "italic": false,
+                            "line_height": 1.2
+                          }
+                        }
+                      ],
+                      "font": {
+                        "size": 16,
+                        "family": "Poppins",
+                        "color": "#4B5563",
+                        "bold": false,
+                        "italic": false,
+                        "line_height": 1.2
+                      }
+                    },
+                    {
+                      "color": {
+                        "color": "#F3F4F6",
+                        "opacity": 1
+                      },
+                      "alignment": "center",
+                      "runs": [
+                        {
+                          "text": "$20/seat",
+                          "font": {
+                            "size": 16,
+                            "family": "Poppins",
+                            "color": "#4B5563",
+                            "bold": false,
+                            "italic": false,
+                            "line_height": 1.2
+                          }
+                        }
+                      ],
+                      "font": {
+                        "size": 16,
+                        "family": "Poppins",
+                        "color": "#4B5563",
+                        "bold": false,
+                        "italic": false,
+                        "line_height": 1.2
+                      }
+                    },
+                    {
+                      "color": {
+                        "color": "#E5E7EB",
+                        "opacity": 1
+                      },
+                      "alignment": "center",
+                      "runs": [
+                        {
+                          "text": "$0.02/run",
+                          "font": {
+                            "size": 16,
+                            "family": "Poppins",
+                            "color": "#4B5563",
+                            "bold": false,
+                            "italic": false,
+                            "line_height": 1.2
+                          }
+                        }
+                      ],
+                      "font": {
+                        "size": 16,
+                        "family": "Poppins",
+                        "color": "#4B5563",
+                        "bold": false,
+                        "italic": false,
+                        "line_height": 1.2
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "color": {
+                        "color": "#E5E7EB",
+                        "opacity": 1
+                      },
+                      "alignment": "center",
+                      "runs": [
+                        {
+                          "text": "Team",
+                          "font": {
+                            "size": 16,
+                            "family": "Poppins",
+                            "color": "#4B5563",
+                            "bold": false,
+                            "italic": false,
+                            "line_height": 1.2
+                          }
+                        }
+                      ],
+                      "font": {
+                        "size": 16,
+                        "family": "Poppins",
+                        "color": "#4B5563",
+                        "bold": false,
+                        "italic": false,
+                        "line_height": 1.2
+                      }
+                    },
+                    {
+                      "color": {
+                        "color": "#F3F4F6",
+                        "opacity": 1
+                      },
+                      "alignment": "center",
+                      "runs": [
+                        {
+                          "text": "$45/seat",
+                          "font": {
+                            "size": 16,
+                            "family": "Poppins",
+                            "color": "#4B5563",
+                            "bold": false,
+                            "italic": false,
+                            "line_height": 1.2
+                          }
+                        }
+                      ],
+                      "font": {
+                        "size": 16,
+                        "family": "Poppins",
+                        "color": "#4B5563",
+                        "bold": false,
+                        "italic": false,
+                        "line_height": 1.2
+                      }
+                    },
+                    {
+                      "color": {
+                        "color": "#E5E7EB",
+                        "opacity": 1
+                      },
+                      "alignment": "center",
+                      "runs": [
+                        {
+                          "text": "$0.015/run",
+                          "font": {
+                            "size": 16,
+                            "family": "Poppins",
+                            "color": "#4B5563",
+                            "bold": false,
+                            "italic": false,
+                            "line_height": 1.2
+                          }
+                        }
+                      ],
+                      "font": {
+                        "size": 16,
+                        "family": "Poppins",
+                        "color": "#4B5563",
+                        "bold": false,
+                        "italic": false,
+                        "line_height": 1.2
+                      }
+                    }
+                  ]
+                ],
+                "decorative": false,
+                "name": "comparison_matrix_table",
+                "min_columns": 4,
+                "max_columns": 4,
+                "min_rows": 4,
+                "max_rows": 4
+              }
+            ]
+          },
+          {
+            "id": "bottom_note",
+            "description": "Centered explanatory paragraph near the bottom with subdued gray typography and wide line length.",
+            "position": {
+              "x": 192,
+              "y": 640
+            },
+            "elements": [
+              {
+                "type": "text",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "size": {
+                  "width": 898,
+                  "height": 48
+                },
+                "font": {
+                  "size": 16,
+                  "family": "Poppins",
+                  "color": "#4B5563",
+                  "bold": false,
+                  "italic": false,
+                  "line_height": 1.2
+                },
+                "alignment": {
+                  "horizontal": "center",
+                  "vertical": "middle"
+                },
+                "runs": [
+                  {
+                    "text": "Seat pricing stopped tracking value once customers automated their workflows.",
+                    "font": {
+                      "size": 16,
+                      "family": "Poppins",
+                      "color": "#4B5563",
+                      "bold": false,
+                      "italic": false,
+                      "line_height": 1.2,
+                      "underline": false
+                    }
+                  }
+                ],
+                "decorative": false,
+                "name": "supporting_note",
+                "max_length": 210,
+                "min_length": 105
+              }
+            ]
+          }
+        ]
+      },
+      "speaker_note": ""
+    }
+  ]
+}

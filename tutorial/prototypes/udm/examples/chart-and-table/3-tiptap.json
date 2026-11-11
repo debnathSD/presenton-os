@@ -1,0 +1,375 @@
+{
+  "type": "doc",
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {
+        "level": 2,
+        "udmKind": "section",
+        "udmId": "sec_1yup3o7",
+        "udmMeta": {
+          "role": "content",
+          "artifact": {
+            "id": "art_0xw8ut6",
+            "provenance": {
+              "origin": "imported",
+              "importedFrom": {
+                "adapter": "presenton.slides",
+                "adapterVersion": "0.1.0"
+              }
+            },
+            "ext": {
+              "presenton.slides": {
+                "templateId": "modern"
+              }
+            }
+          }
+        },
+        "udmExt": {
+          "presenton.slides": {
+            "templateId": "modern",
+            "layoutId": "title_description_chart_table",
+            "titleSlot": "components.1.elements.0"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Company Traction"
+        }
+      ]
+    },
+    {
+      "type": "dataBlock",
+      "attrs": {
+        "kind": "chart",
+        "bindingId": "b_0wyo7ap",
+        "block": {
+          "chartType": "line"
+        },
+        "binding": {
+          "kind": "chart",
+          "source": {
+            "type": "static",
+            "origin": "imported",
+            "data": {
+              "categories": [
+                "2020",
+                "2021",
+                "2022",
+                "2023"
+              ],
+              "series": [
+                {
+                  "name": "Artificial Intelligence",
+                  "values": [
+                    5,
+                    10,
+                    20,
+                    28
+                  ]
+                },
+                {
+                  "name": "Internet of Things",
+                  "values": [
+                    10,
+                    20,
+                    30,
+                    38
+                  ]
+                },
+                {
+                  "name": "Other Technology",
+                  "values": [
+                    8,
+                    15,
+                    22,
+                    29
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "udmId": "blk_105klqi",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.2.elements.1",
+            "name": "line_chart_area",
+            "element": "chart"
+          }
+        }
+      }
+    },
+    {
+      "type": "paragraph",
+      "attrs": {
+        "udmId": "blk_0uva8mg",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.3.elements.0",
+            "name": "intro_paragraph",
+            "element": "text"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Traction is a period where the company is feeling momentum during its development period. If traction momentum is not harnessed, sales figures can decline and the customer base can shrink. In general, companies will judge success by the amount of revenue and new customers they receive."
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "attrs": {
+        "udmMeta": {
+          "bindingId": "b_0r9wjod",
+          "origin": "imported"
+        },
+        "udmId": "blk_1ywpq37",
+        "udmExt": {
+          "presenton.slides": {
+            "slot": "components.4.elements.0",
+            "name": "two_column_table",
+            "element": "table"
+          }
+        }
+      },
+      "content": [
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableHeader",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Metric"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableHeader",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Value"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Users"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "10K+"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Revenue"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "$1.2M"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Satisfaction"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "95%"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Users"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "10K+"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Revenue"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "$1.2M"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "tableRow",
+          "content": [
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Satisfaction"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableCell",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "95%"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

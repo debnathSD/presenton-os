@@ -1,0 +1,40 @@
+{
+  "tiptap": [],
+  "markdown": [
+    {
+      "code": "ext_dropped",
+      "path": "",
+      "detail": "presenton.slides"
+    },
+    {
+      "code": "ext_dropped",
+      "path": "sec_1yup3o7",
+      "detail": "presenton.slides"
+    },
+    {
+      "code": "block_degraded",
+      "path": "sec_1yup3o7/blk_105klqi",
+      "detail": "chart -> table"
+    },
+    {
+      "code": "ext_dropped",
+      "path": "sec_1yup3o7/blk_105klqi",
+      "detail": "presenton.slides"
+    },
+    {
+      "code": "ext_dropped",
+      "path": "sec_1yup3o7/blk_0uva8mg",
+      "detail": "presenton.slides"
+    },
+    {
+      "code": "ext_dropped",
+      "path": "sec_1yup3o7/blk_1ywpq37",
+      "detail": "presenton.slides"
+    },
+    {
+      "code": "section_role_dropped",
+      "path": "sec_1yup3o7",
+      "detail": "content"
+    }
+  ]
+}

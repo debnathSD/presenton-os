@@ -1,0 +1,29 @@
+{
+  "name": "udm-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Feasibility prototype for Part X: a target-agnostic Unified Document Model with Presenton, Tiptap, Markdown and plain-text adapters",
+  "type": "module",
+  "scripts": {
+    "conformance": "node scripts/conformance.mjs",
+    "validate": "node scripts/validate.mjs",
+    "examples": "node scripts/examples.mjs",
+    "typecheck": "tsc --noEmit --strict --allowImportingTsExtensions --target es2022 --module nodenext core/udm.ts core/adapter.ts",
+    "all": "npm run typecheck && npm run conformance && npm run validate && npm run examples"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@tiptap/core": "3.30.5",
+    "@tiptap/extension-image": "3.30.5",
+    "@tiptap/extension-table": "3.30.5",
+    "@tiptap/pm": "3.30.5",
+    "@tiptap/starter-kit": "3.30.5",
+    "marked": "17.0.5"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

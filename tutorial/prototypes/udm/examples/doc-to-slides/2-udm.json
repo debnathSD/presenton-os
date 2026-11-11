@@ -1,0 +1,84 @@
+{
+  "version": "gck.artifact/1",
+  "profile": "udm/1.3",
+  "id": "art_1ksa7st",
+  "provenance": {
+    "origin": "imported",
+    "importedFrom": {
+      "adapter": "tiptap",
+      "adapterVersion": "0.1.0"
+    }
+  },
+  "sections": [
+    {
+      "id": "sec_0rthubp",
+      "title": "Why we are moving to usage pricing",
+      "blocks": [
+        {
+          "id": "blk_16t7c2p",
+          "type": "paragraph",
+          "text": [
+            {
+              "text": "Seat pricing stopped tracking value once customers automated their workflows."
+            }
+          ]
+        },
+        {
+          "id": "blk_00f4iwt",
+          "type": "list",
+          "ordered": false,
+          "items": [
+            [
+              {
+                "text": "Usage aligns cost with value"
+              }
+            ],
+            [
+              {
+                "text": "Smaller teams can start cheaper"
+              }
+            ],
+            [
+              {
+                "text": "Expansion revenue becomes automatic"
+              }
+            ]
+          ]
+        },
+        {
+          "id": "blk_10yhdt6",
+          "type": "table",
+          "bindingId": "b_131zxim"
+        }
+      ]
+    }
+  ],
+  "bindings": {
+    "b_131zxim": {
+      "kind": "table",
+      "source": {
+        "type": "static",
+        "origin": "user",
+        "data": {
+          "columns": [
+            "Plan",
+            "Today",
+            "Proposed"
+          ],
+          "rows": [
+            [
+              "Starter",
+              "$20/seat",
+              "$0.02/run"
+            ],
+            [
+              "Team",
+              "$45/seat",
+              "$0.015/run"
+            ]
+          ]
+        }
+      }
+    }
+  }
+}

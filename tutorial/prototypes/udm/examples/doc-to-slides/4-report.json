@@ -1,0 +1,21 @@
+{
+  "tiptapSchemaIssues": [],
+  "deserializeLoss": [],
+  "chosenLayout": "title_table_description",
+  "serializeLoss": [
+    {
+      "code": "no_slot",
+      "path": "sec_0rthubp/blk_00f4iwt",
+      "detail": "list has no free text-list slot in title_table_description",
+      "droppedText": "Usage aligns cost with value Smaller teams can start cheaper Expansion revenue becomes automatic"
+    }
+  ],
+  "presentonValidation": [
+    {
+      "level": "warning",
+      "code": "max_length",
+      "path": "slides.0.components.1.elements.0",
+      "message": "34 > 17"
+    }
+  ]
+}
