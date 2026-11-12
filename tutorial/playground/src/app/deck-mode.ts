@@ -8,6 +8,7 @@ import { sampleDeck } from "../data";
 import { fmtMs, lossSummary, now, plural } from "./format";
 import type { Ctx } from "./state";
 import type { ModeView } from "./app";
+import { prepareTextMeasure } from "../render/measure";
 
 export function createDeckMode(ctx: Ctx): ModeView {
   const ID = "deck" as const;
@@ -69,6 +70,7 @@ export function createDeckMode(ctx: Ctx): ModeView {
   async function apply() {
     const m = ctx.mode(ID);
     if (!m.deck || !m.template) return;
+    await prepareTextMeasure(m.template);
     await ctx.run(ID, "Apply edits to slides", () => {
       const before = m.deck!;
       const t0 = now();

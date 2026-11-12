@@ -226,3 +226,19 @@ test("auto-fit leaves the template's own sample text alone and shrinks overflowi
   assert.ok(el.font.size < 151.11 && el.font.size >= 151.11 * 0.45 - 0.01);
   assert.equal(el.runs[0].font.size, el.font.size);
 });
+
+test("auto-fit uses an injected font measurer and shrinks until the longest word fits on one line", () => {
+  const el = () => ({ type: "text", size: { width: 500, height: 400 }, font: { size: 100, family: "Wide", line_height: 1 },
+    runs: [{ text: "Extraordinarily", font: { size: 100 } }] });
+  try {
+    B.setTextMeasurer((text, f) => text.length * f.size * 0.6); // 15 chars at 100px = 900px, box is 500px
+    const a = el();
+    const loss = B.autofitText({ e: a }, "s");
+    assert.equal(loss.length, 1);
+    assert.ok(15 * a.font.size * 0.6 * 1.03 <= 500, `longest word fits at ${a.font.size}px`);
+    B.setTextMeasurer(() => NaN); // unmeasurable: falls back to the estimate
+    assert.equal(B.autofitText({ e: el() }, "s").length, 1);
+  } finally {
+    B.setTextMeasurer(null);
+  }
+});

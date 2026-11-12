@@ -133,22 +133,38 @@ function charEm(c: string) {
   return 0.5;
 }
 
-/** Wrapped height estimate: greedy word wrap over per-character widths (bold adds 6%). */
-function textHeight(text: string, width: number, size: number, lineHeight: number, spacing: number, bold: boolean) {
-  const k = bold ? 1.06 : 1;
-  const wordW = (w: string) => [...w].reduce((sum, c) => sum + charEm(c) * size * k + spacing, 0);
-  const spaceW = charEm(" ") * size * k + spacing;
+/** Width of `text` in px for a font; NaN when it cannot be measured (the estimate is used then). */
+export type TextMeasure = (text: string, font: { family: string; size: number; bold: boolean; italic: boolean }) => number;
+let measurer: TextMeasure | null = null;
+/** Use real font metrics for auto-fit (the browser sets a canvas measurer once the template's fonts load). */
+export function setTextMeasurer(m: TextMeasure | null) { measurer = m; }
+
+type FontSpec = { family: string; size: number; lineHeight: number; spacing: number; bold: boolean; italic: boolean; heavyName: boolean };
+
+function wordWidth(w: string, f: FontSpec) {
+  const m = measurer?.(w, f);
+  if (m !== undefined && Number.isFinite(m)) return m * 1.03 + f.spacing * w.length; // 3% for rendering differences
+  const k = f.bold || f.heavyName ? 1.06 : 1;
+  return [...w].reduce((sum, c) => sum + charEm(c) * f.size * k + f.spacing, 0);
+}
+
+/**
+ * Wrapped height: greedy word wrap. The renderer does not break words, so a word wider than the box never fits
+ * (Infinity), which makes auto-fit shrink until the longest word fits on one line.
+ */
+function textHeight(text: string, width: number, f: FontSpec) {
+  const spaceW = wordWidth(" ", f);
   let lines = 0;
   for (const para of text.split(/\r?\n/)) {
     let used = 0; let n = 1;
     for (const w of para.split(/\s+/).filter(Boolean)) {
-      const ww = wordW(w);
-      if (used && used + spaceW + ww > width) { n++; used = 0; }
-      if (ww > width) { n += Math.floor(ww / width); used = ww % width; } else used += (used ? spaceW : 0) + ww;
+      const ww = wordWidth(w, f);
+      if (ww > width) return Infinity;
+      if (used && used + spaceW + ww > width) { n++; used = ww; } else used += (used ? spaceW : 0) + ww;
     }
     lines += n;
   }
-  return lines * size * lineHeight;
+  return lines * f.size * f.lineHeight;
 }
 
 type TextEl = { name?: string; size: { width: number; height: number }; font: any; runs: any[] };
@@ -157,10 +173,16 @@ const isTextEl = (n: any): n is TextEl =>
 
 function estimate(n: TextEl, k = 1) {
   const text = n.runs.map((r: any) => String(r?.text ?? "")).join("");
-  const lh = Number(n.font.line_height ?? n.font.lineHeight ?? 1.2);
-  const ls = Number(n.font.letter_spacing ?? n.font.letterSpacing ?? 0);
-  const bold = isBold(n.font) || n.runs.some((r: any) => isBold(r?.font));
-  return { text, h: textHeight(text, n.size.width, Number(n.font.size) * k, lh, ls * k, bold) };
+  const f: FontSpec = {
+    family: String(n.font.family ?? n.runs.find((r: any) => r?.font?.family)?.font.family ?? "sans-serif"),
+    size: Number(n.font.size) * k,
+    lineHeight: Number(n.font.line_height ?? n.font.lineHeight ?? 1.2),
+    spacing: Number(n.font.letter_spacing ?? n.font.letterSpacing ?? 0) * k,
+    bold: n.font.bold === true || Number(n.font.weight) >= 600,
+    italic: n.font.italic === true,
+    heavyName: isBold(n.font) || n.runs.some((r: any) => isBold(r?.font)),
+  };
+  return { text, h: textHeight(text, n.size.width, f) };
 }
 
 function textElements(ui: any, visit: (n: TextEl, path: string) => void) {

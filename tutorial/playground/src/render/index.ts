@@ -184,7 +184,9 @@ export function renderSlide(container: HTMLElement, slide: DeckSlide, t: Templat
     iframe.setAttribute("sandbox", "allow-scripts");
     iframe.setAttribute("referrerpolicy", "no-referrer");
     iframe.setAttribute("scrolling", "no");
-    iframe.style.cssText = `position:absolute;left:0;top:0;width:${SLIDE_WIDTH}px;height:${SLIDE_HEIGHT}px;border:0;transform-origin:0 0;`;
+    iframe.style.cssText = `position:absolute;left:0;top:0;width:${SLIDE_WIDTH}px;height:${SLIDE_HEIGHT}px;max-width:none;max-height:none;border:0;transform-origin:0 0;`;
+    // max-width:none: host pages often cap iframes at 100% of their container (MkDocs Material does), which would
+    // crop the 1280px slide before the scale transform shrinks it.
     wrapper.appendChild(iframe);
     container.replaceChildren(wrapper);
     f = { wrapper, iframe, html: "", fallbackWidth };

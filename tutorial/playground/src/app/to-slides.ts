@@ -2,11 +2,13 @@
 // editor JSON -> tiptap deserialize -> UDM -> presenton.slides serialize with layouts chosen by slot capacity.
 
 import { tiptapToUdm, udmToNewDeck } from "../udm/bridge";
+import { prepareTextMeasure } from "../render/measure";
 import { fmtMs, lossSummary, now, plural } from "./format";
 import type { Ctx, ModeId } from "./state";
 
 export async function slidesFromPage(ctx: Ctx, id: ModeId, templateId: string, stage: number): Promise<boolean> {
   const t = await ctx.loadTemplate(templateId);
+  await prepareTextMeasure(t); // auto-fit measures slide text with the template's own fonts
   const doc = ctx.getDoc(id);
   const t0 = now();
   const a = tiptapToUdm(doc);

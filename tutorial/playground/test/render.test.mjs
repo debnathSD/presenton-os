@@ -104,6 +104,7 @@ for (const { id } of index) {
       assert.equal(iframe.getAttribute("sandbox"), "allow-scripts");
       assert.equal(iframe.srcdoc, R.slideHtml(slide, t));
       assert.match(iframe.style.transform, /scale\(0\.5\)/);
+      assert.equal(iframe.style.maxWidth, "none", "host page max-width rules must not crop the 1280px slide");
       assert.ok(iframe.title.length > 0);
       assert.equal(box.firstElementChild.classList.contains("udm-slide--changed"), i === 1);
 
