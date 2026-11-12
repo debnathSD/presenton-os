@@ -1,0 +1,1 @@
+import{c as o}from"./chunk-RIQN3XYV.js";var c=15e3,r=5e3;function s(t,e){if(!(t>=r))throw new o(`${e} must be at least ${r}ms (got ${t}); to run without memory sync, pass \`memorySyncIntervalMs: null\` to the worker instead`)}export{c as a,r as b,s as c};

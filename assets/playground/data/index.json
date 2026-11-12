@@ -1,0 +1,23 @@
+[
+  {
+    "id": "general",
+    "name": "General",
+    "description": "General template best for simple presentations, great spacing and clean layout.",
+    "thumbnail": "images/general/thumbnail.jpg",
+    "layoutCount": 8
+  },
+  {
+    "id": "momentum",
+    "name": "Momentum",
+    "description": "A polished, high-energy business template for strategy, performance, product, and leadership presentations, combining bold typography, fluid accents, strong data storytelling, and versatile editorial layouts.",
+    "thumbnail": "images/momentum/thumbnail.jpg",
+    "layoutCount": 8
+  },
+  {
+    "id": "modern",
+    "name": "Modern",
+    "description": "Clean, contemporary layouts with generous whitespace, confident typography, and bold visual accents for a polished presentation.",
+    "thumbnail": "images/modern/thumbnail.jpg",
+    "layoutCount": 8
+  }
+]
