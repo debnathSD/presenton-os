@@ -1,0 +1,245 @@
+/* UDM Playground editor: toolbar, ProseMirror content, node views (chart / diagram / metric / image), dialogs.
+   Colours come from the site's --site-* tokens (light and [data-md-color-scheme="slate"] are set by extra.css);
+   the fallbacks keep the editor usable outside the site. Import this file from the app stylesheet. */
+
+.udm-editor-root,
+.udm-editor,
+.udm-toolbar,
+.udm-dialog {
+  --udm-accent: var(--site-accent, #4f46e5);
+  --udm-accent-strong: var(--site-accent-strong, #4338ca);
+  --udm-accent-soft: var(--site-accent-soft, rgba(79, 70, 229, .10));
+  --udm-text: var(--site-text, #111827);
+  --udm-text-2: var(--site-text-2, #374151);
+  --udm-muted: var(--site-muted, #5b6472);
+  --udm-border: var(--site-border, rgba(17, 24, 39, .10));
+  --udm-border-strong: var(--site-border-strong, #868e9c);
+  --udm-on-accent: var(--site-on-accent, #ffffff);
+  --udm-surface: var(--site-surface, #ffffff);
+  --udm-surface-2: var(--site-surface-2, #f5f6fb);
+  --udm-shadow: var(--site-shadow, 0 8px 24px -12px rgba(17, 24, 39, .14));
+  --udm-danger: #b42318;
+  --udm-success: #067647;
+  --udm-radius: .6rem;
+}
+[data-md-color-scheme="slate"] .udm-editor,
+[data-md-color-scheme="slate"] .udm-toolbar,
+[data-md-color-scheme="slate"] .udm-dialog,
+[data-md-color-scheme="slate"].udm-dialog {
+  --udm-danger: #fda29b;
+  --udm-success: #75e0a7;
+}
+
+.udm-sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- buttons and fields (shared by node views and dialogs) ---------- */
+
+.udm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+  min-height: 2rem; padding: .3rem .75rem; border-radius: .45rem;
+  border: 1px solid var(--udm-border-strong); background: var(--udm-surface); color: var(--udm-text);
+  font: inherit; font-size: .8rem; font-weight: 600; line-height: 1.2; cursor: pointer;
+}
+.udm-btn:hover:not(:disabled) { background: var(--udm-surface-2); border-color: var(--udm-accent); }
+.udm-btn:focus-visible { outline: 2px solid var(--udm-accent); outline-offset: 2px; }
+.udm-btn:disabled { opacity: .5; cursor: not-allowed; }
+.udm-btn--small { min-height: 1.75rem; padding: .2rem .55rem; font-size: .74rem; }
+.udm-btn--primary { background: var(--udm-accent); border-color: var(--udm-accent); color: var(--udm-on-accent); }
+.udm-btn--primary:hover:not(:disabled) { background: var(--udm-accent-strong); border-color: var(--udm-accent-strong); }
+
+.udm-label { display: block; margin: 0 0 .25rem; font-size: .76rem; font-weight: 600; color: var(--udm-text-2); }
+.udm-input {
+  width: 100%; box-sizing: border-box; min-height: 2.1rem; padding: .35rem .55rem;
+  border: 1px solid var(--udm-border-strong); border-radius: .4rem;
+  background: var(--udm-surface); color: var(--udm-text); font: inherit; font-size: .85rem;
+}
+.udm-input:focus-visible { outline: 2px solid var(--udm-accent); outline-offset: 1px; border-color: var(--udm-accent); }
+.udm-input[aria-invalid="true"] { border-color: var(--udm-danger); box-shadow: 0 0 0 2px color-mix(in srgb, var(--udm-danger) 25%, transparent); }
+.udm-input--cell { min-width: 5.5rem; min-height: 1.9rem; padding: .2rem .4rem; font-size: .8rem; }
+.udm-input--num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.udm-badge {
+  display: inline-block; padding: .1rem .45rem; border-radius: 999px;
+  background: var(--udm-accent-soft); color: var(--udm-accent-strong);
+  font-size: .68rem; font-weight: 650; letter-spacing: .02em; white-space: nowrap;
+}
+.udm-muted { color: var(--udm-muted); }
+
+/* ---------- toolbar ---------- */
+
+.udm-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .25rem;
+  padding: .35rem; border: 1px solid var(--udm-border); border-radius: var(--udm-radius) var(--udm-radius) 0 0;
+  background: var(--udm-surface-2);
+}
+.udm-toolbar__group { display: inline-flex; flex-wrap: wrap; gap: .15rem; }
+.udm-toolbar__sep { align-self: stretch; width: 1px; margin: .15rem .2rem; background: var(--udm-border-strong); opacity: .5; }
+.udm-toolbar__btn {
+  min-width: 2rem; height: 2rem; padding: 0 .45rem; border: 1px solid transparent; border-radius: .4rem;
+  background: transparent; color: var(--udm-text-2); font: inherit; font-size: .8rem; font-weight: 650; cursor: pointer;
+}
+.udm-toolbar__btn[data-cmd="bold"] span { font-weight: 800; }
+.udm-toolbar__btn[data-cmd="italic"] span { font-style: italic; font-family: Georgia, serif; }
+.udm-toolbar__btn[data-cmd="underline"] span { text-decoration: underline; }
+.udm-toolbar__btn[data-cmd="strike"] span { text-decoration: line-through; }
+.udm-toolbar__btn[data-cmd="code"] span { font-family: var(--md-code-font-family, ui-monospace, monospace); font-size: .72rem; }
+.udm-toolbar__btn:hover:not(:disabled) { background: var(--udm-surface); border-color: var(--udm-border-strong); color: var(--udm-text); }
+.udm-toolbar__btn:focus-visible { outline: 2px solid var(--udm-accent); outline-offset: 1px; }
+.udm-toolbar__btn[aria-pressed="true"] { background: var(--udm-accent-soft); border-color: var(--udm-accent); color: var(--udm-accent-strong); }
+.udm-toolbar__btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ---------- editing surface ---------- */
+
+.udm-editor {
+  border: 1px solid var(--udm-border); border-top: 0; border-radius: 0 0 var(--udm-radius) var(--udm-radius);
+  background: var(--udm-surface); color: var(--udm-text);
+}
+.udm-editor .udm-prose {
+  min-height: 16rem; padding: 1rem 1.25rem 1.5rem; outline: none;
+  font-size: .9rem; line-height: 1.6; overflow-wrap: anywhere;
+}
+.udm-editor .udm-prose:focus-visible { box-shadow: inset 0 0 0 2px var(--udm-accent); border-radius: 0 0 var(--udm-radius) var(--udm-radius); }
+.udm-prose > * + * { margin-top: .75em; }
+.udm-prose p { margin: 0; }
+.udm-prose h1, .udm-prose h2, .udm-prose h3, .udm-prose h4 { margin: 1.2em 0 .4em; line-height: 1.25; color: var(--udm-text); font-weight: 700; }
+.udm-prose h1 { font-size: 1.6em; }
+.udm-prose h2 { font-size: 1.3em; }
+.udm-prose h3 { font-size: 1.1em; }
+.udm-prose h4 { font-size: 1em; }
+.udm-prose > :first-child { margin-top: 0; }
+.udm-prose a { color: var(--udm-accent-strong); text-decoration: underline; text-underline-offset: 2px; }
+.udm-prose code {
+  padding: .1em .3em; border-radius: .25rem; background: var(--udm-surface-2);
+  font-family: var(--md-code-font-family, ui-monospace, monospace); font-size: .85em;
+}
+.udm-prose pre {
+  padding: .75rem 1rem; border-radius: .45rem; background: var(--udm-surface-2); overflow-x: auto;
+  font-family: var(--md-code-font-family, ui-monospace, monospace); font-size: .8rem;
+}
+.udm-prose pre code { padding: 0; background: none; font-size: inherit; }
+.udm-prose ul, .udm-prose ol { margin: 0; padding-left: 1.5em; }
+.udm-prose li > p { margin: 0; }
+.udm-prose li + li { margin-top: .2em; }
+.udm-prose blockquote { margin: 0; padding: .25em 0 .25em 1em; border-left: 3px solid var(--udm-accent); color: var(--udm-text-2); }
+.udm-prose hr { border: 0; border-top: 1px solid var(--udm-border-strong); margin: 1.25em 0; }
+.udm-prose hr.ProseMirror-selectednode { border-top-color: var(--udm-accent); }
+
+/* Section boundaries from a converted deck (headings carrying a UDM section) get a faint rule above. */
+.udm-prose [data-udm-kind="section"]:not(:first-child) { padding-top: .9em; border-top: 1px dashed var(--udm-border); }
+
+/* placeholder (decoration from the udmPlaceholder plugin) */
+.udm-prose .is-editor-empty:first-child::before {
+  content: attr(data-placeholder); float: left; height: 0; pointer-events: none; color: var(--udm-muted);
+}
+
+/* tables */
+.udm-prose .tableWrapper { overflow-x: auto; margin: 0; }
+.udm-prose table { border-collapse: collapse; width: 100%; table-layout: fixed; margin: 0; font-size: .85rem; }
+.udm-prose th, .udm-prose td {
+  position: relative; min-width: 4rem; padding: .35rem .5rem; vertical-align: top; box-sizing: border-box;
+  border: 1px solid var(--udm-border-strong);
+}
+.udm-prose th { background: var(--udm-surface-2); font-weight: 650; text-align: left; }
+.udm-prose th > p, .udm-prose td > p { margin: 0; }
+.udm-prose .selectedCell::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: var(--udm-accent-soft);
+}
+.udm-prose .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: var(--udm-accent); pointer-events: none; }
+
+/* selected atom (chart, diagram, image, rule) */
+.udm-prose .ProseMirror-selectednode { outline: 2px solid var(--udm-accent); outline-offset: 2px; }
+.udm-prose .ProseMirror-gapcursor::after { border-top-color: var(--udm-text); }
+
+/* ---------- data block cards ---------- */
+
+.udm-datablock {
+  margin: 0; padding: .75rem; border: 1px solid var(--udm-border); border-radius: var(--udm-radius);
+  background: var(--udm-surface); box-shadow: var(--udm-shadow); user-select: none;
+}
+.udm-datablock__head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.udm-datablock__title { flex: 1 1 10rem; min-width: 0; font-weight: 650; color: var(--udm-text); }
+.udm-datablock__actions { display: inline-flex; gap: .35rem; margin-left: auto; }
+.udm-datablock__note { margin: 0; font-size: .8rem; color: var(--udm-muted); }
+.udm-datablock figcaption { margin-top: .5rem; font-size: .8rem; color: var(--udm-muted); }
+.udm-datablock__data { margin-top: .5rem; font-size: .8rem; overflow-x: auto; } /* many series at 375px */
+.udm-datablock__data summary { cursor: pointer; color: var(--udm-text-2); font-weight: 600; }
+.udm-datablock__data summary:focus-visible { outline: 2px solid var(--udm-accent); outline-offset: 2px; border-radius: .2rem; }
+
+.udm-chart { position: relative; height: 16rem; }
+.udm-chart canvas { display: block; width: 100%; height: 100%; }
+.udm-chart__fallback {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; margin: 0; padding: 1rem;
+  border: 1px dashed var(--udm-border-strong); border-radius: .45rem; background: var(--udm-surface-2);
+  color: var(--udm-muted); font-size: .8rem; text-align: center;
+}
+.udm-chart[data-state="ready"] .udm-chart__fallback { display: none; }
+.udm-chart[data-state="pending"] canvas,
+.udm-chart[data-state="error"] canvas { visibility: hidden; }
+
+.udm-datatable { border-collapse: collapse; width: 100%; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.udm-datatable th, .udm-datatable td { padding: .25rem .4rem; border: 1px solid var(--udm-border); text-align: left; }
+.udm-datatable--readonly td { text-align: right; }
+.udm-datatable thead th { background: var(--udm-surface-2); }
+
+.udm-range { display: grid; gap: .3rem; }
+.udm-range__bar { height: .6rem; border-radius: 999px; background: var(--udm-surface-2); border: 1px solid var(--udm-border); overflow: hidden; }
+.udm-range__bar > span { display: block; height: 100%; background: var(--udm-accent); }
+.udm-range__text { font-size: .8rem; color: var(--udm-text-2); }
+.udm-diagram__items { margin: .25rem 0 0; padding-left: 1.4em; display: grid; gap: .35rem; }
+.udm-diagram__items p { margin: .1rem 0 0; font-size: .82rem; color: var(--udm-text-2); }
+
+.udm-metric { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem .75rem; }
+.udm-metric__value { font-size: 1.8rem; font-weight: 750; line-height: 1.1; color: var(--udm-text); font-variant-numeric: tabular-nums; }
+.udm-metric__delta { font-size: .8rem; font-weight: 600; }
+.udm-metric__delta.is-up { color: var(--udm-success); }
+.udm-metric__delta.is-down { color: var(--udm-danger); }
+
+/* ---------- images ---------- */
+
+.udm-image { margin: 0; display: grid; gap: .35rem; user-select: none; }
+.udm-image img { display: block; max-width: 100%; max-height: 22rem; height: auto; border-radius: .45rem; object-fit: contain; background: var(--udm-surface-2); }
+.udm-image.is-broken img { min-height: 4rem; min-width: 8rem; border: 1px dashed var(--udm-border-strong); }
+.udm-image__empty {
+  display: flex; align-items: center; justify-content: center; min-height: 6rem; padding: 1rem;
+  border: 1px dashed var(--udm-border-strong); border-radius: .45rem; background: var(--udm-surface-2);
+  color: var(--udm-muted); font-size: .8rem; text-align: center;
+}
+.udm-image__caption { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-size: .78rem; color: var(--udm-text-2); }
+.udm-image__alt { flex: 1 1 10rem; min-width: 0; }
+.udm-image__alt.is-missing { color: var(--udm-danger); font-weight: 600; }
+
+/* ---------- dialogs ---------- */
+
+.udm-dialog {
+  width: min(32rem, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); box-sizing: border-box;
+  padding: 0; border: 1px solid var(--udm-border); border-radius: .8rem;
+  background: var(--udm-surface); color: var(--udm-text); box-shadow: var(--udm-shadow);
+}
+.udm-dialog--wide { width: min(46rem, calc(100vw - 2rem)); }
+.udm-dialog::backdrop { background: rgba(15, 17, 25, .5); }
+.udm-dialog__form { display: grid; gap: .75rem; padding: 1rem 1.1rem; }
+.udm-dialog__title { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.udm-dialog__hint { margin: -.35rem 0 0; font-size: .8rem; color: var(--udm-muted); }
+.udm-dialog__body { display: grid; gap: .6rem; }
+.udm-dialog__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: .6rem; }
+.udm-dialog__grid { max-height: 45vh; overflow: auto; border: 1px solid var(--udm-border); border-radius: .45rem; }
+.udm-dialog__grid .udm-datatable th, .udm-dialog__grid .udm-datatable td { padding: .2rem; }
+.udm-dialog__tools { display: flex; flex-wrap: wrap; gap: .35rem; }
+.udm-dialog__error { margin: 0; min-height: 1.2em; color: var(--udm-danger); font-size: .8rem; font-weight: 600; }
+.udm-dialog__error:empty { min-height: 0; }
+.udm-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .5rem; }
+
+@media (max-width: 480px) {
+  .udm-editor .udm-prose { padding: .75rem .8rem 1rem; }
+  .udm-toolbar__sep { display: none; }
+  .udm-chart { height: 12rem; }
+  .udm-dialog__form { padding: .85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .udm-editor *, .udm-toolbar *, .udm-dialog { transition: none !important; animation: none !important; }
+}

@@ -1,0 +1,122 @@
+{
+  "format": "udm-playground.generate-run/1",
+  "note": "Hand-authored recording (no API key was available at build time). The outline and section objects have the exact shape the outline and section schemas return; replaySampleRun feeds them through the same pipeline code (normalizeOutline, toUdmSection, checkUdm, udmToTiptap) as a live run. Every figure is illustrative sample data for a fictional company.",
+  "runId": "sample-qbr-emea",
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "recordedAt": "2026-11-12T09:00:00.000Z",
+  "input": {
+    "prompt": "Quarterly business review for a SaaS company in EMEA",
+    "nSections": 6,
+    "tone": "professional",
+    "verbosity": "standard",
+    "language": "English",
+    "instructions": ""
+  },
+  "timings": { "outlineMs": 4200, "sectionMs": [5200, 6100, 5600, 5900, 6400, 4800] },
+  "outline": {
+    "title": "EMEA Quarterly Business Review: Q3 2026",
+    "sections": [
+      {
+        "title": "Executive summary",
+        "content": "- EMEA closed Q3 at EUR 48.6m ARR, up 8.7% quarter on quarter (illustrative figures)\n- Net new ARR of EUR 3.9m against a EUR 3.6m target (108%)\n- Net revenue retention rose to 113%; gross retention held at 94%\n- Focus for Q4: mid-market expansion in DACH and faster onboarding in the Middle East"
+      },
+      {
+        "title": "Revenue performance",
+        "content": "Net new ARR by month, EUR m (illustrative):\n\n| Month | Target | Actual |\n| --- | --- | --- |\n| July | 1.1 | 1.1 |\n| August | 1.1 | 1.0 |\n| September | 1.4 | 1.8 |\n\nSeptember over-delivered on three enterprise renewals with seat expansion; August softness came from summer slippage in Southern Europe."
+      },
+      {
+        "title": "Regional breakdown",
+        "content": "| Region | ARR (EUR m) | QoQ growth | NRR |\n| --- | --- | --- | --- |\n| UK and Ireland | 14.2 | 7.6% | 112% |\n| DACH | 12.8 | 9.4% | 118% |\n| France and Benelux | 8.9 | 8.5% | 109% |\n| Nordics | 5.6 | 6.1% | 115% |\n| Southern Europe | 4.3 | 10.3% | 104% |\n| Middle East and Africa | 2.8 | 14.8% | 121% |\n\nDACH and Middle East and Africa lead on expansion; Southern Europe trails on retention."
+      },
+      {
+        "title": "Customer health and retention",
+        "content": "Net revenue retention by quarter (illustrative): Q3 2025 108%, Q4 2025 109%, Q1 2026 111%, Q2 2026 112%, Q3 2026 113%.\n- Gross retention up from 92% to 94% over the year\n- Churn concentrated in accounts under 50 seats\n- Onboarding time down from 41 to 29 days"
+      },
+      {
+        "title": "Pipeline and Q4 outlook",
+        "content": "- Weighted Q4 pipeline of EUR 5.2m against a EUR 4.1m net new ARR target\n- 3.1x unweighted coverage\n- Risks: two DACH enterprise deals depend on data-residency sign-off; currency headwind on GBP contracts; partner-sourced pipeline still thin in France"
+      },
+      {
+        "title": "Priorities for Q4",
+        "content": "1. Close the two data-residency deals in DACH with the EU-hosted tier\n2. Launch the mid-market package in Benelux and the Nordics\n3. Cut onboarding below 21 days with guided setup\n4. Double partner-sourced pipeline in France\nOwner for each priority reports progress at the monthly EMEA forecast call."
+      }
+    ]
+  },
+  "sections": [
+    {
+      "blocks": [
+        { "type": "paragraph", "text": "EMEA closed the third quarter at **EUR 48.6m ARR**, up 8.7% on the second quarter, with net new ARR ahead of plan for the second quarter in a row." },
+        { "type": "list", "ordered": false, "items": [
+          "Net new ARR of **EUR 3.9m** against a EUR 3.6m target (108%)",
+          "Net revenue retention up to **113%**; gross retention steady at 94%",
+          "Every region grew; Middle East and Africa grew fastest at 14.8%",
+          "Onboarding time cut from 41 to 29 days"
+        ] },
+        { "type": "callout", "tone": "success", "text": "Q4 focus: mid-market expansion in DACH and faster onboarding in the Middle East." }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "paragraph", "text": "Net new ARR reached EUR 3.9m for the quarter. A strong September offset a soft August, when summer slippage in Southern Europe pushed four deals into the next month." },
+        { "type": "chart", "chartType": "bar", "title": "Net new ARR by month", "categories": ["July", "August", "September"],
+          "series": [ { "name": "Target", "values": [1.1, 1.1, 1.4] }, { "name": "Actual", "values": [1.1, 1.0, 1.8] } ],
+          "xAxisLabel": null, "yAxisLabel": "EUR m",
+          "caption": "Illustrative figures for a sample company; not live data." },
+        { "type": "paragraph", "text": "September over-delivered by EUR 0.4m on three enterprise renewals that added seats across *finance* and *operations* teams." }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "table", "columns": ["Region", "ARR (EUR m)", "QoQ growth", "NRR"],
+          "rows": [
+            ["UK and Ireland", "14.2", "7.6%", "112%"],
+            ["DACH", "12.8", "9.4%", "118%"],
+            ["France and Benelux", "8.9", "8.5%", "109%"],
+            ["Nordics", "5.6", "6.1%", "115%"],
+            ["Southern Europe", "4.3", "10.3%", "104%"],
+            ["Middle East and Africa", "2.8", "14.8%", "121%"]
+          ],
+          "caption": "ARR and retention by region at quarter end (illustrative values)." },
+        { "type": "paragraph", "text": "**DACH** and **Middle East and Africa** lead on expansion, both above 115% net revenue retention. Southern Europe grew new business quickly but trails on retention at 104%." }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "chart", "chartType": "line", "title": "Net revenue retention by quarter", "categories": ["Q3 2025", "Q4 2025", "Q1 2026", "Q2 2026", "Q3 2026"],
+          "series": [ { "name": "NRR", "values": [108, 109, 111, 112, 113] } ],
+          "xAxisLabel": null, "yAxisLabel": "%",
+          "caption": "Illustrative trend for a sample company." },
+        { "type": "list", "ordered": false, "items": [
+          "Gross retention up from 92% to 94% over the year",
+          "Churn concentrated in accounts under 50 seats",
+          "Onboarding time down from 41 to 29 days"
+        ] },
+        { "type": "paragraph", "text": "Smaller accounts churn when they never reach a second team. Guided setup and an in-product checklist target that gap in Q4." }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "paragraph", "text": "Weighted Q4 pipeline stands at **EUR 5.2m** against a EUR 4.1m net new ARR target, with 3.1x unweighted coverage." },
+        { "type": "heading", "level": 1, "text": "Risks to the forecast" },
+        { "type": "list", "ordered": false, "items": [
+          "Two DACH enterprise deals depend on data-residency sign-off",
+          "Currency headwind on GBP-denominated contracts",
+          "Partner-sourced pipeline is still thin in France"
+        ] },
+        { "type": "callout", "tone": "warning", "text": "Without the two DACH deals, the forecast falls to about 95% of target." }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "list", "ordered": true, "items": [
+          "Close the two data-residency deals in DACH with the EU-hosted tier",
+          "Launch the mid-market package in Benelux and the Nordics",
+          "Cut onboarding below 21 days with guided setup",
+          "Double partner-sourced pipeline in France"
+        ] },
+        { "type": "paragraph", "text": "Each priority has a named owner who reports progress at the monthly EMEA forecast call." }
+      ]
+    }
+  ]
+}

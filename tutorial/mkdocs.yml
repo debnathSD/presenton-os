@@ -97,6 +97,7 @@ plugins: []
 
 nav:
   - Home: index.md
+  - "Playground: create a page from a prompt": playground/index.md
   - "Part I: Orientation":
       - presenton/index.md
       - What Presenton is: presenton/01-what-is-presenton.md

@@ -29,6 +29,7 @@ hide:
 
 <div class="home-hero__actions" markdown>
 [Start reading :material-arrow-right:](presenton/01-what-is-presenton.md){ .md-button .md-button--primary }
+[Try the Playground: prompt to page](playground/index.md){ .md-button }
 [See the Superset plan](delivery/index.md){ .md-button }
 </div>
 </div>
@@ -60,6 +61,14 @@ hide:
     The Generative Content Kit: slides, Tiptap pages, Superset dashboards and text from natural language, with live data.
 
     [:material-arrow-right: Generative Content Kit](ai-component/index.md) · [Live Superset data](ai-component/69-live-superset-data.md)
+
+-   :material-play-box-outline:{ .lg .middle } __I want to try it in the browser__
+
+    ---
+
+    The Playground: a prompt becomes a Tiptap page the way Presenton makes a deck (outline, then sections streaming in), and the page turns into Presenton slides and back.
+
+    [:material-arrow-right: Open the Playground](playground/index.md)
 
 -   :material-swap-horizontal-bold:{ .lg .middle } __I want the final approach: one model, PPT and Tiptap__
 
